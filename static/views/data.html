@@ -1,0 +1,89 @@
+<div class="row" style="margin-top:10px; margin-bottom: 50px;">
+
+    <div class="col-md-12">
+        <h2>Data</h2>
+        <p>Use this page to upload and manage your region files.</p>
+
+
+        <div style="width: 100%; height: auto;border: 1px solid black;">
+
+            <form ng-submit="submit()">
+                <div class="row">
+
+                    <div class="col-md-3">
+                        <div style="padding: 10px">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Name:</label>
+                                <input type="text" class="form-control" aria-describedby="nameHelp" required="true"
+                                       ng-model="adding_file.name" placeholder="MyRegions">
+                                <small id="nameHelp" class="form-text text-muted">A name to identify the uploaded region file.</small>
+                            </div> 
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div style="padding: 10px">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">File type:</label>
+                                <select class="form-control" aria-describedby="fileTypeHelp" required="true"
+                                        ng-model="adding_file.type">
+                                    <option>bed</option>
+                                    <option>narrowpeak</option>
+                                </select>
+                                <small id="fileTypeHelp" class="form-text text-muted">Select the right format for your file. </small>
+                            </div> 
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div style="padding: 10px;">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Select file:</label>
+                                <input type="file" id="newFile" class="form-control"  aria-describedby="emailHelp" 
+                                       required="true" placeholder="Enter email"/>
+                                <small id="fileHelp" class="form-text text-muted"></small>
+                            </div> 
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 ">
+                        <div style="padding: 10px;">
+                            <div class="form-group">
+                                <button style="bottom:0;"  type="submit" class="btn btn-primary btn align-middle float-right"><i class="fa fa-plus"></i></button>
+                            </div> 
+                        </div>
+
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+
+        <br>
+        <h4>Your Files:</h4>
+
+        <div class="row" ng-if="files.length>0">
+
+            <div class="col-md-4" ng-repeat="file in files track by $index">
+                <div style="border:1px solid black; padding: 10px; margin-top: 10px;">
+                    <div class="row">
+                        <div class="col-md-8" style="font-size: 1em; line-height: 1.9em">{{file.name}} ({{file.type}})</div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-sm btn-danger float-right;" ng-click="removeFile($index)">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div ng-if="files.length==0">No files available. Add a new file using the form above.</div>
+
+    </div>
+
+
+</div>
+
+
+

@@ -1,0 +1,29 @@
+{
+    "types" : [
+        { "name": "Breast Cancer", 
+          "folder": "brca/", 
+          "in_junctions_file":"motifs_in_junctions.csv",
+          "generic_file": "motifs.csv"},
+        { "name": "Colorectal Cancer",
+          "folder": "coca/",
+          "in_junctions_file":"motifs_in_junctions.csv",
+          "generic_file": "motifs.csv"},
+        { "name": "Melanoma",
+          "folder": "mela/",
+          "in_junctions_file":"motifs_in_junctions.csv",
+          "generic_file": "motifs.csv"},
+        { "name": "Skin Cancer",
+          "folder": "skca/",
+          "in_junctions_file":"motifs_in_junctions.csv",
+          "generic_file": "motifs.csv"},
+        { "name": "Liver Cancer",
+          "folder": "liri/",
+          "in_junctions_file":"motifs_in_junctions.csv",
+          "generic_file": "motifs.csv"},
+        { "name": "Esophageal Adenocarcinoma ",
+          "folder": "esad/",
+          "in_junctions_file":"motifs_in_junctions.csv",
+          "generic_file": "motifs.csv"}
+        
+    ]
+}
