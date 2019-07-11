@@ -3,145 +3,96 @@
    #################### */
 app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, $http) {
 
-
     /* # Initialization # */
     window.scroll(0, 0);
     $rootScope.active_menu = "uc3";
 
-
-    // Manage different kinds of tumor type
-    $scope.tumorTypes = {
-        selected: [],
-        available: []
-    }
-
-    // Type of motif (within junctions or generic motifs)
-    $scope.motifsType = {
-        current : "within_junctions",
-        available: ["within_junctions", "generic"]
-    }
-
-    // Manage different kinds of mutation (- is used for deletions or insertions)
-    $scope.mutationTypes = {
-        fromList: ["A","C","T","G","*","-"],
-        toList: ["A","C","T","G","*","-"],
-        selectedTypes : [ {from: "*", to: "*"} ],
-        invalidSelection: false, // must be mutually exclusive
-        stacked: true // different colors for each selection vs single color
-    }
-
     $scope.plot = {binSize: 10, d3graph: null}
     $scope.slider = document.getElementById("slider");
 
-    // Retrieve the list of available tumor types
-    $http({method: 'GET', url:  "./data/data-list.json"})
-        .then(
-        // SUCCESS
-        function(response) {
-            $scope.tumorTypes.available = response.data.types;
+    $scope.selectedFile = null;
+    $scope.selectedTumorTypes = [];
 
-            // Initialize with the first tumor type
-            if($scope.tumorTypes.available.length>0) {
-                if($routeParams.showExample=="1"){
-                    $scope.runExample();
-                } else {
-                    $scope.tumorTypes.selected = [$scope.tumorTypes.available[0]];
-                    $scope.loadTumorType($scope.tumorTypes.selected[0], $scope.motifsType.current);
-                }
-            }
+    // Initialize with the first tumor type
+    if($rootScope.tumorTypes.available.length>0) {
+        if($routeParams.showExample=="1"){
+            $scope.runExample();
+        } else {
+            $scope.selectedTumorTypes = [$rootScope.tumorTypes.available[0]];
 
-        }).catch(
-        // ERROR
-        function(response) {
-            console.error("Error while retrieving the list of tumor types.")
+            //$scope.loadTumorType($scope.selectedTumorTypes[0], $scope.motifsType.current);
         }
-    );
-
-    // Load Melanoma and select mutations C>T and G>A
-    $scope.runExample = function(){               
-        $scope.mutationTypes.selectedTypes = [ {from: "C", to: "T"}, {from: "G", to: "A"} ];
-        $scope.tumorTypes.selected = $scope.tumorTypes.available.slice(0,4);
-        
-        $scope.tumorTypes.selected.forEach(function(tt){$scope.loadTumorType(tt, $scope.motifsType.current);})
     }
 
-    $scope.loadMotifType = function(motifsType) {
-        $scope.tumorTypes.selected.forEach(function(tt){$scope.loadTumorType(tt, motifsType);})
-    }
 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
-    $scope.loadTumorType = function(tumorType, motifsType) {
+    $scope.load = function(file, selectedTumorTypes) {
+        
+        console.log(file)
 
-        console.log("Loading tumor type: "+tumorType.name);
+        console.log("Loading file: "+file.name);
 
-        file = (motifsType == "within_junctions")? tumorType.in_junctions_file : tumorType.generic_file;
-
-        d3.csv("./data/"+tumorType.folder+"/"+file, function(data) { 
-
-
-            tumorType.data = data;
-
-            // Save data in the scope
-            $scope.data = $scope.tumorTypes.selected.map(function(t){return {type: t.name, data: t.data} });
+        // Coordinate available range as the minimum and maximum coordinate in the data
+        dataRange = {
+            min : -file.maxDistance,
+            max : +file.maxDistance
+        };
 
 
-            // Coordinate available range as the minimum and maximum coordinate in the data
-            dataRange = {
-                min : -500,//d3.min(data_junctions.concat(data_nojunctions), function(d) { return +d.dist }),
-                max : 500//d3.max(data_junctions.concat(data_nojunctions), function(d) { return +d.dist })
+        // Initial selected range set between 1/4 and 3/4 of the coordinate space
+        selectedRange = {
+            min: dataRange.min+0.25*(dataRange.max-dataRange.min),
+            max: dataRange.min+0.75*(dataRange.max-dataRange.min)
+        }
+
+        // Initialize the slider
+        if($scope.slider.noUiSlider != null)
+            $scope.slider.noUiSlider.destroy() 
+
+        noUiSlider.create($scope.slider, {
+            start: [selectedRange.min, selectedRange.max],
+            connect: true,
+            range: {
+                'min': dataRange.min,
+                'max': dataRange.max
+            },
+            // Show a scale with the slider
+            pips: {
+                mode: 'positions',
+                values: [0, 25, 50, 75, 100],
+                density: 4
+            },
+
+            tooltips: true,
+
+            format: wNumb({
+                decimals: 0
+            })
+        });
+
+        // Generate the plot
+        $scope.plot.d3graph = uc3($scope.getData(file, selectedTumorTypes),
+                                  $scope.plot.binSize,
+                                  selectedRange, $scope.getSelectedTypes());
+
+        // Set callback on slider change
+        $scope.slider.noUiSlider.on('set.one', function () { 
+
+            selectedRange = {
+                min: $scope.slider.noUiSlider.get()[0],
+                max: $scope.slider.noUiSlider.get()[1]
             };
 
-
-            // Initial selected range set between 1/4 and 3/4 of the coordinate space
-            selectedRange = {
-                min: -300,//dataRange.min+0.25*(dataRange.max-dataRange.min),
-                max: 300//dataRange.min+0.75*(dataRange.max-dataRange.min)
-            }
-
-
-            // Initialize the slider
-            if($scope.slider.noUiSlider != null)
-                $scope.slider.noUiSlider.destroy() 
-
-            noUiSlider.create($scope.slider, {
-                start: [selectedRange.min, selectedRange.max],
-                connect: true,
-                range: {
-                    'min': dataRange.min,
-                    'max': dataRange.max
-                },
-                // Show a scale with the slider
-                pips: {
-                    mode: 'positions',
-                    values: [0, 25, 50, 75, 100],
-                    density: 4
-                },
-
-                tooltips: true,
-
-                format: wNumb({
-                    decimals: 0
-                })
-            });
-
-            // Generate the plot
-            $scope.plot.d3graph = uc3($scope.data, $scope.plot.binSize, selectedRange, $scope.getSelectedTypes());
-
-            // Set callback on slider change
-            $scope.slider.noUiSlider.on('set.one', function () { 
-
-                selectedRange = {
-                    min: $scope.slider.noUiSlider.get()[0],
-                    max: $scope.slider.noUiSlider.get()[1]
-                };
-
-                // Rescale the plot according to the new coordinate range. 
-                // rescaleX function is defined in uc3.js.
-                uc3_rescaleX($scope.data, $scope.plot.d3graph, $scope.plot.binSize, selectedRange, $scope.getSelectedTypes());
-
-            });
+            // Rescale the plot according to the new coordinate range. 
+            // rescaleX function is defined in uc3.js.
+            uc3_rescaleX($scope.getData(file, selectedTumorTypes),
+                         $scope.plot.d3graph,
+                         $scope.plot.binSize, 
+                         selectedRange, $scope.getSelectedTypes());
 
         });
+
+
     }
 
     // Returns the valid mutation types selected in the interface
@@ -152,9 +103,12 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
 
     // Update the plot
-    $scope.updatePlot = function() {
+    $scope.updatePlot = function(file, selectedTumorTypes) {
         // update function is defined in uc3.js.
-        uc3_update($scope.data,$scope.plot.d3graph, $scope.plot.binSize, $scope.getSelectedTypes());
+        uc3_update($scope.getData(file, selectedTumorTypes),
+                   $scope.plot.d3graph,
+                   $scope.plot.binSize,
+                   $scope.getSelectedTypes());
     } 
 
 
@@ -190,22 +144,38 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             $scope.mutationTypes.invalidSelection = true;
         } else {
             $scope.mutationTypes.invalidSelection = false;
-            $scope.updatePlot();
+            $scope.updatePlot($scope.selectedFile, $rootScope.tumorType.displayed);
         }
     };
 
+
+    $scope.getData = function(file, selectedTumorTypes){
+    
+
+        function getDist(file, typeId) {
+            return file.distances.filter(
+            function(x){return x.tumorType==typeId
+                       })[0].distances.filter(function(x){return x[1].length==1 && x[2].length==1})
+        }
+        
+
+        return selectedTumorTypes.map(function(t){
+            return {type: t.name, data: getDist(file, t.identifier)} 
+        });
+    }
+
     $scope.addTumorType = function(type) {
         if(type!=undefined) { 
-            $scope.tumorTypes.selected.push(type);
-            $scope.loadTumorType(type, $scope.motifsType.current); 
+            $scope.selectedTumorTypes.push(type);
+            $scope.load($scope.selectedFile, $scope.selectedTumorTypes); 
 
         }
     }
 
     $scope.removeTumorType = function(type) {
-        $scope.tumorTypes.selected = $scope.tumorTypes.selected.filter(function(t){return t!=type});
-        if($scope.tumorTypes.selected.length>0)
-            $scope.loadTumorType($scope.tumorTypes.selected[0], $scope.motifsType.current); 
+        $scope.selectedTumorTypes = $scope.selectedTumorTypes.filter(function(t){return t!=type});
+        if($scope.selectedTumorTypes.length>0)
+            $scope.load($scope.selectedFile, $scope.selectedTumorTypes)
     }
 
     // Add a new empty condition for mutation types
@@ -219,6 +189,14 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             return o!=condition;
         });
         $scope.changeMutationType();
+    }
+
+    // Load Melanoma and select mutations C>T and G>A
+    $scope.runExample = function(){               
+        $scope.mutationTypes.selectedTypes = [ {from: "C", to: "T"}, {from: "G", to: "A"} ];
+        $scope.selectedTumorTypes = $rootScope.tumorTypes.available.slice(0,4);
+
+        $scope.load($scope.selectedFile, $scope.selectedTumorTypes)
     }
 
 });

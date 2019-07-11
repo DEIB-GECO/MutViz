@@ -14,15 +14,15 @@
             <div class="col-md-12" style="margin-top:10px; background-color:#e6e6e6; height: 90px;">
                 <label for="jtSelect">File:</label>
                 <select class="form-control" id="ttSelect"
-                        ng-model="motifsType.current"
-                        ng-change="loadMotifType(motifsType.current)">
-                    <option ng-repeat="file in files" ng-value="name">{{file.name}}</option>
+                        ng-model="selectedFile"
+                        ng-change="load(selectedFile, selectedTumorTypes)">
+                    <option ng-repeat="file in files track by $index" ng-value="file">{{file.name}}</option>
                 </select>
             </div>
 
             <div class="col-md-12" style="margin-top:20px;">
                 <label for="ttSelect">Tumor types:</label>
-                <div class="row" ng-repeat="tt in tumorTypes.selected">
+                <div class="row" ng-repeat="tt in selectedTumorTypes">
 
                     <div class="col-md-8" style="line-height: 39px;">
                         <span style="margin-left: 10px; padding: 6px; border: 1px solid black;">{{tt.name}}</span>
@@ -42,7 +42,7 @@
                     <div class="col-md-8">
                         <select class="form-control" id="ttSelect" ng-model="tumorType.displayed">
                             <option ng-repeat="type in tumorTypes.available"
-                                    ng-if="!tumorTypes.selected.includes(type)"
+                                    ng-if="!selectedTumorTypes.includes(type)"
                                     ng-value="type">{{type.name}}</option>
                         </select>
                     </div>
@@ -60,7 +60,7 @@
                 <div class="form-group">
                     <label for="inputBins">Bin size (bp):</label>
                     <input type="number" class="form-control" id="inputBins" 
-                           ng-model="plot.binSize" ng-change="updatePlot()">
+                           ng-model="plot.binSize" ng-change="updatePlot(selectedFile, selectedTumorTypes)">
 
                     <br>
                 </div>

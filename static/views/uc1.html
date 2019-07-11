@@ -14,9 +14,9 @@
             <div class="col-md-12" style="margin-top:10px; background-color:#e6e6e6; height: 90px;">
                 <label for="jtSelect">File:</label>
                 <select class="form-control" id="ttSelect"
-                        ng-model="motifsType.current"
-                        ng-change="loadMotifType(motifsType.current)">
-                    <option ng-repeat="file in files track by $index" ng-value="name">{{file.name}}</option>
+                        ng-model="selectedFile"
+                        ng-change="load(selectedFile, tumorTypes.current)">
+                    <option ng-repeat="file in files track by $index" ng-value="file">{{file.name}}</option>
                 </select>
             </div>
 
@@ -24,7 +24,7 @@
                 <label for="ttSelect">Tumor type:</label>
                 <select class="form-control" id="ttSelect"
                         ng-model="tumorTypes.current"
-                        ng-change="loadTumorType(tumorTypes.current, motifsType.current)">
+                        ng-change="load(selectedFile, tumorTypes.current)">
                     <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                 </select>
             </div>
@@ -34,7 +34,7 @@
                 <div class="form-group">
                     <label for="inputBins">Bin size (bp):</label>
                     <input type="number" class="form-control" id="inputBins" 
-                           ng-model="plot.binSize" ng-change="updatePlot()">
+                           ng-model="plot.binSize" ng-change="updatePlot(selectedFile, tumorTypes.current)">
 
                     <br>
                 </div>
@@ -54,13 +54,13 @@
                     <div class="col-md-5">
                         <label class="checkbox-inline float-right">
                             <input type="checkbox"  data-toggle="toggle" 
-                                   ng-change="updatePlot()"
+                                   ng-change="updatePlot(selectedFile, tumorTypes.current)"
                                    ng-model="mutationTypes.stacked"> Stacked
                         </label>
 
                         <label class="checkbox-inline float-right">
                             <input type="checkbox"  data-toggle="toggle" 
-                                   ng-change="updatePlot()"
+                                   ng-change="updatePlot(selectedFile, tumorTypes.current)"
                                    ng-model="plot.showTotal"> Total
                         </label>
                     </div>

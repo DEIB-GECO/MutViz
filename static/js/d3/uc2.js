@@ -41,11 +41,11 @@ function uc2_getFilteredData(data, mutationTypes) {
                 if(t.from=="*" && t.to=="*")
                     return true;
                 if(t.from=="*") 
-                    return t.to==mutation.to  
+                    return t.to==mutation[2]  
                 if(t.to=="*") 
-                    return t.from==mutation.from  
+                    return t.from==mutation[1]  
 
-                return t.from == mutation.from && t.to==mutation.to  
+                return t.from == mutation[1] && t.to==mutation[2]
             }
         ).reduce( function(t1,t2){ return t1 || t2 });
 
@@ -64,36 +64,40 @@ function uc2_update(data, g, binSize, mutationTypes) {
 
     // Configure the histogram function
     var histogram = d3.histogram()
-    .value(function(d) {return d.dist})
+    .value(function(d) {return d[0]})
     .domain(g.xAxisScale.domain())       
     .thresholds(ticks); 
 
-    filtered_junct   = uc2_getFilteredData(data.junctions, mutationTypes);
-    filtered_nojunct = uc2_getFilteredData(data.nojunctions, mutationTypes);
 
-    var binsJunct    = histogram(filtered_junct);
-    var binsNoJunct  = histogram(filtered_nojunct);
+    console.log(data);
+    filtered_f1   = uc2_getFilteredData(data.f1.distances, mutationTypes);
+    filtered_f2 = uc2_getFilteredData(data.f2.distances, mutationTypes);
+    
+    console.log(filtered_f1)
 
-    var maxInJunct = d3.max(binsJunct, function(d) { return +d.length });
-    var maxNoJunct = d3.max(binsNoJunct, function(d) { return +d.length });
+    var binsf1    = histogram(filtered_f1);
+    var binsf2  = histogram(filtered_f2);
+
+    var maxInf1 = d3.max(binsf1, function(d) { return +d.length });
+    var maxf2 = d3.max(binsf2, function(d) { return +d.length });
 
 
-    var binsJunctNorm = binsJunct.map( function(b){
-        b.value = b.length / maxInJunct;
-        b.variable = "within junctions";
+    var binsf1Norm = binsf1.map( function(b){
+        b.value = b.length / maxInf1;
+        b.variable = data.f1.name;
         b.group = b.x0;
         return b;
     });
 
-    var binsNoJunctNorm = binsNoJunct.map(function(b){
-        b.value = b.length / maxNoJunct; 
-        b.variable = "generic";
+    var binsf2Norm = binsf2.map(function(b){
+        b.value = b.length / maxf2; 
+        b.variable = data.f2.name;
         b.group = b.x0;
         return b;
     });
 
 
-    var myVars = ["within junctions", "generic"];
+    var myVars = [data.f1.name, data.f2.name];
 
 
     g.y = d3.scaleBand()
@@ -106,7 +110,7 @@ function uc2_update(data, g, binSize, mutationTypes) {
     $(".y-axis text").attr("transform", "rotate(270) translate(27,-17)");
 
 
-    data = binsJunctNorm.concat(binsNoJunctNorm);
+    data = binsf1Norm.concat(binsf2Norm);
 
     uc2_addTracks(g, data);
 

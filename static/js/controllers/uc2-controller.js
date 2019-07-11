@@ -7,141 +7,119 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
     window.scroll(0, 0);
     $rootScope.active_menu = "uc2";
 
-
-    // Manage different kinds of tumor type
-    $scope.tumorTypes = {
-        current: null,
-        available: []
-    }
-
-    // Manage different kinds of mutation (- is used for deletions or insertions)
-    $scope.mutationTypes = {
-        fromList: ["A","C","T","G","*","-"],
-        toList: ["A","C","T","G","*","-"],
-        selectedTypes : [ {from: "*", to: "*"} ],
-        invalidSelection: false, // to check whether conditions are mutually exclusive
-        stacked: true // whether to use different colors for different mutation types or plot them with a single color
-    }
-
     $scope.plot = {binSize: 10, d3graph: null}
     $scope.slider = document.getElementById("slider");
 
-    // Retrieve the list of available tumor types
-    $http({method: 'GET', url:  "./data/data-list.json"})
-        .then(
-        // SUCCESS
-        function(response) {
-            $scope.tumorTypes.available = response.data.types;
+    // Selected File
+    $scope.selectedFile1 = null;
+    $scope.selectedFile2 = null;
 
-            // Initialize with the first tumor type
-            if($scope.tumorTypes.available.length>0) {
-                if($routeParams.showExample=="1"){
-                    $scope.runExample();
-                } else{
-                    $scope.tumorTypes.current = $scope.tumorTypes.available[0];
-                }
-                $scope.loadTumorType($scope.tumorTypes.current);
-            }
-
-        }).catch(
-        // ERROR
-        function(response) {
-            console.error("Error while retrieving the list of tumor types.")
+    // Initialize with the first tumor type
+    if($rootScope.tumorTypes.available.length>0) {
+        if($routeParams.showExample=="1"){
+            $scope.runExample();
+        } else{
+            $rootScope.tumorTypes.current = $rootScope.tumorTypes.available[0];
         }
-    );
-
-    // Load Melanoma and select mutations C>T and G>A
-    $scope.runExample = function(){               
-        $scope.mutationTypes.selectedTypes = [ {from: "C", to: "T"}, {from: "G", to: "A"} ];
-        $scope.tumorTypes.current = $scope.tumorTypes.available.filter(function(t){return t.name=="Melanoma"})[0];
+        //$scope.load($rootScope.tumorTypes.current);
     }
 
-    // Load data for the provided tumor type ( the plot is (re)-initialized )
-    $scope.loadTumorType = function(type) {
 
-        console.log("Loading tumor type: "+type.name);
+    // Asks the backend to compute distances (if needed) and plots the result
+    $scope.load = function(file1, file2, tumorType) {
+        console.log(file1)
+        console.log(file2)
+        console.log(tumorType)
 
-        d3.csv("./data/"+type.folder+"/motifs_in_junctions.csv", function(data_junctions) { 
-            d3.csv("./data/"+type.folder+"/motifs.csv", function(data_nojunctions) { 
+        if(file1==null || file2==null || tumorType==null) {
+            console.log("Load: missing argument");
+            return;
+        }
 
-
-                // Save data in the scope
-                $scope.data = {
-                    junctions : data_junctions.filter(function(d){return d.from.length==1 && d.to.length==1}),
-                    nojunctions : data_nojunctions.filter(function(d){return d.from.length==1 && d.to.length==1})
-                }
-
-
-                // Coordinate available range as the minimum and maximum coordinate in the data
-                dataRange = {
-                    min : -500,//d3.min(data_junctions.concat(data_nojunctions), function(d) { return +d.dist }),
-                    max : 500//d3.max(data_junctions.concat(data_nojunctions), function(d) { return +d.dist })
-                };
+        // Coordinate available range as the minimum and maximum coordinate in the data
+        minMaxDistance = Math.min(file1.maxDistance, file2.maxDistance);
+        dataRange = {
+            min : -minMaxDistance,
+            max : +minMaxDistance
+        };
 
 
-                // Initial selected range set between 1/4 and 3/4 of the coordinate space
-                selectedRange = {
-                    min: -300,
-                    max: 300
-                }
+        // Initial selected range set between 1/4 and 3/4 of the coordinate space
+        selectedRange = {
+            min: dataRange.min+0.25*(dataRange.max-dataRange.min),
+            max: dataRange.min+0.75*(dataRange.max-dataRange.min)
+        }
 
 
-                // Initialize the slider
-                if($scope.slider.noUiSlider != null)
-                    $scope.slider.noUiSlider.destroy() 
+        // Initialize the slider
+        if($scope.slider.noUiSlider != null)
+            $scope.slider.noUiSlider.destroy() 
 
-                noUiSlider.create($scope.slider, {
-                    start: [selectedRange.min, selectedRange.max],
-                    connect: true,
-                    range: {
-                        'min': dataRange.min,
-                        'max': dataRange.max
-                    },
-                    // Show a scale with the slider
-                    pips: {
-                        mode: 'positions',
-                        values: [0, 25, 50, 75, 100],
-                        density: 4
-                    },
+        noUiSlider.create($scope.slider, {
+            start: [selectedRange.min, selectedRange.max],
+            connect: true,
+            range: {
+                'min': dataRange.min,
+                'max': dataRange.max
+            },
+            // Show a scale with the slider
+            pips: {
+                mode: 'positions',
+                values: [0, 25, 50, 75, 100],
+                density: 4
+            },
 
-                    tooltips: true,
+            tooltips: true,
 
-                    format: wNumb({
-                        decimals: 0
-                    })
-                });
+            format: wNumb({
+                decimals: 0
+            })
+        });
 
-                // Generate the plot
-                $scope.plot.d3graph = uc2($scope.data, $scope.plot.binSize, selectedRange, $scope.getSelectedTypes());
+        // Generate the plot
+        $scope.plot.d3graph = uc2($scope.getData(file1, file2, tumorType),
+                                  $scope.plot.binSize,
+                                  selectedRange,
+                                  $scope.getSelectedTypes());
 
-                // Set callback on slider change
-                $scope.slider.noUiSlider.on('set.one', function () { 
+        // Set callback on slider change
+        $scope.slider.noUiSlider.on('set.one', function () { 
 
-                    selectedRange = {
-                        min: $scope.slider.noUiSlider.get()[0],
-                        max: $scope.slider.noUiSlider.get()[1]
-                    };
+            selectedRange = {
+                min: $scope.slider.noUiSlider.get()[0],
+                max: $scope.slider.noUiSlider.get()[1]
+            };
 
-                    // Rescale the plot according to the new coordinate range. 
-                    // rescaleX function is defined in uc2.js.
-                    uc2_rescaleX($scope.data, $scope.plot.d3graph, $scope.plot.binSize, selectedRange, $scope.getSelectedTypes());
+            // Rescale the plot according to the new coordinate range. 
+            // rescaleX function is defined in uc2.js.
+            uc2_rescaleX($scope.getData(file1, file2, tumorType), 
+                         $scope.plot.d3graph,
+                         $scope.plot.binSize, 
+                         selectedRange,
+                         $scope.getSelectedTypes());
 
-                });
+        });
 
-            }) });
+
     }
 
     // Returns the valid mutation types selected in the interface
     $scope.getSelectedTypes = function() {
         st =  $scope.mutationTypes.selectedTypes.filter(function(t){return t.from!=undefined && t.to!=undefined});
         return st;
+        return st;
     }
 
 
     // Update the plot
-    $scope.updatePlot = function() {
+    $scope.updatePlot = function(file1, file2, tumorType) {
+        console.log(tumorType)
         // update function is defined in uc2.js.
-        uc2_update($scope.data,$scope.plot.d3graph, $scope.plot.binSize, $scope.getSelectedTypes());
+
+        uc2_update($scope.getData(file1, file2, tumorType),
+                   $scope.plot.d3graph,
+                   $scope.plot.binSize, 
+                   $scope.getSelectedTypes());
     } 
 
 
@@ -177,7 +155,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
             $scope.mutationTypes.invalidSelection = true;
         } else {
             $scope.mutationTypes.invalidSelection = false;
-            $scope.updatePlot();
+            $scope.updatePlot($scope.selectedFile1, $scope.selectedFile2, $rootScope.tumorTypes.current);
         }
     };
 
@@ -193,6 +171,28 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
             return o!=condition;
         });
         $scope.changeMutationType();
+    }
+
+    // Load Melanoma and select mutations C>T and G>A
+    $scope.runExample = function(){               
+        $scope.mutationTypes.selectedTypes = [ {from: "C", to: "T"}, {from: "G", to: "A"} ];
+        $rootScope.tumorTypes.current = $rootScope.tumorTypes.available.filter(function(t){return t.name=="Melanoma"})[0];
+    }
+
+    $scope.getData = function(file1, file2, tumorType)  {
+
+        // Extract distances for the proper tumorType
+        data = {f1:{name:file1.name}, f2:{name:file2.name}}
+
+        data.f1.distances = file1.distances.filter(
+            function(x){return x.tumorType==tumorType.identifier
+                       })[0].distances.filter(function(x){return x[1].length==1 && x[2].length==1})
+
+        data.f2.distances = file2.distances.filter(
+            function(x){return x.tumorType==tumorType.identifier
+                       })[0].distances.filter(function(x){return x[1].length==1 && x[2].length==1})
+
+        return data;
     }
 
 });

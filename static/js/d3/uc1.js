@@ -63,11 +63,11 @@ function uc1_getFilteredData(data, mutationTypes) {
         return mutationTypes.map( 
             function(t){ 
                 if(t.from=="*") 
-                    return t.to==mutation.to  
+                    return t.to==mutation[2]  
                 if(t.to=="*") 
-                    return t.from==mutation.from  
+                    return t.from==mutation[1]  
 
-                return t.from == mutation.from && t.to==mutation.to  
+                return t.from == mutation[1] && t.to==mutation[2]
             }
         ).reduce( function(t1,t2){ return t1 || t2 });
 
@@ -116,7 +116,9 @@ function uc1_update(data, g, binSize, mutationTypes, stacked, showTotal) {
     // Configure the histogram function
     var histogram = d3.histogram()
     /* The value accessor: for each mutation return the distance from the motif */
-    .value(function(d) {return d.dist})
+    .value(function(d) {
+        return d[0];
+    })
     /* Then the domain of the graph: 0 to max_x already defined... */
     .domain(g.xAxisScale.domain())       
     /* An array of thresholds defines how values should be split among bins. 

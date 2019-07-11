@@ -10,18 +10,18 @@
             <div class="col-md-12" style="margin-top:10px; background-color:#e6e6e6; height: 90px;">
                 <label for="jtSelect">File 1:</label>
                 <select class="form-control" id="ttSelect"
-                        ng-model="motifsType.current"
-                        ng-change="loadMotifType(motifsType.current)">
-                    <option ng-repeat="file in files" ng-value="name">{{file.name}}</option>
+                        ng-model="selectedFile1"
+                        ng-change="load(selectedFile1, selectedFile2, tumorTypes.current)">
+                    <option ng-repeat="file in files track by $index" ng-value="file">{{file.name}}</option>
                 </select>
             </div>
 
             <div class="col-md-12" style="margin-top:0px; background-color:#e6e6e6; height: 90px;">
                 <label for="jtSelect">File 2:</label>
                 <select class="form-control" id="ttSelect"
-                        ng-model="motifsType.current"
-                        ng-change="loadMotifType(motifsType.current)">
-                    <option ng-repeat="file in files" ng-value="name">{{file.name}}</option>
+                        ng-model="selectedFile2"
+                        ng-change="load(selectedFile1, selectedFile2, tumorTypes.current)">
+                    <option ng-repeat="file in files track by $index" ng-value="file">{{file.name}}</option>
                 </select>
             </div>
 
@@ -29,7 +29,7 @@
                 <label for="ttSelect">Tumor type:</label>
                 <select class="form-control" id="ttSelect"
                         ng-model="tumorTypes.current"
-                        ng-change="loadTumorType(tumorTypes.current, motifsType.current)">
+                        ng-change="load(selectedFile1, selectedFile2, tumorTypes.current)">
                     <option ng-repeat="type in tumorTypes.available" ng-value="type">{{type.name}}</option>
                 </select>
                 <hr>
@@ -100,7 +100,7 @@
                 <div class="form-group">
                     <label for="inputBins">Bin size (bp):</label>
                     <input type="number" class="form-control" id="inputBins" 
-                           ng-model="plot.binSize" ng-change="updatePlot()">
+                           ng-model="plot.binSize" ng-change="updatePlot(selectedFile1, selectedFile2, tumorTypes.current)">
 
                     <br>
                 </div>

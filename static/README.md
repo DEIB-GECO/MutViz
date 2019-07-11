@@ -1,6 +1,6 @@
 The following is a description of the project developed for the course of **Data Results and Visualization** (2018).
 
-The main objective of this interactive tool is the visualization of the mutations that happen in particular areas of the DNA in patients affected by different types of cancer.
+The main objective of this interactive tool is the visualization of the mutations that happen in particular areas of the DNA in patients affected by different types of tumor.
 
 The tool is available at http://genomic.elet.polimi.it/drviz/, where the description that follows can be found in the home page with some extra feature (directly loading of the examples) and better rendering.
 
@@ -19,31 +19,31 @@ Looking at a single chromosome, DNA is arranged in units called genes. Genes dir
 A DNA strand is sequence of four constituent nucleobase (guanine [**G**], adenine [**A**], thymine [**T**], and cytosine [**C**]). In every chromosome, two long DNA strands form a double helix. The double helix further folds on itself, giving the molecule the typical shape of a chromosome ("X" shape). In a DNA double helix, each type of nucleobase on one strand bonds with just one type of nucleobase on the other strand. This is called complementary base pairing. 
 The distance between two nucleobases is measured in **base pairs (bp)**.
 
-## Genes and Cancer
-Each gene has a specific function in the body. Some genes control cell division. When **mutations** occur in these genes, a cell may begin to divide without control. Cells that divide when they are not supposed to may eventually become a cancer. Therefore, cancer is the result of gene mutations.
+## Genes and Tumor
+Each gene has a specific function in the body. Some genes control cell division. When **mutations** occur in these genes, a cell may begin to divide without control. Cells that divide when they are not supposed to may eventually become a tumor. Therefore, tumor is the result of gene mutations.
 
-Mutations may be caused by aging, exposure to chemicals, radiation, hormones or other factors in the body and the environment. Over time, a number of mutations may occur in a single cell, allowing it to divide and grow in a way that becomes a cancer. This usually takes many years, and explains why most cancers occur at a later age in life.
+Mutations may be caused by aging, exposure to chemicals, radiation, hormones or other factors in the body and the environment. Over time, a number of mutations may occur in a single cell, allowing it to divide and grow in a way that becomes a tumor. This usually takes many years, and explains why most tumors occur at a later age in life.
 
 ## Topologically associating domain (TADS)
-TADs are particular three-dimensional structures that can be found in chromosomes. The structure resembles a loop in the DNA, "closed" by what is called a **junction**. The functions of TADs are not fully understood, but in some cases, disrupting TADs leads to disease because changing the 3D organization of the chromosome may alterate the expression level of a gene (e.g. oncogenes, that are genes that have potential to cause cancer).
+TADs are particular three-dimensional structures that can be found in chromosomes. The structure resembles a loop in the DNA, "closed" by what is called a **junction**. The functions of TADs are not fully understood, but in some cases, disrupting TADs leads to disease because changing the 3D organization of the chromosome may alterate the expression level of a gene (e.g. oncogenes, that are genes that have potential to cause tumor).
 
 <img src="https://raw.githubusercontent.com/andreagulino/drviz/master/img/tad.png" width="400"/>
 
 ## CTCF motifs
 CTCF motifs are fixed-length sequences (19 bp) of the DNA involved in many cellular processes. The primary role of CTCF is thought to be in regulating the 3D structures of the DNA, e.g. binding together the strands of DNA forming a TAD. This kind of motifs can therefore be found within the junction of a TAD.
 
-**Mutations that affect a CTCF motif within the junction of a TAD are thought to break the TAD loop, increasing, as a side effect, the expression level of some oncogenes, therefore causing cancer.**
+**Mutations that affect a CTCF motif within the junction of a TAD are thought to break the TAD loop, increasing, as a side effect, the expression level of some oncogenes, therefore causing tumor.**
 
 # Visualization Tool
 This tool is designed to help analysts visualize the mutation activity of DNA in the surroundings of CTCF motifs, providing the possibility to explore three different dimensions:
 
 Motif Position: whether the motif falls within the junction of a TAD or not
-- Cancer Type: consider mutations from patients with different cancer types. Available cancer types are:
-  - Breast Cancer
-  - Colorectal Cancer
+- Tumor Type: consider mutations from patients with different tumor types. Available tumor types are:
+  - Breast Tumor
+  - Colorectal Tumor
   - Melanoma
-  - Skin Cancer
-  - Liver Cancer
+  - Skin Tumor
+  - Liver Tumor
   - Esophageal Adenocarcinoma
 - Mutation Type: consider only subsets of all the possible mutations. The following are three examples of the notation used for denoting a mutation:
   - A mutation from A to C is denoted by "A > C".
@@ -62,7 +62,7 @@ dist,from,to
 9113.0,G,A
 -8582.0,G,A
 ```
-All rows within such dataset represent mutations found in multiple patients having the same type of cancer. The columns have the following meaning:
+All rows within such dataset represent mutations found in multiple patients having the same type of tumor. The columns have the following meaning:
 - **dist**: distance, in base pairs (bp), of the mutated nucleobase w.r.t. the center of a motif.
 - **from**: nucleobase that mutates (can be "-", indicating an addition )
 - **to**: nucleobase that replaces the mutated one (can be "-", indicating a deletion)
@@ -79,10 +79,10 @@ The tooldbar on the left of every plot allows to restrict the set of mutations t
 ## View 1: Mutations
 The first interactive plot is an histogram that aims to provide an insight on the class of mutations that are mostly affecting the area surrounding a motif. The interactive toolbar on the left side allows the selection of:
 
-- A specific cancer type
+- A specific tumor type
 - The position of motifs to consider (whether they fall within a junction or not)
 - A class of mutations
-It is known that specific cancer types are associated to specific classes of mutations. For instance, Melanoma and Skin Cancer are generally associated to mutations of type "C > T" and "G > A", that are supposed to be caused by sun rays.
+It is known that specific tumor types are associated to specific classes of mutations. For instance, Melanoma and Skin Tumor are generally associated to mutations of type "C > T" and "G > A", that are supposed to be caused by sun rays.
 
 Independently on the selected class of mutations, grey bars on the background will always represent the total amount of mutations, of any kind, contained in their respective bin.
 
@@ -97,7 +97,7 @@ The palette used for the bars derives from this article / tool and guarantees ac
 <img src="https://raw.githubusercontent.com/andreagulino/drviz/master/img/palette.png" width="300" style="margin-left:150px"/>
 
 ## View 2: Junctions
-The second interactive plot is a heat-map that aims to highlight how mutations affecting motifs that fall within a junction - in contrast to those located at generic positions within a chromosome - are most likely the ones that caused the development of a given cancer.
+The second interactive plot is a heat-map that aims to highlight how mutations affecting motifs that fall within a junction - in contrast to those located at generic positions within a chromosome - are most likely the ones that caused the development of a given tumor.
 
 The first row of the heat-map shows the mutation density around generic motifs, the second row is displaying the density for motifs falling within a junction.
 
@@ -106,9 +106,9 @@ In each row (independently), normalization is performed by dividing the number o
 <img src="https://raw.githubusercontent.com/andreagulino/drviz/master/img/example2.png" width="450">
 
 ## View 3: Tumors
-The third interactive plot is a heat-map that aims to compare the effect of a selected set of mutations on different cancer types. For instance, considering only "C > T" and "G > A", we can see how they are mostly affecting motifs in patients with Melanoma and Skin Cancer, since those mutations are most likely caused by sun rays.
+The third interactive plot is a heat-map that aims to compare the effect of a selected set of mutations on different tumor types. For instance, considering only "C > T" and "G > A", we can see how they are mostly affecting motifs in patients with Melanoma and Skin Tumor, since those mutations are most likely caused by sun rays.
 
-Each row of the heat-map shows the mutation density of the selected class of mutations for a specific cancer type.
+Each row of the heat-map shows the mutation density of the selected class of mutations for a specific tumor type.
 
 In each row (independently), normalization is performed by dividing the number of elements in each bin by the maximum number of element contained in a bin of that row.
 

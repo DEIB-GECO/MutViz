@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "L01 - List Cancer Types",
+			"name": "L01 - List Tumor Types",
 			"request": {
 				"method": "GET",
 				"header": [],

@@ -42,11 +42,11 @@ function uc3_getFilteredData(data, mutationTypes) {
                 if(t.from=="*" && t.to=="*")
                     return true;
                 if(t.from=="*") 
-                    return t.to==mutation.to  
+                    return t.to==mutation[2]  
                 if(t.to=="*") 
-                    return t.from==mutation.from  
+                    return t.from==mutation[1]  
 
-                return t.from == mutation.from && t.to==mutation.to  
+                return t.from == mutation[1] && t.to==mutation[2]  
             }
         ).reduce( function(t1,t2){ return t1 || t2 });
 
@@ -65,7 +65,7 @@ function uc3_update(data, g, binSize, mutationTypes) {
 
     // Configure the histogram function
     var histogram = d3.histogram()
-                      .value(function(d) {return d.dist})
+                      .value(function(d) {return d[0]})
                       .domain(g.xAxisScale.domain())       
                       .thresholds(ticks); 
 
