@@ -1,11 +1,30 @@
 from flask import Flask, json, request, abort
 from flask_cors import CORS
+import sqlalchemy
+from model.models import *
+from db import *
+
 
 # documentation:
 # https://docs.google.com/document/d/1kNJ7mogv5Jj6Wu2WOU4jCeX-Nav250l4tMHm6YFGANU/edit#
 
 app = Flask(__name__, static_url_path='', static_folder='../static')
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+app.config['SQLALCHEMY_DATABASE_URI'] = get_db_uri()
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+
+# Save mutation-code in a dictionary
+with app.app_context():
+    mutations = MutationCode.query.all()
+    print(mutations[0].mutation)
+
+
+#with app.app_context():
+#    res = db.engine.execute(sqlalchemy.text("SELECT * FROM mutation_codes")).fetchall()
+#   print(res)
 
 
 # Serve static content
@@ -65,18 +84,18 @@ def get_test1():
     regions = request.form.get('regions')
     regionsFormat = request.form.get('regionsFormat')
     tumorType = request.form.get('tumorType')
-    transitions = request.form.get('transitions')
+    mutations = request.form.get('mutations')
     maxDistance = int(request.form.get('maxDistance'))
 
-    if not(regions and regionsFormat and maxDistance and tumorType and transitions):
+    if not(regions and regionsFormat and maxDistance and tumorType and mutations):
         abort(400)
 
     if regions == "file non parsabile ...":
         abort(422)
 
 
-    # parse transitions array
-    trans_arr = json.loads(transitions)
+    # parse mutations array
+    trans_arr = json.loads(mutations)
 
     results = { "pvalue" : 0.1}
     return json.dumps(results)
@@ -89,17 +108,17 @@ def get_test2():
     regionsFormat_1 = request.form.get('regionsFormat_1')
     regionsFormat_2 = request.form.get('regionsFormat_2')
     tumorType = request.form.get('tumorType')
-    transitions = request.form.get('transitions')
+    mutations = request.form.get('mutations')
     maxDistance = int(request.form.get('maxDistance'))
 
-    if not(regions_1 and regions_2 and regionsFormat_1 and regionsFormat_2 and maxDistance and tumorType and transitions):
+    if not(regions_1 and regions_2 and regionsFormat_1 and regionsFormat_2 and maxDistance and tumorType and mutations):
         abort(400)
 
     if regions_1 == "file non parsabile ..." or regions_2 == "file non parsabile ...":
         abort(422)
 
-    # parse transitions array
-    trans_arr = json.loads(transitions)
+    # parse mutations array
+    trans_arr = json.loads(mutations)
 
     results = { "pvalue" : 0.1}
     return json.dumps(results)
@@ -111,18 +130,18 @@ def get_test3():
     regionsFormat = request.form.get('regionsFormat')
     tumorType_1 = request.form.get('tumorType_1')
     tumorType_2 = request.form.get('tumorType_2')
-    transitions = request.form.get('transitions')
+    mutations = request.form.get('mutations')
     maxDistance = int(request.form.get('maxDistance'))
 
 
-    if not(regions and regionsFormat  and maxDistance and tumorType_1 and tumorType_2 and transitions):
+    if not(regions and regionsFormat  and maxDistance and tumorType_1 and tumorType_2 and mutations):
         abort(400)
 
     if regions == "file non parsabile ...":
         abort(422)
 
-    # parse transitions array
-    trans_arr = json.loads(transitions)
+    # parse mutations array
+    trans_arr = json.loads(mutations)
 
     results = { "pvalue" : 0.1}
     return json.dumps(results)
