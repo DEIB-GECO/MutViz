@@ -11,7 +11,7 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http) {
     function clone(object) { return JSON.parse(JSON.stringify(object))}
 
     // File prototype
-    $scope.empty_file = {name: "", type:"bed", file_txt:"", distances:null, maxDistance:300};
+    $scope.empty_file = {name: "", type:"bed", file_txt:"", distances:null, maxDistance:300, count:0};
     $scope.adding_file = clone($scope.empty_file);
 
     // On form submitted
@@ -22,15 +22,29 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http) {
             file = input.files[0];
 
             reader = new FileReader();
-            
+
             new Promise((resolve, reject) => {
                 reader.onload = event => resolve(event.target.result)
                 reader.onerror = error => reject(error)
                 reader.readAsText(file);
             }).then(content => {
 
+                // Take only chromosome and center (compress_regions is in support.js)
+                res = compress_regions(content, $scope.adding_file.type=="narrowpeak");
+
+                if( res.parsed_count < res.total_count) {
+                    $("#modal_title").text("File: "+file.name);
+                    $("#modal_description").text("Parsing error:");
+
+                    $("#modal_rows").text(res.log);
+                    $('#modale').modal();
+                    return;
+                }
+
+                $scope.adding_file.count = res.total_count;
+
                 // Add file's text to the prototype
-                $scope.adding_file.file_txt = content;
+                $scope.adding_file.file_txt = res.output;
 
                 // Build the POST request body
                 request_body = {
@@ -47,7 +61,7 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http) {
                     url: API_R01
                 }).then(
                     function success(response) {
-                        
+
                         // Add the new file to the local list of files together with the answer
                         $scope.adding_file.distances = response.data;
                         $rootScope.files.push(clone($scope.adding_file));
@@ -66,6 +80,14 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     }
 
+    $scope.viewRegions = function(file) {
+        $("#modal_title").text("File: "+file.name);
+        $("#modal_description").text("This "+file.type+" file contains the following "+file.count+" regions (chromosome, center):");
+
+        $("#modal_rows").text(file.file_txt);
+        $('#modale').modal();
+    }
+
 
     $scope.persistData = function() {
         localStorage['STFNCR-Data'] = JSON.stringify($rootScope.files);
@@ -75,6 +97,5 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http) {
         $rootScope.files.splice(index,1);
         $scope.persistData();
     }
-
 
 });
