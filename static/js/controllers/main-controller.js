@@ -1,7 +1,7 @@
 /* ##########################################################
    Main Controller - Always active independently on the view
    ########################################################## */
-app.controller('main_ctrl', function($scope, $http, $location, $rootScope) {
+app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $interval) {
 
     // Mutations (- is used for deletions or insertions)
     $rootScope.mutationTypes = {
@@ -40,6 +40,40 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope) {
     if( $rootScope.files.length == 0) {
         var stored = localStorage['STFNCR-Data'];
         if (stored) $rootScope.files = JSON.parse(stored);
+
+        // Restart folling
+        $rootScope.files.forEach(function(f){
+
+            f.timer = $interval( function(file){
+
+                console.log("polling for file: "+file.name+" with jobId"+file.jobID);
+
+                // Call the API
+                $http({method: 'GET', url: API_R01+file.jobID
+                      }).then(
+                    function success(response) {
+                        if( response.data.ready == true) {
+                            console.log("result for "+file.jobID+" is ready");
+
+                            // Add the new file to the local list of files together with the answer
+                            file.distances = response.data.result;
+                            file.ready = true;
+
+                            // Stop timer
+                            $interval.cancel(file.timer);
+
+                            // Persist
+                            $scope.persistData();
+                        }
+                    }, 
+                    function error(response) {
+                        console.log("error");
+                    });
+
+
+            }, POLLING_TIMEOUT, 0, true, f);
+
+        });
     }
 
     // ########### //

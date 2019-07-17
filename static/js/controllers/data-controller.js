@@ -1,7 +1,7 @@
 /* ####################
    Data Controller
    #################### */
-app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http) {
+app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $interval) {
 
     /* # Initialization # */
     window.scroll(0, 0);
@@ -12,7 +12,7 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http) {
     function clone(object) { return JSON.parse(JSON.stringify(object))}
 
     // File prototype
-    $scope.empty_file = {id:null, name: "", type:"bed", file_txt:"", distances:null, maxDistance:300, count:0, source:null};
+    $scope.empty_file = {id:null, name: "", type:"bed", file_txt:"", distances:null, maxDistance:300, count:0, source:null, ready:false, jobID:null};
     $scope.adding_file = clone($scope.empty_file);
 
     // On form submitted
@@ -55,6 +55,7 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http) {
                     maxDistance: $scope.adding_file.maxDistance
                 }
 
+
                 // Call the API
                 $http({
                     method: 'POST',
@@ -64,14 +65,46 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http) {
                 }).then(
                     function success(response) {
 
-                        // Add the new file to the local list of files together with the answer
-                        $scope.adding_file.distances = response.data;
+                        $scope.adding_file.jobID = response.data.jobID;
                         $scope.adding_file.source = "custom";
-                        $rootScope.files.push(clone($scope.adding_file));
+
+                        file_clone = clone($scope.adding_file);
                         $scope.adding_file = clone($scope.empty_file);
 
+                        // Start timer
+                        file_clone.timer =  $interval( function(file){
+
+                            console.log("polling for file: "+file.name+" with jobId"+file.jobID);
+                            
+                            // Call the API
+                            $http({method: 'GET', url: API_R01+file.jobID
+                            }).then(
+                                function success(response) {
+                                    if( response.data.ready == true) {
+                                        console.log("result for "+file.jobID+" is ready");
+
+                                        // Add the new file to the local list of files together with the answer
+                                        file.distances = response.data.result;
+                                        file.ready = true;
+                                        
+                                        // Stop timer
+                                        $interval.cancel(file.timer);
+
+                                        // Persist
+                                        $scope.persistData();
+                                    }
+                                }, 
+                                function error(response) {
+                                     console.log("error");
+                                });
+
+
+                        }, POLLING_TIMEOUT, 0, true, file_clone);
+
                         // Persist
+                        $rootScope.files.push(file_clone);
                         $scope.persistData();
+
                     }, 
                     function error(response) {
                         window.alert("error");
@@ -108,7 +141,7 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http) {
                 file.distances = response.data;
                 $rootScope.files.push(file);
 
-                // Persist
+                // Persistxe
                 $scope.persistData();
             }, 
             function error(response) {

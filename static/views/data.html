@@ -68,7 +68,7 @@ required="true" placeholder="Enter email"/-->
                         </div>
 
                     </div>
-                    
+
                 </div>
             </form>
         </div>
@@ -109,16 +109,22 @@ required="true" placeholder="Enter email"/-->
                     <div class="row">
                         <div class="col-md-8" style="font-size: 1em; line-height: 1.9em;">
                             {{file.name}} <span ng-if="file.source=='custom'">({{file.type}})</span>
-                        
+
                             <br>
                             <a ng-if="file.source=='custom'" href="javascript:void(0);" ng-click="viewRegions(file)" style="color:green">{{file.count}} regions</a>
                             <span style="color:#007bff" ng-if="file.source=='repo'">From Repository</span>
-                            
+
 
                         </div>
-                        <div class="col-md-4 my-auto">
+                        <div class="col-md-4 my-auto" ng-if="file.ready">
                             <button type="submit" class="btn btn-sm btn-danger float-right" ng-click="removeFile($index)">Remove</button>
                         </div>
+
+                        <div class="col-md-4 my-auto" ng-if="!file.ready">
+                           <img src="img/loading.gif" class="float-right" style="height: 35px">
+                        </div>
+
+                     
                     </div>
                 </div>
 
