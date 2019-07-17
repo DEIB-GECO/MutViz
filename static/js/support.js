@@ -48,3 +48,27 @@ function compress_regions(csv_txt, peak) {
 
     return {output: output, parsed_count: correctly_parsed, total_count: lines.length, log: parsing_log};
 }
+
+function bs_input_file() {
+	$(".input-file").before(
+		function() {
+			if ( ! $(this).prev().hasClass('input-ghost') ) {
+				var element = $("<input type='file' class='input-ghost' id='newFile' style='visibility:hidden; display:none; height:0'>");
+				element.attr("name",$(this).attr("name"));
+				element.change(function(){
+					element.next(element).find('input').val((element.val()).split('\\').pop());
+				});
+				$(this).find("span#btn-choose").click(function(){
+					element.click();
+				});
+				
+				$(this).find('input').css("cursor","pointer");
+				$(this).find('input').mousedown(function() {
+					$(this).parents('.input-file').prev().click();
+					return false;
+				});
+				return element;
+			}
+		}
+	);
+}

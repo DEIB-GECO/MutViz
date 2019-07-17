@@ -17,9 +17,9 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 # Save mutation-code in a dictionary
-with app.app_context():
-    mutations = MutationCode.query.all()
-    print(mutations[0].mutation)
+#with app.app_context():
+#    mutations = MutationCode.query.all()
+#    print(mutations[0].mutation)
 
 
 #with app.app_context():
@@ -43,15 +43,28 @@ def get_tumor_types():
     ]
     return json.dumps(results)
 
+# API L02
+@app.route('/api/repository/')
+def get_repository():
+
+    with app.app_context():
+        mutations = Repository.query.all()
+        res = list(map(lambda x: {"identifier":x.id, "name":x.name, "description":x.description }, mutations))
+
+        print(res)
+
+    return json.dumps(res)
+
 # API R01
 @app.route('/api/distance/', methods=['POST'])
 def get_distances():
+    repoId = request.form.get('repoId')
     regions = request.form.get('regions')
     regionsFormat = request.form.get('regionsFormat')
     maxDistance = int(request.form.get('maxDistance'))
     tumorType = request.form.get('tumorType')
 
-    if not(regions and regionsFormat and maxDistance):
+    if not( (repoId or regions and regionsFormat) and maxDistance):
         abort(400)
 
     if tumorType==None:
@@ -81,15 +94,18 @@ def get_distances():
 # API T01
 @app.route('/api/t01/', methods=['POST'])
 def get_test1():
+    repoId = request.form.get('repoId')
     regions = request.form.get('regions')
     regionsFormat = request.form.get('regionsFormat')
     tumorType = request.form.get('tumorType')
     mutations = request.form.get('mutations')
     maxDistance = int(request.form.get('maxDistance'))
 
-    if not(regions and regionsFormat and maxDistance and tumorType and mutations):
+    if not( (repoId or regions and regionsFormat) and
+            maxDistance and tumorType and mutations):
         abort(400)
 
+    # in teoria inutile perchè lo parso lato client
     if regions == "file non parsabile ...":
         abort(422)
 
@@ -103,6 +119,8 @@ def get_test1():
 # API T02
 @app.route('/api/t02/', methods=['POST'])
 def get_test2():
+    repoId1 = request.form.get('repoId1')
+    repoId2 = request.form.get('repoId2')
     regions_1 = request.form.get('regions_1')
     regions_2 = request.form.get('regions_2')
     regionsFormat_1 = request.form.get('regionsFormat_1')
@@ -111,7 +129,9 @@ def get_test2():
     mutations = request.form.get('mutations')
     maxDistance = int(request.form.get('maxDistance'))
 
-    if not(regions_1 and regions_2 and regionsFormat_1 and regionsFormat_2 and maxDistance and tumorType and mutations):
+    if not( (repoId1 or regions_1 and regionsFormat_1) and
+            (repoId2 or regions_2 and regionsFormat_2) and
+             maxDistance and tumorType and mutations):
         abort(400)
 
     if regions_1 == "file non parsabile ..." or regions_2 == "file non parsabile ...":
@@ -126,6 +146,7 @@ def get_test2():
 # API T03
 @app.route('/api/t03/', methods=['POST'])
 def get_test3():
+    repoId = request.form.get('repoId')
     regions = request.form.get('regions')
     regionsFormat = request.form.get('regionsFormat')
     tumorType_1 = request.form.get('tumorType_1')
@@ -134,7 +155,8 @@ def get_test3():
     maxDistance = int(request.form.get('maxDistance'))
 
 
-    if not(regions and regionsFormat  and maxDistance and tumorType_1 and tumorType_2 and mutations):
+    if not( (repoId or regions and regionsFormat) and
+             maxDistance and tumorType_1 and tumorType_2 and mutations):
         abort(400)
 
     if regions == "file non parsabile ...":

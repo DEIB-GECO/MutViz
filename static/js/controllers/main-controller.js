@@ -18,8 +18,13 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope) {
         available: []
     }
 
+    // Repository
+    $rootScope.repository = [];
+
     // Array of files objects
     $rootScope.files = [];
+
+
 
     // Extract the svg of the plot and download it
     $scope.downloadPlot = function() {
@@ -36,7 +41,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope) {
         var stored = localStorage['STFNCR-Data'];
         if (stored) $rootScope.files = JSON.parse(stored);
     }
-    
+
     // ########### //
 
 
@@ -52,6 +57,24 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope) {
         function error (response) {
             console.log(response);
             console.error("Error while retrieving the list of tumor types.")
+        }
+    );
+
+    // Retrieve the list of available tumor types
+    $http({method: 'GET', url:  API_L02})
+        .then(
+        function success (response) {
+            $rootScope.repository = response.data;
+            console.log( $rootScope.repository);
+            if($rootScope.repository.length>0)
+                $rootScope.repoEl = $rootScope.repository[0];
+            console.log("loaded repository");
+
+        }).catch(
+        // ERROR
+        function error (response) {
+            console.log(response);
+            console.error("Error while retrieving the repository.")
         }
     );
 
