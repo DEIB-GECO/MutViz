@@ -11,11 +11,14 @@ function compress_regions(csv_txt, peak) {
     for(var i=0; i<lines.length;i++) {
         cols = lines[i].split(new RegExp("\\s"));
 
-        if(peak && cols.length<10 || !peak && cols.length<3) {
-            parsing_log+="Not enough cols in line "+(i+1)+": "+lines[i]+"\n";
-            continue;
+        if (lines[i].trim() != "") { //skip empty lines
+
+            if(peak && cols.length<10 || !peak &&  cols.length<3) {
+                parsing_log+="Not enough cols in line "+(i+1)+": "+lines[i]+"\n";
+                continue;
+            }
         }
-        
+
 
         chromosome = cols[0];
         start = Number(cols[1])
@@ -50,25 +53,25 @@ function compress_regions(csv_txt, peak) {
 }
 
 function bs_input_file() {
-	$(".input-file").before(
-		function() {
-			if ( ! $(this).prev().hasClass('input-ghost') ) {
-				var element = $("<input type='file' class='input-ghost' id='newFile' style='visibility:hidden; display:none; height:0'>");
-				element.attr("name",$(this).attr("name"));
-				element.change(function(){
-					element.next(element).find('input').val((element.val()).split('\\').pop());
-				});
-				$(this).find("span#btn-choose").click(function(){
-					element.click();
-				});
-				
-				$(this).find('input').css("cursor","pointer");
-				$(this).find('input').mousedown(function() {
-					$(this).parents('.input-file').prev().click();
-					return false;
-				});
-				return element;
-			}
-		}
-	);
+    $(".input-file").before(
+        function() {
+            if ( ! $(this).prev().hasClass('input-ghost') ) {
+                var element = $("<input type='file' class='input-ghost' id='newFile' style='visibility:hidden; display:none; height:0'>");
+                element.attr("name",$(this).attr("name"));
+                element.change(function(){
+                    element.next(element).find('input').val((element.val()).split('\\').pop());
+                });
+                $(this).find("span#btn-choose").click(function(){
+                    element.click();
+                });
+
+                $(this).find('input').css("cursor","pointer");
+                $(this).find('input').mousedown(function() {
+                    $(this).parents('.input-file').prev().click();
+                    return false;
+                });
+                return element;
+            }
+        }
+    );
 }
