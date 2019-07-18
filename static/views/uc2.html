@@ -12,7 +12,7 @@
                 <select class="form-control" id="ttSelect"
                         ng-model="selectedFile1"
                         ng-change="load(selectedFile1, selectedFile2, tumorTypes.current)">
-                    <option ng-repeat="file in files track by $index" ng-value="file">{{file.name}}</option>
+                    <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file">{{file.name}}</option>
                 </select>
             </div>
 
@@ -21,7 +21,7 @@
                 <select class="form-control" id="ttSelect"
                         ng-model="selectedFile2"
                         ng-change="load(selectedFile1, selectedFile2, tumorTypes.current)">
-                    <option ng-repeat="file in files track by $index" ng-value="file">{{file.name}}</option>
+                    <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file">{{file.name}}</option>
                 </select>
             </div>
 
@@ -34,10 +34,6 @@
                 </select>
                 <hr>
             </div>
-
-
-
-
 
             <div class="col-md-12" style="margin-top:10px;">
 

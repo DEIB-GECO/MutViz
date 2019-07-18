@@ -16,7 +16,7 @@
                 <select class="form-control" id="ttSelect"
                         ng-model="selectedFile"
                         ng-change="load(selectedFile, tumorTypes.current)">
-                    <option ng-repeat="file in files track by $index" ng-value="file">{{file.name}}</option>
+                    <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file">{{file.name}}</option>
                 </select>
             </div>
 
