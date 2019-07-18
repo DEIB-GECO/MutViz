@@ -12,6 +12,11 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
         stacked: true // whether to use different colors for different mutation types or plot them with a single color
     }
 
+
+    $rootScope.persistData = function() {
+        localStorage['STFNCR-Data'] = JSON.stringify($rootScope.files);
+    }
+
     // Tumor Types
     $rootScope.tumorTypes = {
         current: null,
@@ -36,6 +41,47 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
         document.getElementById("dwn").click();
     }
 
+
+    // Polling for API R01
+    $rootScope.pollR01 = function(file) {
+
+        console.log(file);
+
+        return $interval( function(file) {
+
+            console.log("polling for file: "+file.name+" with jobId"+file.jobID);
+
+            // Call the API
+            $http({method: 'GET', url: API_R01+file.jobID
+                  }).then(
+                function success(response) {
+                    if( response.data.ready == true) {
+                        file.ready = true;
+                        console.log("result for "+file.jobID+" is ready");
+
+                        // Add the new file to the local list of files together with the answer
+                        file.distances = response.data.result;
+
+                        // Stop timer
+                        $interval.cancel(file.timer);
+
+                        // Persist
+                        $rootScope.persistData();
+                    }
+                }, 
+                function error(response) {
+                    $interval.cancel(file.timer);
+                    window.alert("Error. File "+file.name+" will be removed.");
+                    index =  $rootScope.files.indexOf(file);
+                    $rootScope.files.splice(index, 1);
+
+                    $rootScope.persistData();
+                });
+
+
+        }, POLLING_TIMEOUT, 0, true, file);
+    }
+
     // Restore Files Stored in Local Storage
     if( $rootScope.files.length == 0) {
         var stored = localStorage['STFNCR-Data'];
@@ -43,36 +89,8 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
 
         // Restart folling
         $rootScope.files.forEach(function(f){
-
-            f.timer = $interval( function(file){
-
-                console.log("polling for file: "+file.name+" with jobId"+file.jobID);
-
-                // Call the API
-                $http({method: 'GET', url: API_R01+file.jobID
-                      }).then(
-                    function success(response) {
-                        if( response.data.ready == true) {
-                            console.log("result for "+file.jobID+" is ready");
-
-                            // Add the new file to the local list of files together with the answer
-                            file.distances = response.data.result;
-                            file.ready = true;
-
-                            // Stop timer
-                            $interval.cancel(file.timer);
-
-                            // Persist
-                            $scope.persistData();
-                        }
-                    }, 
-                    function error(response) {
-                        console.log("error");
-                    });
-
-
-            }, POLLING_TIMEOUT, 0, true, f);
-
+            if(!f.ready)
+                f.timer = $rootScope.pollR01(f);
         });
     }
 
@@ -111,6 +129,8 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
             console.error("Error while retrieving the repository.")
         }
     );
+
+
 
 });
 

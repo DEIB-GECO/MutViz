@@ -105,7 +105,7 @@ required="true" placeholder="Enter email"/-->
         <div class="row" style="background-color: #fafafa; padding:10px;">
 
             <div ng-if="files.length>0" class="col-md-4 file-item" ng-repeat="file in files track by $index">
-                <div style="border:1px solid black; padding: 10px; margin-top: 10px; background-color: white">
+                <div style="border:1px solid {{file.ready?'black':'#dadada'}}; padding: 10px; margin-top: 10px; background-color: white; min-height: 87px;">
                     <div class="row">
                         <div class="col-md-8" style="font-size: 1em; line-height: 1.9em;">
                             {{file.name}} <span ng-if="file.source=='custom'">({{file.type}})</span>
@@ -120,11 +120,17 @@ required="true" placeholder="Enter email"/-->
                             <button type="submit" class="btn btn-sm btn-danger float-right" ng-click="removeFile($index)">Remove</button>
                         </div>
 
-                        <div class="col-md-4 my-auto" ng-if="!file.ready">
-                           <img src="img/loading.gif" class="float-right" style="height: 35px">
+                        <div class="col-md-4 " ng-if="!file.ready">
+                            <div class="row">
+                                <div class="col-md-12 text-center">
+                                    <img src="img/loading.gif" style="height: 45px; margin-left: 5px; margin-bottom: 4px;">
+                                </div>
+                                <div class="col-md-12 text-center" style="font-size: 0.7em">
+                                    Processing
+                                </div>
+                            </div>
                         </div>
 
-                     
                     </div>
                 </div>
 
