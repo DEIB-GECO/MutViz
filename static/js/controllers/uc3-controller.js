@@ -27,7 +27,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
     $scope.load = function(file, selectedTumorTypes) {
-        
+
         console.log(file)
 
         console.log("Loading file: "+file.name);
@@ -113,7 +113,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
 
     // Update the plot according to the new bin size
-    $scope.changeMutationType =  function() {
+    $scope.changeMutationType  =  function() {
 
         types = $scope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.to!=null});
 
@@ -144,20 +144,20 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             $scope.mutationTypes.invalidSelection = true;
         } else {
             $scope.mutationTypes.invalidSelection = false;
-            $scope.updatePlot($scope.selectedFile, $rootScope.tumorType.displayed);
+            $scope.updatePlot($scope.selectedFile, $scope.selectedTumorTypes);
         }
     };
 
 
     $scope.getData = function(file, selectedTumorTypes){
-    
+
 
         function getDist(file, typeId) {
             return file.distances.filter(
-            function(x){return x.tumorType==typeId
-                       })[0].distances.filter(function(x){return x[1].length==1 && x[2].length==1})
+                function(x){return x.tumorType==typeId
+                           })[0].distances.filter(function(x){return x[1].length==1 && x[2].length==1})
         }
-        
+
 
         return selectedTumorTypes.map(function(t){
             return {type: t.name, data: getDist(file, t.identifier)} 
@@ -177,6 +177,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         if($scope.selectedTumorTypes.length>0)
             $scope.load($scope.selectedFile, $scope.selectedTumorTypes)
     }
+
 
     // Add a new empty condition for mutation types
     $scope.addCondition = function() {

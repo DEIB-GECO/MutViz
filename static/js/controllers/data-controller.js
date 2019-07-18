@@ -64,34 +64,15 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
             maxDistance: $scope.empty_file.maxDistance
         }
 
-        // Call the API
-        $http({
-            method: 'POST',
-            data: $.param(request_body),
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            url: API_R01
-        }).then(
-            function success(response) {
-                // Add the new file to the local list of files together with the answer
-                file = clone($scope.empty_file)
-                file.identifier = repoEl.identifier;
-                file.name = repoEl.name;
-                file.source = "repo";
-                file.jobID = response.data.jobID;
+        file = clone($scope.empty_file)
+        file.identifier = repoEl.identifier;
+        file.name = repoEl.name;
+        file.source = "repo";
+        file.repoId = repoEl.identifier;
 
-                // Start polling
-                file.timer = $rootScope.pollR01(file);
+        $rootScope.files.push(file);
 
-                $rootScope.files.push(file);
-
-                // Persistxe
-                $rootScope.persistData();
-            }, 
-            function error(response) {
-                window.alert("error");
-            });
-
-
+        $rootScope.computeDistances(file);
     }
 
     $scope.viewRegions = function(file) {

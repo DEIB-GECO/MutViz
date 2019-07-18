@@ -38,7 +38,6 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
             function(x){return x.tumorType==tumorType.identifier
                        })[0].distances
         
-        console.log(distances);
 
         distances = distances.filter(function(x){return x[1].length==1 && x[2].length==1})
 
@@ -120,7 +119,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     // Update the plot
     $scope.updatePlot = function(file, tumorType) {
-
+        
         distances = file.distances.filter(function(x){return x.tumorType==tumorType.identifier})[0].distances;
 
         // Update function is defined in uc1.js.
@@ -165,7 +164,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
             $rootScope.mutationTypes.invalidSelection = true;
         } else {
             $rootScope.mutationTypes.invalidSelection = false;
-            $scope.updatePlot();
+            $scope.updatePlot($scope.selectedFile, $rootScope.tumorTypes.current);
         }
     };
 

@@ -118,6 +118,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
 
         // Build the POST request body
         request_body = {
+            repoId: file.repoId,
             regions: file.file_txt,
             regionsFormat: file.type,
             maxDistance: file.maxDistance
