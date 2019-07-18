@@ -52,6 +52,7 @@ function compress_regions(csv_txt, peak) {
     return {output: output, parsed_count: correctly_parsed, total_count: lines.length, log: parsing_log};
 }
 
+// Initialize the upload file elements
 function bs_input_file() {
     $(".input-file").before(
         function() {
@@ -75,3 +76,6 @@ function bs_input_file() {
         }
     );
 }
+
+// Function that creates a copy of a generic object
+function clone(object) { return JSON.parse(JSON.stringify(object))}

@@ -8,9 +8,6 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
     bs_input_file();
     $rootScope.active_menu = "data";
 
-    // Function that creates a copy of a generic object
-    function clone(object) { return JSON.parse(JSON.stringify(object))}
-
     // File prototype
     $scope.empty_file = {id:null, name: "", type:"bed", file_txt:"", distances:null, maxDistance:300, count:0, source:null, ready:false, jobID:null};
     $scope.adding_file = clone($scope.empty_file);
@@ -46,43 +43,12 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
 
                 // Add file's text to the prototype
                 $scope.adding_file.file_txt = res.output;
+                $scope.adding_file.source = "custom";
 
+                file_clone = clone($scope.adding_file);
+                $rootScope.files.push(file_clone);
 
-                // Build the POST request body
-                request_body = {
-                    regions: $scope.adding_file.file_txt,
-                    regionsFormat: $scope.adding_file.type,
-                    maxDistance: $scope.adding_file.maxDistance
-                }
-
-
-                // Call the API
-                $http({
-                    method: 'POST',
-                    data: $.param(request_body),
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    url: API_R01
-                }).then(
-                    function success(response) {
-
-                        $scope.adding_file.jobID = response.data.jobID;
-                        $scope.adding_file.source = "custom";
-
-                        file_clone = clone($scope.adding_file);
-                        $scope.adding_file = clone($scope.empty_file);
-
-                        // Start polling
-                        file_clone.timer = $rootScope.pollR01(file_clone);
-
-                        // Persist
-                        $rootScope.files.push(file_clone);
-                        $rootScope.persistData();
-
-                    }, 
-                    function error(response) {
-                        window.alert("error");
-                    });
-
+                $rootScope.computeDistances(file_clone);
 
             }).catch(error => console.log(error))
         }

@@ -30,7 +30,7 @@ def getJobResult(jobID):
         return json.dumps({"ready": False})
     else:
         res = json.dumps({"ready": True, "result": jobs[jobID]})
-        del jobs[jobID]
+        #del jobs[jobID]
         return res
 
 

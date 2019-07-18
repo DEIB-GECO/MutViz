@@ -12,11 +12,6 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
         stacked: true // whether to use different colors for different mutation types or plot them with a single color
     }
 
-
-    $rootScope.persistData = function() {
-        localStorage['STFNCR-Data'] = JSON.stringify($rootScope.files);
-    }
-
     // Tumor Types
     $rootScope.tumorTypes = {
         current: null,
@@ -29,18 +24,17 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
     // Array of files objects
     $rootScope.files = [];
 
+    // Persist Files in local storage
+    $rootScope.persistData = function() {
+        files = clone($rootScope.files);
+        console.log("persisting "+files.length+" files");
 
-
-    // Extract the svg of the plot and download it
-    $scope.downloadPlot = function() {
-
-        $('#dwn').attr('href', 'data:application/octet-stream;base64,' + btoa($("#uc1").html())); 
-        $('#dwn').attr('download', 'plot.svg');
-        $('#dwn').click();
-
-        document.getElementById("dwn").click();
+        for (i=0; i<files.length; i++) {
+            files[i].distances=[]; // don't save the computation result
+            localStorage['file-'+i] = JSON.stringify(files[i]); 
+        }
+ 
     }
-
 
     // Polling for API R01
     $rootScope.pollR01 = function(file) {
@@ -71,9 +65,13 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
                 }, 
                 function error(response) {
                     $interval.cancel(file.timer);
-                    window.alert("Error. File "+file.name+" will be removed.");
-                    index =  $rootScope.files.indexOf(file);
-                    $rootScope.files.splice(index, 1);
+                    //window.alert("Error. File "+file.name+" will be removed.");
+                    //index =  $rootScope.files.indexOf(file);
+                    //$rootScope.files.splice(index, 1);
+
+                    // Attempt another computation
+                    console.log("Attempting another computation.");
+                    $rootScope.computeDistances(file);
 
                     $rootScope.persistData();
                 });
@@ -82,17 +80,74 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
         }, POLLING_TIMEOUT, 0, true, file);
     }
 
-    // Restore Files Stored in Local Storage
-    if( $rootScope.files.length == 0) {
-        var stored = localStorage['STFNCR-Data'];
-        if (stored) $rootScope.files = JSON.parse(stored);
+    // Recover files from local storage
+    $rootScope.recoverData = function() {
+        // Restore Files Stored in Local Storage
+        if( $rootScope.files.length == 0) {
 
-        // Restart folling
-        $rootScope.files.forEach(function(f){
-            if(!f.ready)
+            for (el in localStorage)
+                if(el.startsWith("file-")) {
+                    file = JSON.parse(localStorage[el]);
+                    console.log("Restoring file "+file.name+" from local storage");
+                    $rootScope.files.push(file);
+                }
+
+            // Restart polling
+            $rootScope.files.forEach(function(f){
+                f.ready = false;
                 f.timer = $rootScope.pollR01(f);
-        });
+            });
+        }
     }
+
+    $rootScope.recoverData();
+
+
+    // Extract the svg of the plot and download it
+    $scope.downloadPlot = function() {
+
+        $('#dwn').attr('href', 'data:application/octet-stream;base64,' + btoa($("#uc1").html())); 
+        $('#dwn').attr('download', 'plot.svg');
+        $('#dwn').click();
+
+        document.getElementById("dwn").click();
+    }
+
+    // Compute Distances
+    $rootScope.computeDistances = function(file) {
+
+        // Build the POST request body
+        request_body = {
+            regions: file.file_txt,
+            regionsFormat: file.type,
+            maxDistance: file.maxDistance
+        }
+
+        // Call the API
+        $http({
+            method: 'POST',
+            data: $.param(request_body),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            url: API_R01
+        }).then(
+            function success(response) {
+
+                file.jobID = response.data.jobID;
+
+                // Start polling
+                file.timer = $rootScope.pollR01(file);
+
+                // Persist
+                $rootScope.persistData();
+
+            }, 
+            function error(response) {
+                window.alert("error");
+            });
+
+    }
+
+
 
     // ########### //
 
