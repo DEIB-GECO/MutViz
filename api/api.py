@@ -6,6 +6,7 @@ import flask
 import sqlalchemy
 from flask import Flask, json, request, abort
 from flask_cors import CORS
+from flask_executor import Executor
 
 from api.db import *
 from api.model.models import *
@@ -36,6 +37,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = get_db_uri()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
+
+executor = Executor(app)
 
 # JOBS   jobId->resultJson
 jobs = {"abcde-fghi-lmno": None, "abbbb-fknifn": None}
@@ -130,77 +133,84 @@ def get_distances():
 
     # Generate a jobID
     jobID = str(uuid.uuid1()).replace('-', '_')
+    jobs[jobID] = None
     table_name = "t_" + jobID
 
     logger.debug(f"{jobID}->{table_name}")
 
+    # TODO remove after testing
+    # regions = list(regions)[:1000]
     ### Asynchronous computation
+    def async_function():
+        session = db.session
+        session.execute("set enable_seqscan=false")
 
-    session = db.session
-    session.execute("set enable_seqscan=false")
+        session.execute(sqlalchemy.text(f"CREATE TEMPORARY TABLE {table_name}(chrom smallint, pos bigint)"))
+        # session.execute(f"INSERT INTO {table_name} VALUES ({4},{4})")
+        session.flush()
 
-    session.execute(sqlalchemy.text(f"CREATE TEMPORARY TABLE {table_name}(chrom smallint, pos bigint)"))
-    # session.execute(f"INSERT INTO {table_name} VALUES ({4},{4})")
-    session.flush()
+        if tumorType == None:
+            result = defaultdict(list)
+            # return result for each available tumor type
+            if regions:
+                for i, (chrom, pos) in enumerate(regions):
+                    if i % 100 == 0:
+                        session.flush()
+                        print(i)
+                    chrom = chrom.lower().replace('chr', '')
+                    try:
+                        pos = int(pos)
+                    except ValueError:
+                        pos = None
 
-    if tumorType == None:
-        result = defaultdict(list)
-        # return result for each available tumor type
-        if regions:
-            for i, (chrom, pos) in enumerate(regions):
-                if i % 100 == 0:
-                    session.flush()
-                    print(i)
-                chrom = chrom.lower().replace('chr', '')
-                try:
-                    pos = int(pos)
-                except ValueError:
-                    pos = None
+                    if chrom in chromosome_dict and pos:
+                        chrom = chromosome_dict[chrom]
+                        session.execute(f"INSERT INTO {table_name} VALUES ({chrom},{pos})")
+                logger.debug("INSERTED")
 
-                if chrom in chromosome_dict and pos:
-                    chrom = chromosome_dict[chrom]
-                    session.execute(f"INSERT INTO {table_name} VALUES ({chrom},{pos})")
-            logger.debug("INSERTED")
+                session.flush()
 
-            session.flush()
+                query_result = session.execute(
+                    f"""SELECT tumor_type_id,  mut.pos - te.pos as new_pos, mutation_code_id, count(*)
+                        FROM mutation_group AS mut
+                        JOIN {table_name} as te ON te.chrom = mut.chrom 
+                            AND mut.pos between te.pos - {maxDistance} 
+                            AND te.pos + {maxDistance}
+                        GROUP BY tumor_type_id,  new_pos, mutation_code_id""") \
+                    .fetchall()
+                logger.debug(query_result[0])
 
-            query_result = session.execute(
-                f"""SELECT tumor_type_id,  mut.pos - te.pos as new_pos, mutation_code_id, count(*)
-                    FROM mutation_group AS mut
-                    JOIN {table_name} as te ON te.chrom = mut.chrom 
-                        AND mut.pos between te.pos - {maxDistance} 
-                        AND te.pos + {maxDistance}
-                    GROUP BY tumor_type_id,  new_pos, mutation_code_id""") \
-                .fetchall()
-            logger.debug(query_result[0])
+                for t in query_result:
+                    from_allele, to_allele = mutation_code_dict[t[2]]
+                    result[t.tumor_type_id].append([t[1], from_allele, to_allele, t[3]])
 
-            for t in query_result:
-                from_allele, to_allele = mutation_code_dict[t[2]]
-                result[t.tumor_type_id].append([t[1], from_allele, to_allele, t[3]])
+            result = [
+                {"tumorType": tumorType,
+                 "maxDistance": maxDistance,
+                 "distances": result[tumorType_id]
+                 }
+                for tumorType_id, tumorType in tumor_type_dict.items()
+            ]
 
-        result = [
-            {"tumorType": tumorType,
-             "maxDistance": maxDistance,
-             "distances": result[tumorType_id]
-             }
-            for tumorType_id, tumorType in tumor_type_dict.items()
-        ]
+            session.rollback()
+            session.close()
 
-        session.close()
+            jobs[jobID] = result
 
-        jobs[jobID] = result
+        else:
+            # TODO
+            results = {
+                "tumorType": tumorType,
+                "maxDistance": maxDistance,
+                "distances": [[123, 'A', 'C'], [-13, 'C', 'G']]
+            }
 
-    else:
-        # TODO
-        results = {
-            "tumorType": tumorType,
-            "maxDistance": maxDistance,
-            "distances": [[123, 'A', 'C'], [-13, 'C', 'G']]
-        }
+            jobs[jobID] = results
 
-        jobs[jobID] = results
+    executor.submit(async_function)
 
     ### End of asynchronous computation
+    print("TEST")
 
     return json.dumps({"jobID": jobID})
 
