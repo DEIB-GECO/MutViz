@@ -3,6 +3,18 @@ var uc2_getColor = d3.scaleLinear()
 .range(["white", "#0a3281"])
 .domain([0,1]);
 
+// Get y value
+function yVal(bin) {
+    y_val = bin.map( function(x) {
+        if(x.length>=4)
+            return x[3];
+        else
+            return 1;
+    }).reduce(function(x,y){return x+y},0);
+
+    return y_val;
+}
+
 // Highlith on the x-axis the interval corresponding to the the motif
 function highlightMotif(g) {
     g.svg.selectAll("line.motif").remove()
@@ -78,19 +90,19 @@ function uc2_update(data, g, binSize, mutationTypes) {
     var binsf1    = histogram(filtered_f1);
     var binsf2  = histogram(filtered_f2);
 
-    var maxInf1 = d3.max(binsf1, function(d) { return +d.length });
-    var maxf2 = d3.max(binsf2, function(d) { return +d.length });
+    var maxInf1 = d3.max(binsf1, function(d) { return +yVal(d) });
+    var maxf2 = d3.max(binsf2, function(d) { return +yVal(d) });
 
 
     var binsf1Norm = binsf1.map( function(b){
-        b.value = b.length / maxInf1;
+        b.value = yVal(b) / maxInf1;
         b.variable = data.f1.name;
         b.group = b.x0;
         return b;
     });
 
     var binsf2Norm = binsf2.map(function(b){
-        b.value = b.length / maxf2; 
+        b.value = yVal(b) / maxf2; 
         b.variable = data.f2.name;
         b.group = b.x0;
         return b;

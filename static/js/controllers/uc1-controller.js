@@ -8,7 +8,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
     $rootScope.active_menu = "uc1";
 
     $scope.plot = {binSize: 10, d3graph: null, showTotal: true}
-    $scope.slider = document.getElementById("slider");
+    $scope.loaded = false;
 
     // Selected File
     $scope.selectedFile = null;
@@ -28,6 +28,8 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
     // Asks the backend to compute distances (if needed) and plots the result
     $scope.load = function(file, tumorType) {
 
+        $scope.loaded = true;
+
         if(file==null || tumorType==null) {
             console.log("Load: missing argument");
             return;
@@ -37,7 +39,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         distances = file.distances.filter(
             function(x){return x.tumorType==tumorType.identifier
                        })[0].distances
-        
+
 
         distances = distances.filter(function(x){return x[1].length==1 && x[2].length==1})
 
@@ -47,6 +49,8 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
             max : +file.maxDistance
         };
 
+        // Slider
+        $scope.slider = document.getElementById("slider");
 
         // Initial selected range set between 1/4 and 3/4 of the coordinate space
         selectedRange = {
@@ -119,7 +123,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     // Update the plot
     $scope.updatePlot = function(file, tumorType) {
-        
+
         distances = file.distances.filter(function(x){return x.tumorType==tumorType.identifier})[0].distances;
 
         // Update function is defined in uc1.js.

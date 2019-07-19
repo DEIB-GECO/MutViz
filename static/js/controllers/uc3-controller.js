@@ -8,7 +8,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $rootScope.active_menu = "uc3";
 
     $scope.plot = {binSize: 10, d3graph: null}
-    $scope.slider = document.getElementById("slider");
+    $scope.loaded = false;
 
     $scope.selectedFile = null;
     $scope.selectedTumorTypes = [];
@@ -28,9 +28,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
     $scope.load = function(file, selectedTumorTypes) {
 
-        console.log(file)
-
         console.log("Loading file: "+file.name);
+        $scope.loaded = true;
 
         // Coordinate available range as the minimum and maximum coordinate in the data
         dataRange = {
@@ -38,6 +37,9 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             max : +file.maxDistance
         };
 
+
+        // Slider
+        $scope.slider = document.getElementById("slider");
 
         // Initial selected range set between 1/4 and 3/4 of the coordinate space
         selectedRange = {

@@ -1,7 +1,19 @@
 // Function that builds the color scale
 var uc3_getColor = d3.scaleLinear()
-                     .range(["white", "#e6194B"])
-                     .domain([0,1]);
+.range(["white", "#e6194B"])
+.domain([0,1]);
+
+// Get y value
+function yVal(bin) {
+    y_val = bin.map( function(x) {
+        if(x.length>=4)
+            return x[3];
+        else
+            return 1;
+    }).reduce(function(x,y){return x+y},0);
+
+    return y_val;
+}
 
 // Highlith on the x-axis the interval corresponding to the the motif
 function highlightMotif(g) {
@@ -56,41 +68,41 @@ function uc3_getFilteredData(data, mutationTypes) {
 
 // This function (re-)builds the graph g provided the number of bins and selected mutation types
 function uc3_update(data, g, binSize, mutationTypes) {
-    
+
     // bins intervals centered on 0
     positive_side = d3.range(0-binSize/2, g.xAxisScale.domain()[1] + 1, binSize);
     negative_side = d3.range(binSize/2, -g.xAxisScale.domain()[0]+1, binSize).map(function(i){return -i}).reverse();
-    
+
     ticks = negative_side.concat(positive_side);
 
     // Configure the histogram function
     var histogram = d3.histogram()
-                      .value(function(d) {return d[0]})
-                      .domain(g.xAxisScale.domain())       
-                      .thresholds(ticks); 
+    .value(function(d) {return d[0]})
+    .domain(g.xAxisScale.domain())       
+    .thresholds(ticks); 
 
 
     // Binned data (array, one element is the binned data for a specific tumor type in data)
     binned = data.map(function(tumorType){return histogram(uc3_getFilteredData(tumorType.data, mutationTypes));});
 
     // Max elements contained in a bin (array, one for each binned data in binned)
-    maxx = binned.map(function(bins){ return d3.max(bins, function(d) { return +d.length }); });
+    maxx = binned.map(function(bins){ return d3.max(bins, function(d) { return +yVal(d) }); });
 
     // Add to each bin the normalized value
     var normalized = binned.map(function(bins,i){  
 
         return bins.map( function(b){
-            b.value = b.length / maxx[i];
+            b.value = yVal(b) / maxx[i];
             b.variable = data[i].type;
             b.group = b.x0;
             return b;
         });
     });
 
-    
+
     // Different tracks titles
     var types = data.map(function(d){return d.type});
-    
+
     // Setup y axis
     g.y = d3.scaleBand()
         .range([ g.height, 0 ])
@@ -102,13 +114,13 @@ function uc3_update(data, g, binSize, mutationTypes) {
     // Rotate y-axis labels
     $(".y-axis text").attr("transform", "rotate(270) translate(37,-17)");
 
-    
+
     // Merge all binned data (the different type is tracked by the property "variable" within each bin)
     union = binned.reduce(function(a,b){return a.concat(b)});
 
     // Add the tracks to the plot
     uc3_addTracks(g, union);
-    
+
     highlightMotif(g);
 
 }
@@ -117,7 +129,7 @@ function uc3_update(data, g, binSize, mutationTypes) {
 function uc3_rescaleX(data, g, binSize, range, mutationTypes) {
 
     g.xAxisScale = d3.scaleLinear().domain([range.min,range.max]).range([0, g.width]);
-    
+
     g.xAxis
         .transition()
         .duration(500)

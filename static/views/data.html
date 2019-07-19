@@ -1,172 +1,176 @@
-<div class="row" style="margin-top:10px; margin-bottom: 50px;">
+<!-- Begin page content -->
+<main role="main" class="flex-shrink-0">
+    <div class="container">
+        <div class="row" style="margin-top:10px; margin-bottom: 50px;">
 
-    <div class="col-md-12">
-        <!--h2>Data</h2-->
+            <div class="col-md-12">
+                <!--h2>Data</h2-->
 
-        <div style="width: 100%; height: auto;border: 1px solid black;">
-            <form ng-submit="submit()">
-                <div class="row" style="padding: 10px;">
+                <div style="width: 100%; height: auto;border: 1px solid black; border-radius: 5px;">
+                    <form ng-submit="submit()">
+                        <div class="row" style="padding: 10px;">
 
-                    <div class="col-md-12">
-                        <b>Upload your custom region file</b>
-                        <hr>
-                    </div>
+                            <div class="col-md-12">
+                                <b>Upload your custom region file</b>
+                                <hr>
+                            </div>
 
-                    <div class="col-md-3">
-                        <div style="padding: 0px">
-                            <div class="form-group">
-                                <label style="font-size: 0.9em"><b>Name:</b></label>
-                                <input type="text" class="form-control" aria-describedby="nameHelp" required="true"
-                                       ng-model="adding_file.name" placeholder="MyRegions">
-                                <!--small id="nameHelp" class="form-text text-muted">A name to identify the uploaded region file.</small-->
-                            </div> 
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <div style="padding: 0px">
-                            <div class="form-group">
-                                <label style="font-size: 0.9em"><b>Format:</b></label>
-                                <select class="form-control" aria-describedby="fileTypeHelp" required="true"
-                                        ng-model="adding_file.type">
-                                    <option>bed</option>
-                                    <option>narrowpeak</option>
-                                </select>
-                                <!--small id="fileTypeHelp" class="form-text text-muted">Select the right format for your file. </small-->
-                            </div> 
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <div style="padding: 0px;">
-                            <div class="form-group">
-                                <label style="font-size: 0.9em"><b>File:</b></label>
-                                <div class="input-group input-file">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text btn" id="btn-choose">Choose</span>
-                                    </div>
-
-                                    <input type="text" class="form-control" placeholder='Choose a file...' />
+                            <div class="col-md-3">
+                                <div style="padding: 0px">
+                                    <div class="form-group">
+                                        <label style="font-size: 0.9em"><b>Name:</b></label>
+                                        <input type="text" class="form-control" aria-describedby="nameHelp" required="true"
+                                               ng-model="adding_file.name" placeholder="MyRegions">
+                                        <!--small id="nameHelp" class="form-text text-muted">A name to identify the uploaded region file.</small-->
+                                    </div> 
                                 </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div style="padding: 0px">
+                                    <div class="form-group">
+                                        <label style="font-size: 0.9em"><b>Format:</b></label>
+                                        <select class="form-control" aria-describedby="fileTypeHelp" required="true"
+                                                ng-model="adding_file.type">
+                                            <option>bed</option>
+                                            <option>narrowpeak</option>
+                                        </select>
+                                        <!--small id="fileTypeHelp" class="form-text text-muted">Select the right format for your file. </small-->
+                                    </div> 
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div style="padding: 0px;">
+                                    <div class="form-group">
+                                        <label style="font-size: 0.9em"><b>File:</b></label>
+                                        <div class="input-group input-file">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text btn" id="btn-choose">Choose</span>
+                                            </div>
+
+                                            <input type="text" class="form-control" placeholder='Choose a file...' />
+                                        </div>
 
 
 
-                                <!--input type="file" id="newFile" class="form-control"  aria-describedby="emailHelp" 
+                                        <!--input type="file" id="newFile" class="form-control"  aria-describedby="emailHelp" 
 required="true" placeholder="Enter email"/-->
-                                <!--small id="fileHelp" class="form-text text-muted"></small-->
-                            </div> 
+                                        <!--small id="fileHelp" class="form-text text-muted"></small-->
+                                    </div> 
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 ">
+                                <div style="padding: 0px">
+                                    <div class="form-group my-auto">
+                                        <label style="font-size: 0.9em; visibility: hidden "><b>*</b></label><br>
+                                        <button type="submit" class="btn btn-primary  float-right">Add to Workspace<!--i class="fa fa-plus"></i--></button>
+                                        <!--small id="nameHelp" class="form-text text-muted">A name to identify the uploaded region file.</small-->
+                                    </div> 
+                                </div>
+
+                            </div>
+
                         </div>
-                    </div>
-
-                    <div class="col-md-3 ">
-                        <div style="padding: 0px">
-                            <div class="form-group my-auto">
-                                <label style="font-size: 0.9em; visibility: hidden "><b>*</b></label><br>
-                                <button type="submit" class="btn btn-primary  float-right">Add to Workspace<!--i class="fa fa-plus"></i--></button>
-                                <!--small id="nameHelp" class="form-text text-muted">A name to identify the uploaded region file.</small-->
-                            </div> 
-                        </div>
-
-                    </div>
-
+                    </form>
                 </div>
-            </form>
-        </div>
 
-        <div style="width: 100%; height: auto;border: 1px solid black; margin-top:10px;">
+                <div style="width: 100%; height: auto;border: 1px solid black; margin-top:10px;">
 
-            <form ng-submit="submit()">
-                <div class="row" style="padding: 10px;">
-                    <div class="col-md-4 my-auto">
-                        <b>Or select a region file from the repository:</b>
-                    </div>
+                    <form ng-submit="submit()">
+                        <div class="row" style="padding: 10px;">
+                            <div class="col-md-4 my-auto">
+                                <b>Or select a region file from the repository:</b>
+                            </div>
 
 
-                    <div class="col-md-4">
-                        <select class="form-control" ng-model="repoEl" aria-describedby="fileTypeHelp" required="true">
-                            <option ng-repeat="el in repository track by $index" 
-                                    ng-value="el">{{el.name}}</option>
-                        </select>
-                    </div>
+                            <div class="col-md-4">
+                                <select class="form-control" ng-model="repoEl" aria-describedby="fileTypeHelp" required="true">
+                                    <option ng-repeat="el in repository track by $index" 
+                                            ng-value="el">{{el.name}}</option>
+                                </select>
+                            </div>
 
-                    <div class="col-md-4 my-auto" >
-                        <div class="form-group">
-                            <button style="bottom:0;"  type="submit" class="btn btn-primary  float-right"
-                                    ng-click="submitRepo(repoEl)">Add to Workspace<!--i class="fa fa-plus"></i--></button>
-                        </div> 
-                    </div>
+                            <div class="col-md-4 my-auto" >
+                                <div class="form-group">
+                                    <button style="bottom:0;"  type="submit" class="btn btn-primary  float-right"
+                                            ng-click="submitRepo(repoEl)">Add to Workspace<!--i class="fa fa-plus"></i--></button>
+                                </div> 
+                            </div>
+                        </div>
+                    </form>
                 </div>
-            </form>
-        </div>
 
-        <br>
-        <h4>Workspace ({{files.length}} files):</h4>
+                <br>
+                <h4>Workspace ({{files.length}} files):</h4>
 
-        <div class="row" style="background-color: #fafafa; padding:10px;">
+                <div class="row" style="background-color: #fafafa; padding:10px;">
 
-            <div ng-if="files.length>0" class="col-md-4 file-item" ng-repeat="file in files track by $index">
-                <div style="border:1px solid {{file.ready?'black':'#dadada'}}; padding: 10px; margin-top: 10px; background-color: white; min-height: 87px;">
-                    <div class="row">
-                        <div class="col-md-8" style="font-size: 1em; line-height: 1.9em;">
-                            {{file.name}} <span ng-if="file.source=='custom'">({{file.type}})</span>
-
-                            <br>
-                            <a ng-if="file.source=='custom'" href="javascript:void(0);" ng-click="viewRegions(file)" style="color:green">{{file.count}} regions</a>
-                            <span style="color:#007bff" ng-if="file.source=='repo'">From Repository</span>
-
-
-                        </div>
-                        <div class="col-md-4 my-auto" ng-if="file.ready">
-                            <button type="submit" class="btn btn-sm btn-danger float-right" ng-click="removeFile($index)">Remove</button>
-                        </div>
-
-                        <div class="col-md-4 " ng-if="!file.ready">
+                    <div ng-if="files.length>0" class="col-md-4 file-item" ng-repeat="file in files track by $index">
+                        <div style="border:1px solid {{file.ready?'black':'#dadada'}}; padding: 10px; margin-top: 10px; background-color: white; min-height: 87px;">
                             <div class="row">
-                                <div class="col-md-12 text-center">
-                                    <img src="img/loading.gif" style="height: 45px; margin-left: 5px; margin-bottom: 4px;">
+                                <div class="col-md-8" style="font-size: 1em; line-height: 1.9em;">
+                                    {{file.name}} <span ng-if="file.source=='custom'">({{file.type}})</span>
+
+                                    <br>
+                                    <a ng-if="file.source=='custom'" href="javascript:void(0);" ng-click="viewRegions(file)" style="color:green">{{file.count}} regions</a>
+                                    <span style="color:#007bff" ng-if="file.source=='repo'">From Repository</span>
+
+
                                 </div>
-                                <div class="col-md-12 text-center" style="font-size: 0.7em">
-                                    Processing
+                                <div class="col-md-4 my-auto" ng-if="file.ready">
+                                    <button type="submit" class="btn btn-sm btn-danger float-right" ng-click="removeFile($index)">Remove</button>
                                 </div>
+
+                                <div class="col-md-4 " ng-if="!file.ready">
+                                    <div class="row">
+                                        <div class="col-md-12 text-center">
+                                            <img src="img/loading.gif" style="height: 45px; margin-left: 5px; margin-bottom: 4px;">
+                                        </div>
+                                        <div class="col-md-12 text-center" style="font-size: 0.7em">
+                                            Processing
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 
                     </div>
+
+                    <div ng-if="files.length==0" class="col-md-12 text-center" style="color:black">
+                        No files available. Add a new file using the form above.
+                    </div>
+
                 </div>
+
 
             </div>
 
-            <div ng-if="files.length==0" class="col-md-12 text-center" style="color:black">
-                No files available. Add a new file using the form above.
+
+            <div class="modal" tabindex="-1" role="dialog" id="modale">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modal_title"></h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="modal_description">{{modal.description}}</p>
+                            <pre style="max-height:300px; overflow-y: scroll; background-color:#f5f5f5;"
+                                 id="modal_rows"></pre>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
-
-
     </div>
-
-
-    <div class="modal" tabindex="-1" role="dialog" id="modale">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modal_title"></h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p id="modal_description">{{modal.description}}</p>
-                    <pre style="max-height:300px; overflow-y: scroll; background-color:#f5f5f5;"
-                         id="modal_rows"></pre>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-
+</main>

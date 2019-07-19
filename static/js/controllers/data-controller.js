@@ -86,6 +86,10 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
 
     $scope.removeFile = function(index) {
         $rootScope.files.splice(index,1);
+        if($rootScope.files.length==0) {
+            $rootScope.someAreReady = false;
+            console.log("no more ready");
+        }
         $rootScope.persistData();
     }
 

@@ -1,134 +1,153 @@
+<!-- Begin page content -->
+<main role="main" class="wrapper">
 
+    <!-- Sidebar  -->
+    <nav id="sidebar">
+        <div class="col-md-12" style="background-color: #f5f5f5">
 
+            <div class="row">
 
-<div class="row" style="margin-top:50px; margin-bottom: 50px;">
-
-    <div class="col-md-3" style="background-color: #f5f5f5">
-
-        <div class="row">
-
-            <div class="col-md-12 text-center">
-                <h4 style="margin-top: 15px">Histogram</h4>
-            </div>
-
-            <div class="col-md-12" style="margin-top:10px; background-color:#e6e6e6; height: 90px;">
-                <label for="jtSelect">File:</label>
-                <select class="form-control" id="ttSelect"
-                        ng-model="selectedFile"
-                        ng-change="load(selectedFile, tumorTypes.current)">
-                    <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file">{{file.name}}</option>
-                </select>
-            </div>
-
-            <div class="col-md-12" style="margin-top:10px;">
-                <label for="ttSelect">Tumor type:</label>
-                <select class="form-control" id="ttSelect"
-                        ng-model="tumorTypes.current"
-                        ng-change="load(selectedFile, tumorTypes.current)">
-                    <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
-                </select>
-            </div>
-
-
-            <div class="col-md-12" style="margin-top:10px;">
-                <div class="form-group">
-                    <label for="inputBins">Bin size (bp):</label>
-                    <input type="number" class="form-control" id="inputBins" 
-                           ng-model="plot.binSize" ng-change="updatePlot(selectedFile, tumorTypes.current)">
-
-                    <br>
-                </div>
-            </div>
-
-
-            <div class="col-md-12" style="margin-top:10px;">
-
-
-
-
-                <div class="row">
-
-                    <div class="col-md-7">
-                        <label for="inputBins"><b>Mutation types</b></label>
-                    </div>
-                    <div class="col-md-5">
-                        <label class="checkbox-inline float-right">
-                            <input type="checkbox"  data-toggle="toggle" 
-                                   ng-change="updatePlot(selectedFile, tumorTypes.current)"
-                                   ng-model="mutationTypes.stacked"> Stacked
-                        </label>
-
-                        <label class="checkbox-inline float-right">
-                            <input type="checkbox"  data-toggle="toggle" 
-                                   ng-change="updatePlot(selectedFile, tumorTypes.current)"
-                                   ng-model="plot.showTotal"> Total
-                        </label>
-                    </div>
-
+                <div class="col-md-12 text-center">
+                    <h4 style="margin-top: 15px">Histogram</h4>
                 </div>
 
 
+                <div class="col-md-12" style="margin-top:10px; {{files.length>0?'background-color:#e6e6e6;':''}} ">
 
-
-
-                <div class="row" ng-repeat="st in mutationTypes.selectedTypes track by $index" style="margin-top: 5px; margin-bottom: 10px;">
-
-                    <div class="col-md-1 text-center" style="line-height: 32px;">
-                        <span  ng-if="mutationTypes.selectedTypes.length>1 && $first!=true && !mutationTypes.stacked">or</span>
+                    <div ng-if="files.length==0 && !someAreReady"
+                         class="col-md-12 text-center"
+                         style="padding-top: 20px;padding-bottom: 20px; background-color: #ffe28d">
+                        Your <a href="#!/data">workspace</a> is empty. Please, upload a region file or add a file from the repository.
                     </div>
 
-                    <div class="col-md-3 text-center">
-                        <select class="form-control" id="mtSelect"
-                                ng-model="st.from"
-                                ng-change="changeMutationType()">
-                            <option ng-repeat="f in mutationTypes.fromList track by $index"  ng-value="f">{{f}}</option>
+                    <div ng-if="files.length>0 && !someAreReady"
+                         class="col-md-12 text-center"
+                         style="padding-top: 20px;padding-bottom: 20px;">
+                        Loading your workspace
+                        <div class="col-md-12 text-center" style="padding-top: 10px;">
+                            <img src="img/loading.gif" style="height: 45px; margin-left: 5px; margin-bottom: 4px;">
+                        </div>
+                    </div>
+
+                    <div ng-show="files.length>0 && someAreReady"
+                         style="height: 90px;">
+                        <label for="jtSelect">File:</label>
+                        <select class="form-control" id="ttSelect"
+                                ng-model="selectedFile"
+                                ng-change="load(selectedFile, tumorTypes.current)" >
+                            <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file">{{file.name}}</option>
                         </select>
                     </div>
+                </div>
 
-                    <div class="col-md-1 text-center" style="line-height: 32px;">
-                        <i class="fas fa-arrow-right"></i>
-                    </div>
-                    <div class="col-md-3 text-center">
-                        <select class="form-control" id="mtSelect"
-                                ng-model="st.to"
-                                ng-change="changeMutationType()">
-                            <option ng-repeat="t in mutationTypes.toList track by $index" ng-if="t!=st.from" ng-value="t">{{t}}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-3 text-center" style="line-height: 32px;"
-                         ng-if="mutationTypes.selectedTypes.length>1 && $first!=true">
-                        <a class="form-control btn btn-default"  ng-click="removeCondition(st)">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                <div class="col-md-12" style="margin-top:10px;">
+                    <label for="ttSelect">Tumor type:</label>
+                    <select class="form-control" id="ttSelect"
+                            ng-model="tumorTypes.current"
+                            ng-change="load(selectedFile, tumorTypes.current)">
+                        <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
+                    </select>
+                </div>
+
+
+                <div class="col-md-12" style="margin-top:10px;">
+                    <div class="form-group">
+                        <label for="inputBins">Bin size (bp):</label>
+                        <input type="number" class="form-control" id="inputBins" 
+                               ng-model="plot.binSize" ng-change="updatePlot(selectedFile, tumorTypes.current)">
+
+                        <br>
                     </div>
                 </div>
 
-                <hr>
 
-                <div ng-if="mutationTypes.invalidSelection" style="color: red">
-                    Conditions must be mutually exclusive. The plot will not be updated.
+                <div class="col-md-12" style="margin-top:10px;">
+
+                    <div class="row">
+
+                        <div class="col-md-7">
+                            <label for="inputBins"><b>Mutation types</b></label>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="checkbox-inline float-right">
+                                <input type="checkbox"  data-toggle="toggle" 
+                                       ng-change="updatePlot(selectedFile, tumorTypes.current)"
+                                       ng-model="mutationTypes.stacked"> Stacked
+                            </label>
+
+                            <label class="checkbox-inline float-right">
+                                <input type="checkbox"  data-toggle="toggle" 
+                                       ng-change="updatePlot(selectedFile, tumorTypes.current)"
+                                       ng-model="plot.showTotal"> Total
+                            </label>
+                        </div>
+
+                    </div>
+
+
+                    <div class="row" ng-repeat="st in mutationTypes.selectedTypes track by $index" style="margin-top: 5px; margin-bottom: 10px;">
+
+                        <div class="col-md-1 text-center" style="line-height: 32px;">
+                            <span  ng-if="mutationTypes.selectedTypes.length>1 && $first!=true && !mutationTypes.stacked">or</span>
+                        </div>
+
+                        <div class="col-md-3 text-center">
+                            <select class="form-control" id="mtSelect"
+                                    ng-model="st.from"
+                                    ng-change="changeMutationType()">
+                                <option ng-repeat="f in mutationTypes.fromList track by $index"  ng-value="f">{{f}}</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-1 text-center" style="line-height: 32px;">
+                            <i class="fas fa-arrow-right"></i>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <select class="form-control" id="mtSelect"
+                                    ng-model="st.to"
+                                    ng-change="changeMutationType()">
+                                <option ng-repeat="t in mutationTypes.toList track by $index" ng-if="t!=st.from" ng-value="t">{{t}}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 text-center" style="line-height: 32px;"
+                             ng-if="mutationTypes.selectedTypes.length>1 && $first!=true">
+                            <a class="form-control btn btn-default"  ng-click="removeCondition(st)">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+
                     <hr>
-                </div>
 
-                <div class="row" style="margin-top: 5px; margin-bottom: 10px;">
-
-                    <div class="col-md-12 text-center" style="line-height: 32px;">
-                        <input class="form-control btn btn-default"
-                               value="ADD" type="button" ng-click="addCondition()"/>
+                    <div ng-if="mutationTypes.invalidSelection" style="color: red">
+                        Conditions must be mutually exclusive. The plot will not be updated.
+                        <hr>
                     </div>
 
+                    <div class="row" style="margin-top: 5px; margin-bottom: 10px;">
+
+                        <div class="col-md-12 text-center" style="line-height: 32px;">
+                            <input class="form-control btn btn-default"
+                                   value="ADD" type="button" ng-click="addCondition()"/>
+                        </div>
+
+                    </div>
+
+
                 </div>
 
+            </div>
+        </div>
+    </nav>
 
+    <div id="content">
+        <div class="row">
+
+            <div class="col-md-12 text-center my-auto" ng-if="!loaded">
+               Select a file.
             </div>
 
-        </div>
-    </div>
 
-
-    <div class="col-md-9">
-
-        <div class="row">
 
             <div class="col-md-12" style="padding-left: 50px; padding-right: 50px;">
                 <div id="slider"></div>
@@ -141,10 +160,5 @@
             </div>
 
         </div>
-
     </div>
-
-</div>
-
-
-
+</main>

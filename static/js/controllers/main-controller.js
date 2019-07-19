@@ -23,17 +23,26 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
 
     // Array of files objects
     $rootScope.files = [];
+    $rootScope.someAreReady = false;
 
     // Persist Files in local storage
     $rootScope.persistData = function() {
+
+        // Remove any previously stored data
+        for (el in localStorage)
+            if(el.startsWith("file-")) 
+                delete localStorage[el];
+
+
         files = clone($rootScope.files);
         console.log("persisting "+files.length+" files");
 
         for (i=0; i<files.length; i++) {
             files[i].distances=[]; // don't save the computation result
+            files[i].ready=false;
             localStorage['file-'+i] = JSON.stringify(files[i]); 
         }
- 
+
     }
 
     // Polling for API R01
@@ -55,6 +64,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
 
                         // Add the new file to the local list of files together with the answer
                         file.distances = response.data.result;
+                        $rootScope.someAreReady=true;
 
                         // Stop timer
                         $interval.cancel(file.timer);
@@ -185,7 +195,6 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
             console.error("Error while retrieving the repository.")
         }
     );
-
 
 
 });

@@ -8,7 +8,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
     $rootScope.active_menu = "uc2";
 
     $scope.plot = {binSize: 10, d3graph: null}
-    $scope.slider = document.getElementById("slider");
+    $scope.loaded = false;
 
     // Selected File
     $scope.selectedFile1 = null;
@@ -27,9 +27,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     // Asks the backend to compute distances (if needed) and plots the result
     $scope.load = function(file1, file2, tumorType) {
-        console.log(file1)
-        console.log(file2)
-        console.log(tumorType)
+        $scope.loaded = true;
 
         if(file1==null || file2==null || tumorType==null) {
             console.log("Load: missing argument");
@@ -44,12 +42,14 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
         };
 
 
+        // Slider
+        $scope.slider = document.getElementById("slider");
+
         // Initial selected range set between 1/4 and 3/4 of the coordinate space
         selectedRange = {
             min: dataRange.min+0.25*(dataRange.max-dataRange.min),
             max: dataRange.min+0.75*(dataRange.max-dataRange.min)
         }
-
 
         // Initialize the slider
         if($scope.slider.noUiSlider != null)
