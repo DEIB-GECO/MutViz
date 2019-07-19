@@ -76,7 +76,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
                 density: 4
             },
 
-            tooltips: true,
+            tooltips: false,
 
             format: wNumb({
                 decimals: 0

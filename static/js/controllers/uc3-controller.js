@@ -65,7 +65,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                 density: 4
             },
 
-            tooltips: true,
+            tooltips: false,
 
             format: wNumb({
                 decimals: 0

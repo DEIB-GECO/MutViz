@@ -21,11 +21,11 @@ main > .container {
 }
 
 /*.file-item.ng-leave {
-  transition:0.5s linear all;
-  opacity:1;
+transition:0.5s linear all;
+opacity:1;
 }
 .file-item.ng-leave.ng-leave-active {
-  opacity:0;
+opacity:0;
 }*/
 
 
@@ -58,6 +58,35 @@ svg {
     background-color: white;
 } 
 
+.noUi-value-horizontal {
+    -webkit-transform: translate(-50%,10%);
+    transform: translate(-50%,10%);
+    font-size: 0.88em;
+}
+
+.noUi-handle:after, .noUi-handle:before {
+    background: none!important;
+}
+
+.noUi-marker-horizontal.noUi-marker-large {
+    height: 5px;
+}
+
+.noUi-marker-horizontal.noUi-marker {
+    margin-left: -1px;
+    width: 2px;
+    height: 2px;
+}
+
+.noUi-horizontal {
+    height: 14px;
+}
+
+.noUi-horizontal .noUi-handle {
+    height: 24px;
+    top: -5px;
+}
+
 .noUi-tooltip {
     border: none;
 }
@@ -71,15 +100,15 @@ svg {
     background-color: #343a40
 }
 .noUi-handle {
-  outline: none;
+    outline: none;
 }
 .noUi-handle:focus {
-  outline: none;
+    outline: none;
 }
 /**/
 
 /* ---------------------------------------------------
-    CONTENT STYLE
+CONTENT STYLE
 ----------------------------------------------------- */
 
 #content {
@@ -90,7 +119,7 @@ svg {
 }
 
 /* ---------------------------------------------------
-    SIDEBAR STYLE
+SIDEBAR STYLE
 ----------------------------------------------------- */
 
 
@@ -98,7 +127,7 @@ svg {
     min-width: 400px;
     max-width: 400px;
     background: #f5f5f5;
-   /* color: #fff;*/
+    /* color: #fff;*/
     transition: all 0.3s;
 }
 
