@@ -1,13 +1,33 @@
+import uuid
+from collections import defaultdict
+from logging.config import dictConfig
+
+import flask
+import sqlalchemy
 from flask import Flask, json, request, abort
 from flask_cors import CORS
-import sqlalchemy
-import uuid
-from model.models import *
-from db import *
 
+from api.db import *
+from api.model.models import *
 
 # documentation:
 # https://docs.google.com/document/d/1kNJ7mogv5Jj6Wu2WOU4jCeX-Nav250l4tMHm6YFGANU/edit#
+
+dictConfig({
+    'version': 1,
+    'formatters': {'default': {
+        'format': '[%(asctime)s] %(levelname)s in %(module)s:%(lineno)d: %(message)s',
+    }},
+    'handlers': {'wsgi': {
+        'class': 'logging.StreamHandler',
+        'stream': 'ext://flask.logging.wsgi_errors_stream',
+        'formatter': 'default'
+    }},
+    'root': {
+        'level': 'DEBUG',
+        'handlers': ['wsgi']
+    }
+})
 
 app = Flask(__name__, static_url_path='', static_folder='../static')
 cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -17,20 +37,30 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
 
+# JOBS   jobId->resultJson
+jobs = {"abcde-fghi-lmno": None, "abbbb-fknifn": None}
 
-#JOBS   jobId->resultJson
-jobs = { "abcde-fghi-lmno" : None , "abbbb-fknifn": None}
+with app.app_context():
+    logger = flask.current_app.logger
+
+chromosome_dict = dict([(str(x), x) for x in range(1, 23)] + [('x', 23), ('y', 24), ('mt', 25)])
+with app.app_context():
+    res = MutationCode.query.all()
+    mutation_code_dict = dict([(x.mutation_code_id, (x.from_allele, x.to_allele)) for x in res])
+    # print(mutation_code_dict)
+    res = TumorType.query.all()
+    tumor_type_dict = dict([(x.tumor_type_id, x.tumor_type) for x in res])
+    tumor_type_reverse_dict = dict([(x.tumor_type, x.tumor_type_id) for x in res])
 
 
 def getJobResult(jobID):
-
     if not jobID in jobs:
         abort(404)
-    elif  jobs[jobID]==None:
+    elif jobs[jobID] == None:
         return json.dumps({"ready": False})
     else:
         res = json.dumps({"ready": True, "result": jobs[jobID]})
-        #del jobs[jobID]
+        # del jobs[jobID]
         return res
 
 
@@ -39,47 +69,163 @@ def getJobResult(jobID):
 def root():
     return app.send_static_file('index.html')
 
+
 # API L01
 @app.route('/api/tumor_types/')
 def get_tumor_types():
     results = [
-        { "name": "Breast Cancer",
-          "identifier": "brca" },
-        { "name": "Colorectal Cancer",
-          "identifier": "coca"}
+        {"name": "Breast Cancer",
+         "identifier": "BRCA"},
+        {"name": "Colorectal Cancer",
+         "identifier": "COCA"}
     ]
-    return json.dumps(results)
+    result = [{"name": x,
+               "identifier": x}
+              for x in tumor_type_dict.values()
+              ]
+    return json.dumps(result)
+
 
 # API L02
 @app.route('/api/repository/')
 def get_repository():
-
-    with app.app_context():
-        mutations = Repository.query.all()
-        res = list(map(lambda x: {"identifier":x.id, "name":x.name, "description":x.description }, mutations))
-
-        print(res)
-
+    mutations = Repository.query.all()
+    res = list(map(lambda x: {"identifier": x.repository_id, "name": x.name, "description": x.description}, mutations))
     return json.dumps(res)
+
 
 # API R01
 @app.route('/api/distance/', methods=['POST'])
 def get_distances():
     repoId = request.form.get('repoId')
-    regions = request.form.get('regions')
-    regionsFormat = request.form.get('regionsFormat')
-    maxDistance = int(request.form.get('maxDistance'))
-    tumorType = request.form.get('tumorType')
+    logger.debug(f"repoId: {repoId}")
 
-    if not( (repoId or regions and regionsFormat) and maxDistance):
+    regions = request.form.get('regions')
+    if not regions:
+        logger.debug(f"regions: {regions}")
+
+    # no need?
+    # regionsFormat = request.form.get('regionsFormat')
+    # logger.debug("regionsFormat:" + regionsFormat)
+
+    maxDistance = request.form.get('maxDistance')
+    logger.debug(f"maxDistance: {maxDistance}")
+
+    tumorType = request.form.get('tumorType')
+    logger.debug(f"tumorType: {tumorType}")
+
+    # REMOVED region_format
+    if not ((repoId or regions) and maxDistance):
         abort(400)
 
+    # we can move into thread?
+    if regions:
+        regions = regions.split("\n")
+        logger.debug(f"regions: {len(regions)}")
+        regions = filter(lambda x: x, regions)
+        regions = map(lambda x: x.split("\t"), regions)
+    else:
+        logger.debug("regions:" + str(regions))
+    maxDistance = int(maxDistance)
+
     # Generate a jobID
-    jobID = str(uuid.uuid1())
+    jobID = str(uuid.uuid1()).replace('-', '_')
+    table_name = "t_" + jobID
+
+    logger.debug(f"{jobID}->{table_name}")
 
     ### Asynchronous computation
+    session_maker = db.sessionmaker(autocommit=False, autoflush=False)
+
+    session = session_maker(bind=db.engine)
+
+    session.execute(sqlalchemy.text(f"CREATE TEMPORARY TABLE {table_name}(chrom smallint, pos bigint)"))
+    # session.execute(f"INSERT INTO {table_name} VALUES ({4},{4})")
+    session.flush()
+    # session.commit()
+
     if tumorType == None:
+        result = defaultdict(list)
         # return result for each available tumor type
+        if regions:
+            for i, (chrom, pos) in enumerate(regions):
+                if i % 1000 == 0:
+                    session.flush()
+                    print(i)
+                chrom = chrom.lower().replace('chr', '')
+                try:
+                    pos = int(pos)
+                except ValueError:
+                    pos = None
+
+                if chrom in chromosome_dict and pos:
+                    chrom = chromosome_dict[chrom]
+
+                    # logger.debug(f"Region: {chrom} - {pos}")
+
+                    session.execute(f"INSERT INTO {table_name} VALUES ({chrom},{pos})")
+            logger.debug("INSERTED")
+
+            session.flush()
+            session.commit()
+            logger.debug(session.execute('show enable_seqscan').fetchall())
+            session.execute("set enable_seqscan=false")
+            logger.debug(session.execute('show enable_seqscan').fetchall())
+            print(session.execute(
+                f"""set enable_seqscan=false;
+                    EXPLAIN SELECT tumor_type_id,  mut.pos - te.pos as new_pos, mutation_code_id, count(*)
+                    FROM mutation_group AS mut
+                    JOIN {table_name} as te ON te.chrom = mut.chrom 
+                        AND mut.pos between te.pos - {maxDistance} 
+                        AND te.pos + {maxDistance}
+                    GROUP BY tumor_type_id,  new_pos, mutation_code_id""") \
+                  .fetchall())
+
+            query_result = session.execute(
+                f"""set enable_seqscan=false;
+                    SELECT tumor_type_id,  mut.pos - te.pos as new_pos, mutation_code_id, count(*)
+                    FROM mutation_group AS mut
+                    JOIN {table_name} as te ON te.chrom = mut.chrom 
+                        AND mut.pos between te.pos - {maxDistance} 
+                        AND te.pos + {maxDistance}
+                    GROUP BY tumor_type_id,  new_pos, mutation_code_id""") \
+                .fetchall()
+            logger.debug(query_result[0])
+
+            for t in query_result:
+                from_allele, to_allele = mutation_code_dict[t[2]]
+                result[t.tumor_type_id].append([t[1], from_allele, to_allele, t[3]])
+
+        #
+        #             # res = db.engine.execute(sqlalchemy.text("SELECT * FROM mutation_group WHERE")).fetchall()
+        #             q = MutationGroup.query \
+        #                 .filter(MutationGroup.chrom == chrom) \
+        #                 .filter(MutationGroup.pos <= pos + maxDistance) \
+        #                 .filter(MutationGroup.pos >= pos - maxDistance) #\
+        #                 # .order_by(MutationGroup.tumor_type_id, MutationGroup.pos)
+        #             # print(q)
+        #             query_result = q.all()
+        #             if query_result:
+        #                 for t in query_result:
+        #                     from_allele, to_allele = mutation_code_dict[t.mutation_code]
+        #                     result[t.tumor_type_id].append([t.pos - pos, from_allele, to_allele, t.mutation_count])
+        #
+        #             # print(len(result))
+        #             # print(str(query_result[0]))
+        #             # print(maxDistance)
+        #
+        #             # print(r, MutationGroup.query.first())
+        #
+        result = [
+            {"tumorType": tumorType,
+             "maxDistance": maxDistance,
+             "distances": result[tumorType_id]
+             }
+            for tumorType_id, tumorType in tumor_type_dict.items()
+        ]
+
+        # session.close()
+
         results = [
             {"tumorType": "brca",
              "maxDistance": maxDistance,
@@ -89,7 +235,7 @@ def get_distances():
              "maxDistance": maxDistance,
              "distances": [[0, 'A', 'C'], [-13, 'C', 'G']]}
         ]
-        jobs[jobID] = results
+        jobs[jobID] = result
 
     else:
 
@@ -109,7 +255,7 @@ def get_distances():
 # API R01r
 @app.route('/api/distance/<string:jobID>', methods=['GET'])
 def get_distances_r(jobID):
-    print(jobID)
+    # print(jobID)
     return getJobResult(jobID)
 
 
@@ -123,7 +269,7 @@ def get_test1():
     mutations = request.form.get('mutations')
     maxDistance = int(request.form.get('maxDistance'))
 
-    if not( (repoId or regions and regionsFormat) and
+    if not ((repoId or regions and regionsFormat) and
             maxDistance and tumorType and mutations):
         abort(400)
 
@@ -135,8 +281,8 @@ def get_test1():
     jobID = str(uuid.uuid1())
 
     ### Asynchronous computation
-    trans_arr = json.loads(mutations) #parse mutations array
-    jobs[jobID] = { "pvalue" : 0.1}
+    trans_arr = json.loads(mutations)  # parse mutations array
+    jobs[jobID] = {"pvalue": 0.1}
 
     return json.dumps({"jobID": jobID})
 
@@ -145,6 +291,7 @@ def get_test1():
 @app.route('/api/t01/<string:jobID>', methods=['GET'])
 def get_test1_r(jobID):
     return getJobResult(jobID)
+
 
 # API T02
 @app.route('/api/t02/', methods=['POST'])
@@ -159,9 +306,9 @@ def get_test2():
     mutations = request.form.get('mutations')
     maxDistance = int(request.form.get('maxDistance'))
 
-    if not( (repoId1 or regions_1 and regionsFormat_1) and
+    if not ((repoId1 or regions_1 and regionsFormat_1) and
             (repoId2 or regions_2 and regionsFormat_2) and
-             maxDistance and tumorType and mutations):
+            maxDistance and tumorType and mutations):
         abort(400)
 
     if regions_1 == "file non parsabile ..." or regions_2 == "file non parsabile ...":
@@ -171,15 +318,17 @@ def get_test2():
     jobID = str(uuid.uuid1())
 
     ### Asynchronous computation
-    trans_arr = json.loads(mutations) #parse mutations array
-    jobs[jobID] = { "pvalue" : 0.1}
+    trans_arr = json.loads(mutations)  # parse mutations array
+    jobs[jobID] = {"pvalue": 0.1}
 
     return json.dumps({"jobID": jobID})
+
 
 # API T02r
 @app.route('/api/t02/<string:jobID>', methods=['GET'])
 def get_test2_r(jobID):
     return getJobResult(jobID)
+
 
 # API T03
 @app.route('/api/t03/', methods=['POST'])
@@ -192,9 +341,8 @@ def get_test3():
     mutations = request.form.get('mutations')
     maxDistance = int(request.form.get('maxDistance'))
 
-
-    if not( (repoId or regions and regionsFormat) and
-             maxDistance and tumorType_1 and tumorType_2 and mutations):
+    if not ((repoId or regions and regionsFormat) and
+            maxDistance and tumorType_1 and tumorType_2 and mutations):
         abort(400)
 
     if regions == "file non parsabile ...":
@@ -204,10 +352,11 @@ def get_test3():
     jobID = str(uuid.uuid1())
 
     ### Asynchronous computation
-    trans_arr = json.loads(mutations) #parse mutations array
-    jobs[jobID] = { "pvalue" : 0.1}
+    trans_arr = json.loads(mutations)  # parse mutations array
+    jobs[jobID] = {"pvalue": 0.1}
 
     return json.dumps({"jobID": jobID})
+
 
 # API T03r
 @app.route('/api/t03/<string:jobID>', methods=['GET'])
@@ -215,6 +364,5 @@ def get_test3_r(jobID):
     return getJobResult(jobID)
 
 
-
 if __name__ == '__main__':
-   app.run()
+    app.run()

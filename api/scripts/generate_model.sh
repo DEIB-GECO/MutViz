@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 
-TABLES="mutation,mutation_code,mutation_group,mutation_group_pre,repository,tumor_type"
+TABLES="mutation,mutation_code,mutation_group,repository,tumor_type"
 
 postgres_url="localhost"
 postgres_user="mutviz"
