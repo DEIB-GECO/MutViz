@@ -135,21 +135,20 @@ def get_distances():
     logger.debug(f"{jobID}->{table_name}")
 
     ### Asynchronous computation
-    session_maker = db.sessionmaker(autocommit=False, autoflush=False)
 
-    session = session_maker(bind=db.engine)
+    session = db.session
+    session.execute("set enable_seqscan=false")
 
     session.execute(sqlalchemy.text(f"CREATE TEMPORARY TABLE {table_name}(chrom smallint, pos bigint)"))
     # session.execute(f"INSERT INTO {table_name} VALUES ({4},{4})")
     session.flush()
-    # session.commit()
 
     if tumorType == None:
         result = defaultdict(list)
         # return result for each available tumor type
         if regions:
             for i, (chrom, pos) in enumerate(regions):
-                if i % 1000 == 0:
+                if i % 100 == 0:
                     session.flush()
                     print(i)
                 chrom = chrom.lower().replace('chr', '')
@@ -160,30 +159,13 @@ def get_distances():
 
                 if chrom in chromosome_dict and pos:
                     chrom = chromosome_dict[chrom]
-
-                    # logger.debug(f"Region: {chrom} - {pos}")
-
                     session.execute(f"INSERT INTO {table_name} VALUES ({chrom},{pos})")
             logger.debug("INSERTED")
 
             session.flush()
-            session.commit()
-            logger.debug(session.execute('show enable_seqscan').fetchall())
-            session.execute("set enable_seqscan=false")
-            logger.debug(session.execute('show enable_seqscan').fetchall())
-            print(session.execute(
-                f"""set enable_seqscan=false;
-                    EXPLAIN SELECT tumor_type_id,  mut.pos - te.pos as new_pos, mutation_code_id, count(*)
-                    FROM mutation_group AS mut
-                    JOIN {table_name} as te ON te.chrom = mut.chrom 
-                        AND mut.pos between te.pos - {maxDistance} 
-                        AND te.pos + {maxDistance}
-                    GROUP BY tumor_type_id,  new_pos, mutation_code_id""") \
-                  .fetchall())
 
             query_result = session.execute(
-                f"""set enable_seqscan=false;
-                    SELECT tumor_type_id,  mut.pos - te.pos as new_pos, mutation_code_id, count(*)
+                f"""SELECT tumor_type_id,  mut.pos - te.pos as new_pos, mutation_code_id, count(*)
                     FROM mutation_group AS mut
                     JOIN {table_name} as te ON te.chrom = mut.chrom 
                         AND mut.pos between te.pos - {maxDistance} 
@@ -196,26 +178,6 @@ def get_distances():
                 from_allele, to_allele = mutation_code_dict[t[2]]
                 result[t.tumor_type_id].append([t[1], from_allele, to_allele, t[3]])
 
-        #
-        #             # res = db.engine.execute(sqlalchemy.text("SELECT * FROM mutation_group WHERE")).fetchall()
-        #             q = MutationGroup.query \
-        #                 .filter(MutationGroup.chrom == chrom) \
-        #                 .filter(MutationGroup.pos <= pos + maxDistance) \
-        #                 .filter(MutationGroup.pos >= pos - maxDistance) #\
-        #                 # .order_by(MutationGroup.tumor_type_id, MutationGroup.pos)
-        #             # print(q)
-        #             query_result = q.all()
-        #             if query_result:
-        #                 for t in query_result:
-        #                     from_allele, to_allele = mutation_code_dict[t.mutation_code]
-        #                     result[t.tumor_type_id].append([t.pos - pos, from_allele, to_allele, t.mutation_count])
-        #
-        #             # print(len(result))
-        #             # print(str(query_result[0]))
-        #             # print(maxDistance)
-        #
-        #             # print(r, MutationGroup.query.first())
-        #
         result = [
             {"tumorType": tumorType,
              "maxDistance": maxDistance,
@@ -224,21 +186,12 @@ def get_distances():
             for tumorType_id, tumorType in tumor_type_dict.items()
         ]
 
-        # session.close()
+        session.close()
 
-        results = [
-            {"tumorType": "brca",
-             "maxDistance": maxDistance,
-             "distances": [[0, 'A', 'C'], [-1, 'C', 'G']]
-             },
-            {"tumorType": "coca",
-             "maxDistance": maxDistance,
-             "distances": [[0, 'A', 'C'], [-13, 'C', 'G']]}
-        ]
         jobs[jobID] = result
 
     else:
-
+        # TODO
         results = {
             "tumorType": tumorType,
             "maxDistance": maxDistance,
