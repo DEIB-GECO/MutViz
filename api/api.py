@@ -2,14 +2,14 @@ import uuid
 from collections import defaultdict
 from logging.config import dictConfig
 
-import flask
-import sqlalchemy
 from flask import Flask, json, request, abort
 from flask_cors import CORS
 from flask_executor import Executor
+from sqlalchemy import between
+from sqlalchemy import func
 
 from api.db import *
-from api.model.models import *
+from api.utils import *
 
 # documentation:
 # https://docs.google.com/document/d/1kNJ7mogv5Jj6Wu2WOU4jCeX-Nav250l4tMHm6YFGANU/edit#
@@ -46,14 +46,15 @@ jobs = {"abcde-fghi-lmno": None, "abbbb-fknifn": None}
 with app.app_context():
     logger = flask.current_app.logger
 
-chromosome_dict = dict([(str(x), x) for x in range(1, 23)] + [('x', 23), ('y', 24), ('mt', 25)])
+chromosome_dict = dict([(str(x), x) for x in range(1, 23)] + [('x', 23), ('y', 24), ('mt', 25), ('m', 25), ])
 with app.app_context():
     res = MutationCode.query.all()
     mutation_code_dict = dict([(x.mutation_code_id, (x.from_allele, x.to_allele)) for x in res])
-    # print(mutation_code_dict)
+    mutation_code_reverse_dict = dict([((x.from_allele, x.to_allele), x.mutation_code_id) for x in res])
     res = TumorType.query.all()
-    tumor_type_dict = dict([(x.tumor_type_id, x.tumor_type) for x in res])
+    tumor_type_dict = dict([(x.tumor_type_id, (x.tumor_type, x.description)) for x in res])
     tumor_type_reverse_dict = dict([(x.tumor_type, x.tumor_type_id) for x in res])
+    repositories = Repository.query.all()
 
 
 def getJobResult(jobID):
@@ -76,14 +77,8 @@ def root():
 # API L01
 @app.route('/api/tumor_types/')
 def get_tumor_types():
-    results = [
-        {"name": "Breast Cancer",
-         "identifier": "BRCA"},
-        {"name": "Colorectal Cancer",
-         "identifier": "COCA"}
-    ]
-    result = [{"name": x,
-               "identifier": x}
+    result = [{"name": x[1],
+               "identifier": x[0]}
               for x in tumor_type_dict.values()
               ]
     return json.dumps(result)
@@ -92,8 +87,10 @@ def get_tumor_types():
 # API L02
 @app.route('/api/repository/')
 def get_repository():
-    mutations = Repository.query.all()
-    res = list(map(lambda x: {"identifier": x.repository_id, "name": x.name, "description": x.description}, mutations))
+    res = list(map(lambda x: {"identifier": x.repository_id,
+                              "name": x.name,
+                              "description": x.description},
+                   repositories))
     return json.dumps(res)
 
 
@@ -107,112 +104,95 @@ def get_distances():
     if not regions:
         logger.debug(f"regions: {regions}")
 
-    # no need?
-    # regionsFormat = request.form.get('regionsFormat')
-    # logger.debug("regionsFormat:" + regionsFormat)
-
     maxDistance = request.form.get('maxDistance')
     logger.debug(f"maxDistance: {maxDistance}")
 
     tumorType = request.form.get('tumorType')
     logger.debug(f"tumorType: {tumorType}")
 
-    # REMOVED region_format
     if not ((repoId or regions) and maxDistance):
         abort(400)
 
-    # we can move into thread?
-    if regions:
-        regions = regions.split("\n")
-        logger.debug(f"regions: {len(regions)}")
-        regions = filter(lambda x: x, regions)
-        regions = map(lambda x: x.split("\t"), regions)
-    else:
-        logger.debug("regions:" + str(regions))
-    maxDistance = int(maxDistance)
+    try:
+        maxDistance = int(maxDistance)
+    except ValueError:
+        abort(400, 'max distance integer')
+
+    regions, error_regions = parse_input_regions(regions)
 
     # Generate a jobID
     jobID = str(uuid.uuid1()).replace('-', '_')
     jobs[jobID] = None
-    table_name = "t_" + jobID
 
-    logger.debug(f"{jobID}->{table_name}")
+    logger.debug(f"jobID: {jobID}")
 
     # TODO remove after testing
     # regions = list(regions)[:1000]
     ### Asynchronous computation
     def async_function():
-        session = db.session
-        session.execute("set enable_seqscan=false")
+        try:
+            session = db.session
+            session.execute("set enable_seqscan=false")
 
-        session.execute(sqlalchemy.text(f"CREATE TEMPORARY TABLE {table_name}(chrom smallint, pos bigint)"))
-        # session.execute(f"INSERT INTO {table_name} VALUES ({4},{4})")
-        session.flush()
+            table_name = "t_" + jobID
+            logger.debug(f"{jobID} -> {table_name}")
 
-        if tumorType == None:
+            temp_table = create_upload_table(session, table_name, regions)
+
+            query = session \
+                .query(MutationGroup.tumor_type_id,
+                       MutationGroup.pos - temp_table.c.pos,
+                       MutationGroup.mutation_code_id,
+                       func.sum(MutationGroup.mutation_count)) \
+                .join(temp_table,
+                      (MutationGroup.chrom == temp_table.c.chrom) &
+                      between(MutationGroup.pos, temp_table.c.pos - maxDistance, temp_table.c.pos + maxDistance)) \
+                .group_by(MutationGroup.tumor_type_id,
+                          MutationGroup.pos - temp_table.c.pos,
+                          MutationGroup.mutation_code_id)
+            if tumorType:
+                query = query.filter(MutationGroup.tumor_type_id == tumor_type_reverse_dict[tumorType])
+
+            logger.debug(f"query: {query}")
+
+            # print(session.execute(f"EXPLAIN ANALYZE {query}").fetchall())
+
+            query_result = query.all()
+
             result = defaultdict(list)
-            # return result for each available tumor type
-            if regions:
-                for i, (chrom, pos) in enumerate(regions):
-                    if i % 100 == 0:
-                        session.flush()
-                        print(i)
-                    chrom = chrom.lower().replace('chr', '')
-                    try:
-                        pos = int(pos)
-                    except ValueError:
-                        pos = None
 
-                    if chrom in chromosome_dict and pos:
-                        chrom = chromosome_dict[chrom]
-                        session.execute(f"INSERT INTO {table_name} VALUES ({chrom},{pos})")
-                logger.debug("INSERTED")
-
-                session.flush()
-
-                query_result = session.execute(
-                    f"""SELECT tumor_type_id,  mut.pos - te.pos as new_pos, mutation_code_id, count(*)
-                        FROM mutation_group AS mut
-                        JOIN {table_name} as te ON te.chrom = mut.chrom 
-                            AND mut.pos between te.pos - {maxDistance} 
-                            AND te.pos + {maxDistance}
-                        GROUP BY tumor_type_id,  new_pos, mutation_code_id""") \
-                    .fetchall()
-                logger.debug(query_result[0])
-
-                for t in query_result:
-                    from_allele, to_allele = mutation_code_dict[t[2]]
-                    result[t.tumor_type_id].append([t[1], from_allele, to_allele, t[3]])
+            for t in query_result:
+                from_allele, to_allele = mutation_code_dict[t[2]]
+                result[t.tumor_type_id].append([t[1], from_allele, to_allele, t[3]])
 
             result = [
                 {"tumorType": tumorType,
                  "maxDistance": maxDistance,
                  "distances": result[tumorType_id]
                  }
-                for tumorType_id, tumorType in tumor_type_dict.items()
+                for tumorType, tumorType_id
+                in (tumor_type_reverse_dict.items() if not tumorType else [
+                    (tumorType, tumor_type_reverse_dict[tumorType])])
             ]
+            # print(result)
 
-            session.rollback()
+            session.commit()
             session.close()
 
             jobs[jobID] = result
-
-        else:
-            # TODO
-            results = {
-                "tumorType": tumorType,
-                "maxDistance": maxDistance,
-                "distances": [[123, 'A', 'C'], [-13, 'C', 'G']]
-            }
-
-            jobs[jobID] = results
+            logger.info('JOB DONE: ' + jobID)
+        except Exception as e:
+            logger.error("Async error", e)
+            raise
 
     executor.submit(async_function)
-
+    # async_function()
     ### End of asynchronous computation
-    print("TEST")
 
-    return json.dumps({"jobID": jobID})
+    return json.dumps(
+        {**{"jobID": jobID, 'correct_region_size': len(regions)},
+         **({"error": error_regions} if error_regions else {})}
+    )
 
 
 # API R01r
