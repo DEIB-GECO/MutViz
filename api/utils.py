@@ -27,7 +27,8 @@ def parse_input_regions(regions):
                     chrom = chromosome_dict[chrom]
                     try:
                         pos = int(pos)
-                        if pos >= 0:
+                        # position negative check is excluded
+                        if True or pos >= 0:
                             result.append((chrom, pos))
                         else:
                             error_results.append(["position_negative_error", i, region])
