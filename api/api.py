@@ -1,3 +1,4 @@
+import threading
 import uuid
 from collections import defaultdict
 from logging.config import dictConfig
@@ -9,6 +10,7 @@ from sqlalchemy import between
 from sqlalchemy import func
 
 from api.db import *
+from api.jobs import register_job, update_job, get_job_result, unregister_job
 from api.utils import *
 
 # documentation:
@@ -35,13 +37,18 @@ cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 app.config['SQLALCHEMY_DATABASE_URI'] = get_db_uri()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['EXECUTOR_PROPAGATE_EXCEPTIONS'] = True
 
 db.init_app(app)
 
 executor = Executor(app)
 
-# JOBS   jobId->resultJson
-jobs = {"abcde-fghi-lmno": None, "abbbb-fknifn": None}
+
+@app.before_first_request
+def activate_job_cleaner():
+    thread = threading.Thread(target=api.jobs.auto_delete)
+    thread.start()
+
 
 with app.app_context():
     logger = flask.current_app.logger
@@ -55,17 +62,6 @@ with app.app_context():
     tumor_type_dict = dict([(x.tumor_type_id, (x.tumor_type, x.description)) for x in res])
     tumor_type_reverse_dict = dict([(x.tumor_type, x.tumor_type_id) for x in res])
     repositories = Repository.query.all()
-
-
-def getJobResult(jobID):
-    if not jobID in jobs:
-        abort(404)
-    elif jobs[jobID] == None:
-        return json.dumps({"ready": False})
-    else:
-        res = json.dumps({"ready": True, "result": jobs[jobID]})
-        # del jobs[jobID]
-        return res
 
 
 # Serve static content
@@ -122,7 +118,8 @@ def get_distances():
 
     # Generate a jobID
     jobID = str(uuid.uuid1()).replace('-', '_')
-    jobs[jobID] = None
+    register_job(jobID)
+    # jobs[jobID] = None
 
     logger.debug(f"jobID: {jobID}")
 
@@ -179,10 +176,11 @@ def get_distances():
             session.commit()
             session.close()
 
-            jobs[jobID] = result
+            update_job(jobID, result)
             logger.info('JOB DONE: ' + jobID)
         except Exception as e:
-            logger.error("Async error", e)
+            unregister_job(jobID)
+            # logger.error("Async error", e)
             raise
 
     executor.submit(async_function)
@@ -199,7 +197,7 @@ def get_distances():
 @app.route('/api/distance/<string:jobID>', methods=['GET'])
 def get_distances_r(jobID):
     # print(jobID)
-    return getJobResult(jobID)
+    return get_job_result(jobID)
 
 
 # API T01
@@ -225,7 +223,7 @@ def get_test1():
 
     ### Asynchronous computation
     trans_arr = json.loads(mutations)  # parse mutations array
-    jobs[jobID] = {"pvalue": 0.1}
+    update_job(jobID, {"pvalue": 0.1})
 
     return json.dumps({"jobID": jobID})
 
@@ -233,7 +231,7 @@ def get_test1():
 # API T01r
 @app.route('/api/t01/<string:jobID>', methods=['GET'])
 def get_test1_r(jobID):
-    return getJobResult(jobID)
+    return get_job_result(jobID)
 
 
 # API T02
@@ -262,7 +260,7 @@ def get_test2():
 
     ### Asynchronous computation
     trans_arr = json.loads(mutations)  # parse mutations array
-    jobs[jobID] = {"pvalue": 0.1}
+    update_job(jobID, {"pvalue": 0.1})
 
     return json.dumps({"jobID": jobID})
 
@@ -270,7 +268,7 @@ def get_test2():
 # API T02r
 @app.route('/api/t02/<string:jobID>', methods=['GET'])
 def get_test2_r(jobID):
-    return getJobResult(jobID)
+    return get_job_result(jobID)
 
 
 # API T03
@@ -296,7 +294,7 @@ def get_test3():
 
     ### Asynchronous computation
     trans_arr = json.loads(mutations)  # parse mutations array
-    jobs[jobID] = {"pvalue": 0.1}
+    update_job(jobID, {"pvalue": 0.1})
 
     return json.dumps({"jobID": jobID})
 
@@ -304,7 +302,7 @@ def get_test3():
 # API T03r
 @app.route('/api/t03/<string:jobID>', methods=['GET'])
 def get_test3_r(jobID):
-    return getJobResult(jobID)
+    return get_job_result(jobID)
 
 
 if __name__ == '__main__':
