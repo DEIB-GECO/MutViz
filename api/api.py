@@ -73,10 +73,10 @@ def root():
 # API L01
 @app.route('/api/tumor_types/')
 def get_tumor_types():
-    result = sorted([{"name": x[0] + " - " +  x[1],
+    result = [{"name": x[0] + " - " + x[1],
                "identifier": x[0]}
-              for x in tumor_type_dict.values()
-              ])
+              for x in sorted(tumor_type_dict.values())
+              ]
     return json.dumps(result)
 
 
