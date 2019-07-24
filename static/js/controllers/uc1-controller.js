@@ -54,8 +54,8 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
         // Initial selected range set between 1/4 and 3/4 of the coordinate space
         selectedRange = {
-            min: dataRange.min+0.25*(dataRange.max-dataRange.min),
-            max: dataRange.min+0.75*(dataRange.max-dataRange.min)
+            min: dataRange.min+0*(dataRange.max-dataRange.min),
+            max: dataRange.min+1*(dataRange.max-dataRange.min)
         }
 
         // Initialize the slider

@@ -12,6 +12,9 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
         stacked: true // whether to use different colors for different mutation types or plot them with a single color
     }
 
+    // Maximum distance from center
+    $rootScope.maxDistance = 1000;
+
     // Tumor Types
     $rootScope.tumorTypes = {
         current: null,
@@ -24,6 +27,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
     // Array of files objects
     $rootScope.files = [];
     $rootScope.someAreReady = false;
+    $rootScope.someAreValid = false;
 
     // Persist Files in local storage
     $rootScope.persistData = function() {
@@ -104,8 +108,11 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
 
             // Restart polling
             $rootScope.files.forEach(function(f){
-                f.ready = false;
-                f.timer = $rootScope.pollR01(f);
+                if(f.valid) {
+                    $rootScope.someAreValid = true;
+                    f.ready = false;
+                    f.timer = $rootScope.pollR01(f);
+                }
             });
         }
     }
@@ -144,9 +151,22 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
             function success(response) {
 
                 file.jobID = response.data.jobID;
+                file.parsed_lines =  response.data.correct_region_size;
+                if(response.data.error && response.data.error.length>0)
+                    file.errors = response.data.error;
+                else
+                    file.errors = [];
 
-                // Start polling
-                file.timer = $rootScope.pollR01(file);
+                if(file.parsed_lines==0){
+                    file.valid = false;
+                } else {
+
+                    $rootScope.someAreValid = true;
+                    file.valid = true;
+
+                    // Start polling
+                    file.timer = $rootScope.pollR01(file);
+                }
 
                 // Persist
                 $rootScope.persistData();

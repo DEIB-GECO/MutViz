@@ -9,7 +9,8 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
     $rootScope.active_menu = "data";
 
     // File prototype
-    $scope.empty_file = {id:null, name: "", type:"bed", file_txt:"", distances:null, maxDistance:300, count:0, source:null, ready:false, jobID:null};
+    $scope.empty_file = {id:null, name: "", type:"bed", file_txt:"", distances:null,
+                         maxDistance: $rootScope.maxDistance, count:0, source:null, ready:false, jobID:null};
     $scope.adding_file = clone($scope.empty_file);
 
     // On form submitted
@@ -29,8 +30,10 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
 
                 // Take only chromosome and center (compress_regions is in support.js)
                 res = compress_regions(content, $scope.adding_file.type=="narrowpeak");
+                console.log("res is ")
+                console.log(res);
 
-                if( res.parsed_count < res.total_count) {
+                if( res.error_count > 0) {
                     $("#modal_title").text("File: "+file.name);
                     $("#modal_description").text("Parsing error:");
 
@@ -75,21 +78,25 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
         $rootScope.computeDistances(file);
     }
 
-    $scope.viewRegions = function(file) {
+    $scope.viewErrors = function(file) {
         $("#modal_title").text("File: "+file.name);
-        $("#modal_description").text("This "+file.type+" file contains the following "+file.count+" regions (chromosome, center):");
+        $("#modal_description").text("Some lines were ignored due to the following parsing errors:");
 
-        $("#modal_rows").text(file.file_txt);
+        err_string = ""
+        for (i=0; i<file.errors.length; i++){
+            err_string+="line "+file.errors[i][1]+" :'"+file.errors[i][2]+"' ("+file.errors[i][0]+").\n"
+        }
+
+
+        $("#modal_rows").text(err_string);
         $('#modale').modal();
     }
 
 
     $scope.removeFile = function(index) {
         $rootScope.files.splice(index,1);
-        if($rootScope.files.length==0) {
-            $rootScope.someAreReady = false;
-            console.log("no more ready");
-        }
+        $rootScope.someAreReady = $rootScope.files.every(function(x){return x.ready}, false);
+        $rootScope.someAreValid = $rootScope.files.every(function(x){return x.valid}, false);
         $rootScope.persistData();
     }
 

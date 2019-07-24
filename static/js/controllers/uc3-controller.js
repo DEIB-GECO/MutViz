@@ -28,7 +28,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
     $scope.load = function(file, selectedTumorTypes) {
 
-        console.log("Loading file: "+file.name);
+        if(file==null)
+            return;
         $scope.loaded = true;
 
         // Coordinate available range as the minimum and maximum coordinate in the data
@@ -43,8 +44,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         // Initial selected range set between 1/4 and 3/4 of the coordinate space
         selectedRange = {
-            min: dataRange.min+0.25*(dataRange.max-dataRange.min),
-            max: dataRange.min+0.75*(dataRange.max-dataRange.min)
+            min: dataRange.min+0*(dataRange.max-dataRange.min),
+            max: dataRange.min+1*(dataRange.max-dataRange.min)
         }
 
         // Initialize the slider
@@ -73,7 +74,9 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         });
 
         // Generate the plot
-        $scope.plot.d3graph = uc3($scope.getData(file, selectedTumorTypes),
+        data = $scope.getData(file, selectedTumorTypes);
+        $("#uc1 svg").css("height", (data.length*150)+"px");
+        $scope.plot.d3graph = uc3(data,
                                   $scope.plot.binSize,
                                   selectedRange, $scope.getSelectedTypes());
 
@@ -162,7 +165,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
 
         return selectedTumorTypes.map(function(t){
-            return {type: t.name, data: getDist(file, t.identifier)} 
+            return {type: t.identifier, data: getDist(file, t.identifier)} 
         });
     }
 

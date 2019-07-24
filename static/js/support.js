@@ -6,19 +6,25 @@ function compress_regions(csv_txt, peak) {
     console.log(lines);
 
     correctly_parsed = 0;
+    empty_lines=0;
     parsing_log = "";
+    
+    if(csv_txt.trim()=="")
+        parsing_log+="Empty file."
 
     for(var i=0; i<lines.length;i++) {
+        
+        if (lines[i].trim() == "") {  //skip empty lines
+            empty_lines+=1;
+            continue;
+        }
+        
         cols = lines[i].split(new RegExp("\\s"));
 
-        if (lines[i].trim() != "") { //skip empty lines
-
-            if(peak && cols.length<10 || !peak &&  cols.length<3) {
-                parsing_log+="Not enough cols in line "+(i+1)+": "+lines[i]+"\n";
-                continue;
-            }
+        if(peak && cols.length<10 || !peak &&  cols.length<3) {
+            parsing_log+="line "+(i+1)+": '"+lines[i]+"' (not enough columns).\n";
+            continue;
         }
-
 
         chromosome = cols[0];
         start = Number(cols[1])
@@ -30,26 +36,23 @@ function compress_regions(csv_txt, peak) {
             stop = start; // s.t. (start+stop)/2 = start
         }
 
-        if(start==NaN || stop==NaN || offset==NaN) {
-            parsing_log+="Could not parse line "+(i+1)+": "+lines[i]+"\n";
+        if(Number.isNaN(start) || Number.isNaN(stop) || Number.isNaN(offset)) {
+            parsing_log+="line "+(i+1)+": '"+lines[i]+"' (start and stop must be integer numbers).\n";
             continue;
         } else {
             center= Math.floor((start+stop)/2+offset);
         }
+        
+        if(output!="")
+            output += "\n";
 
         output += chromosome+"\t"+center;
         correctly_parsed +=1;
 
-        if(i<=lines.length)
-            output += "\n";
     }
 
-    if(correctly_parsed<lines.length) { 
-        console.log("Some lines were not correctly parsed:");
-        console.log(parsing_log)
-    }
 
-    return {output: output, parsed_count: correctly_parsed, total_count: lines.length, log: parsing_log};
+    return {output: output, parsed_count: correctly_parsed, total_count: lines.length, error_count:lines.length-empty_lines-correctly_parsed,  log: parsing_log};
 }
 
 // Initialize the upload file elements

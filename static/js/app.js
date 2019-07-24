@@ -35,3 +35,9 @@ app.config(['$routeProvider', '$locationProvider',
       }).otherwise('/home');
 
 }]);
+
+app.filter('reverse', function() {
+  return function(items) {
+    return items.slice().reverse();
+  };
+});

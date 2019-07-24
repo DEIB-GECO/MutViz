@@ -1,3 +1,5 @@
+var RECT_HEIGHT = 50;
+
 // Function that builds the color scale
 var uc3_getColor = d3.scaleLinear()
 .range(["white", "#e6194B"])
@@ -17,6 +19,9 @@ function yVal(bin) {
 
 // Highlith on the x-axis the interval corresponding to the the motif
 function highlightMotif(g) {
+    
+    return;
+    
     g.svg.selectAll("line.motif").remove()
     g.svg.append("line")
         .attr("class", "motif")
@@ -39,7 +44,7 @@ function uc3_addTracks(g, data) {
         .attr("x", function(d) { return g.xAxisScale(d.group) })
         .attr("y", function(d) { return g.y(d.variable) })
         .attr("width", function(b){return g.xAxisScale(b.x1)-g.xAxisScale(b.x0)} )
-        .attr("height", g.y.bandwidth() )
+        .attr("height", g.y.bandwidth() ) 
         .style("fill", function(d) { return uc3_getColor(d.value)} )
 }
 
@@ -112,7 +117,7 @@ function uc3_update(data, g, binSize, mutationTypes) {
     g.yAxis.call(d3.axisLeft(g.y));
 
     // Rotate y-axis labels
-    $(".y-axis text").attr("transform", "rotate(270) translate(37,-17)");
+    $(".y-axis text").attr("transform", "rotate(270) translate(25,-17)");
 
 
     // Merge all binned data (the different type is tracked by the property "variable" within each bin)

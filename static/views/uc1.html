@@ -12,15 +12,15 @@
                 </div>
 
 
-                <div class="col-md-12" style="margin-top:10px; {{files.length>0?'background-color:#e6e6e6;':''}} ">
+                <div class="col-md-12" style="margin-top:10px; {{files.length>0 && someAreValid?'background-color:#e6e6e6;':''}} ">
 
-                    <div ng-if="files.length==0 && !someAreReady"
+                    <div ng-if="files.length==0 && !someAreRead || !someAreValid"
                          class="col-md-12 text-center"
                          style="padding-top: 20px;padding-bottom: 20px; background-color: #ffe28d">
-                        Your <a href="#!/data">workspace</a> is empty. Please, upload a region file or add a file from the repository.
+                        No valid file in your <a href="#!/data">workspace</a>. Please, upload a region file or add a file from the repository.
                     </div>
 
-                    <div ng-if="files.length>0 && !someAreReady"
+                    <div ng-if="files.length>0 && !someAreReady && someAreValid"
                          class="col-md-12 text-center"
                          style="padding-top: 20px;padding-bottom: 20px;">
                         Loading your workspace
@@ -66,7 +66,7 @@
                     <div class="row">
 
                         <div class="col-md-7">
-                            <label for="inputBins"><b>Mutation types</b></label>
+                            <b>Mutation types</b>
                         </div>
                         <div class="col-md-5">
                             <label class="checkbox-inline float-right">
@@ -133,7 +133,34 @@
 
                     </div>
 
+                </div>
 
+                <div class="col-md-12" style="margin-top:10px;">
+                    <div class="row">
+
+                        <div class="col-md-12">
+                            <b>Statistical test</b>
+                        </div>
+
+                        <div class="col-md-12">
+                            <table class="table table-striped">
+                                <tbody>
+
+                                    <tr>
+                                        <td>PValue</td>
+                                        <td>?</td>
+                                        <td>
+                                            <div class="float-right">
+                                                <button class="btn btn-sm btn-info">compute</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
                 </div>
 
             </div>
@@ -144,7 +171,7 @@
         <div class="row">
 
             <div class="col-md-12 text-center my-auto" ng-if="!loaded">
-               Select a file.
+                Select a file.
             </div>
 
 
