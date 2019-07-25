@@ -32,8 +32,10 @@ dictConfig({
     }
 })
 
-app = Flask(__name__, static_url_path='', static_folder='../static')
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+base_url = "/sombrero"
+
+app = Flask(__name__, static_url_path=base_url + '', static_folder='../static')
+cors = CORS(app, resources={r"/sombrero/api/*": {"origins": "*"}})
 
 app.config['SQLALCHEMY_DATABASE_URI'] = get_db_uri()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -65,13 +67,13 @@ with app.app_context():
 
 
 # Serve static content
-@app.route('/')
+@app.route(base_url + '/')
 def root():
     return app.send_static_file('index.html')
 
 
 # API L01
-@app.route('/api/tumor_types/')
+@app.route(base_url + '/api/tumor_types/')
 def get_tumor_types():
     result = [{"name": x[0] + " - " + x[1],
                "identifier": x[0]}
@@ -81,7 +83,7 @@ def get_tumor_types():
 
 
 # API L02
-@app.route('/api/repository/')
+@app.route(base_url + '/api/repository/')
 def get_repository():
     res = list(map(lambda x: {"identifier": x.repository_id,
                               "name": x.name,
@@ -91,7 +93,7 @@ def get_repository():
 
 
 # API R01
-@app.route('/api/distance/', methods=['POST'])
+@app.route(base_url + '/api/distance/', methods=['POST'])
 def get_distances():
     repoId = request.form.get('repoId')
     logger.debug(f"repoId: {repoId}")
@@ -194,14 +196,14 @@ def get_distances():
 
 
 # API R01r
-@app.route('/api/distance/<string:jobID>', methods=['GET'])
+@app.route(base_url + '/api/distance/<string:jobID>', methods=['GET'])
 def get_distances_r(jobID):
     # print(jobID)
     return get_job_result(jobID)
 
 
 # API T01
-@app.route('/api/t01/', methods=['POST'])
+@app.route(base_url + '/api/t01/', methods=['POST'])
 def get_test1():
     repoId = request.form.get('repoId')
     regions = request.form.get('regions')
@@ -229,13 +231,13 @@ def get_test1():
 
 
 # API T01r
-@app.route('/api/t01/<string:jobID>', methods=['GET'])
+@app.route(base_url + '/api/t01/<string:jobID>', methods=['GET'])
 def get_test1_r(jobID):
     return get_job_result(jobID)
 
 
 # API T02
-@app.route('/api/t02/', methods=['POST'])
+@app.route(base_url + '/api/t02/', methods=['POST'])
 def get_test2():
     repoId1 = request.form.get('repoId1')
     repoId2 = request.form.get('repoId2')
@@ -266,13 +268,13 @@ def get_test2():
 
 
 # API T02r
-@app.route('/api/t02/<string:jobID>', methods=['GET'])
+@app.route(base_url + '/api/t02/<string:jobID>', methods=['GET'])
 def get_test2_r(jobID):
     return get_job_result(jobID)
 
 
 # API T03
-@app.route('/api/t03/', methods=['POST'])
+@app.route(base_url + '/api/t03/', methods=['POST'])
 def get_test3():
     repoId = request.form.get('repoId')
     regions = request.form.get('regions')
@@ -300,7 +302,7 @@ def get_test3():
 
 
 # API T03r
-@app.route('/api/t03/<string:jobID>', methods=['GET'])
+@app.route(base_url + '/api/t03/<string:jobID>', methods=['GET'])
 def get_test3_r(jobID):
     return get_job_result(jobID)
 
