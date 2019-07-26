@@ -1,3 +1,40 @@
+//#### DATA BINNING
+// Filter data taking only mutations with type in mutationTypes (array of selected mutation types: A->C, C->* ... )
+function uc1_getFilteredData(data, mutationTypes) {
+
+    return data.filter( function(mutation) {
+
+        return mutationTypes.map( 
+            function(t){ 
+                if(t.from=="*") 
+                    return t.to==mutation[2]  
+                if(t.to=="*") 
+                    return t.from==mutation[1]  
+
+                return t.from == mutation[1] && t.to==mutation[2]
+            }
+        ).reduce( function(t1,t2){ return t1 || t2 });
+
+    });
+
+}
+
+function uc1_get_bins(data, mutationTypes, binSize, minX, maxX) {
+
+    filtered = uc1_getFilteredData(data, mutationTypes);
+
+    ticks = getTicks(minX, maxX, binSize);
+
+    // Configure the histogram function
+    var histogram = d3.histogram().value(function(d) {return d[0];})
+    .domain([minX, maxX])       
+    .thresholds(ticks); 
+
+    return histogram(filtered);
+}
+
+
+
 // List of available colors
 var uc1_colors = ["#e6194B", "#3cb44b", "#ffe119", "#4363d8", "#f58231", "#911eb4", "#42d4f4", "#f032e6", "#bfef45", "#fabebe", "#469990", "#e6beff", "#9A6324", "#fffac8", "#800000", "#aaffc3", "#808000", "#ffd8b1", "#000075", "#a9a9a9", "#ffffff", "#000000"];
 
@@ -15,16 +52,26 @@ function yVal(bin) {
 
 
 // Highlith on the x-axis the interval corresponding to the the motif
-function highlightMotif(g) {
-    g.svg.selectAll("line.motif").remove()
+function uc1_highlightMotif(g, area) {
+    /*g.svg.selectAll("line.area").remove()
     g.svg.append("line")
-        .attr("class", "motif")
-        .attr("x1", g.xAxisScale(-9.5))
+        .attr("class", "area")
+        .attr("x1", g.xAxisScale(from))
         .attr("y1", g.height+2)
-        .attr("x2", g.xAxisScale(+9.5))
+        .attr("x2", g.xAxisScale(to))
         .attr("y2", g.height+2)
-        .attr("stroke-width", 2)
-        .attr("stroke", "black")
+        .attr("stroke-width", 100)
+        .attr("stroke", "black")*/
+
+    g.svg.selectAll("rect.area").remove()
+    g.svg.append("rect")
+        .attr("class", "area")
+        .attr("x", g.xAxisScale(area.from))
+        .attr("y", 0)
+        .attr("fill", 'rgba(0, 169, 190, 0.17)')
+        .attr("width", g.xAxisScale(area.to)-g.xAxisScale(area.from))
+        .attr("height", g.height);
+    
 }
 
 
@@ -69,26 +116,6 @@ function uc1_addBars(g, groupId, bins, alreadyAddedMutations, color) {
 }
 
 
-// Filter data taking only mutations with type in mutationTypes (array of selected mutation types: A->C, C->* ... )
-function uc1_getFilteredData(data, mutationTypes) {
-
-    return data.filter( function(mutation) {
-
-        return mutationTypes.map( 
-            function(t){ 
-                if(t.from=="*") 
-                    return t.to==mutation[2]  
-                if(t.to=="*") 
-                    return t.from==mutation[1]  
-
-                return t.from == mutation[1] && t.to==mutation[2]
-            }
-        ).reduce( function(t1,t2){ return t1 || t2 });
-
-
-    });
-
-}
 
 function uc1_addLegendItem(g, index, color, text) {
 
@@ -121,11 +148,7 @@ function uc1_update(data, g, binSize, mutationTypes, stacked, showTotal) {
 
        https://d3-wiki.readthedocs.io/zh_CN/master/Histogram-Layout/?q=d3.histogram&check_keywords=yes&area=default */
 
-    // bins intervals centered on 0
-    positive_side = d3.range(0-binSize/2, g.xAxisScale.domain()[1] + 1, binSize);
-    negative_side = d3.range(binSize/2, -g.xAxisScale.domain()[0]+1, binSize).map(function(i){return -i}).reverse();
-
-    ticks = negative_side.concat(positive_side);
+    ticks = getTicks(g.xAxisScale.domain()[0], g.xAxisScale.domain()[1], binSize);
 
     // Configure the histogram function
     var histogram = d3.histogram()
@@ -238,8 +261,6 @@ function uc1_update(data, g, binSize, mutationTypes, stacked, showTotal) {
     }
 
 
-    highlightMotif(g);
-
 }
 
 /* This function rescales the x axis, given the graph object and the new provided domain (range) */
@@ -269,6 +290,8 @@ function uc1(data, binSize, range, mutationTypes, stacked, showTotal) {
     g.margin = {top: 10, right: 50, bottom: 30, left: 55},
         g.width  = 700 - g.margin.left - g.margin.right,
         g.height = 400 - g.margin.top - g.margin.bottom;
+    
+    console.log("deleting");
 
     d3.select("#uc1 svg").html("");
 

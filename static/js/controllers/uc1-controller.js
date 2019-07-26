@@ -10,8 +10,11 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
     $scope.plot = {binSize: 10, d3graph: null, showTotal: true}
     $scope.loaded = false;
 
+    $scope.test = {area:{from:0, to:0, fromPosition:-$scope.plot.binSize/2, toPosition:$scope.plot.binSize/2, visible: true, L:null, H:null}};
+
     // Selected File
-    $scope.selectedFile = null;
+    $scope.file_selector = {name : null, file: null};
+    
 
     // Initialize with the first tumor type or with the example
     if($rootScope.tumorTypes.available.length>0) {
@@ -24,9 +27,48 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         //$scope.loadtumorType($rootScope.tumorTypes.current, $scope.motifsType.current);
     }
 
+    $scope.doTest = function(file, tumorType) {
+
+        if(Number.isNaN($scope.test.area.from) ||  Number.isNaN($scope.test.area.to))
+            return;
+
+        min = $scope.slider.noUiSlider.get()[0];
+        max = $scope.slider.noUiSlider.get()[1];
+
+        // Get binned
+        bins = uc1_get_bins($rootScope.getDistances(file,tumorType),
+                            $scope.getSelectedTypes(),
+                            $scope.plot.binSize, 
+                            min, 
+                            max);
+
+        full = bins.map(function(bin){
+            return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
+        })
+
+        start = bins.filter(function(b){ return b.x0==$scope.test.area.fromPosition })[0];
+        start_pos = bins.indexOf(start);
+        stop = bins.filter(function(b){ return b.x1==$scope.test.area.toPosition })[0];
+        stop_pos = bins.indexOf(stop);
+        sliced = bins.slice(start_pos, stop_pos+1)
+
+        selected = sliced.map(function(bin){
+            return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
+        })
+
+        res = uc1_test(full, selected);
+        $scope.test.L = res.L;
+        $scope.test.H = res.H;
+
+    }
+
 
     // Asks the backend to compute distances (if needed) and plots the result
-    $scope.load = function(file, tumorType) {
+    $scope.load = function(filename, tumorType) {
+        file = $rootScope.getSelectedFile(filename);
+        $scope.file_selector.file = file;
+        
+        console.log("loading "+filename);
 
         $scope.loaded = true;
 
@@ -34,14 +76,6 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
             console.log("Load: missing argument");
             return;
         }
-
-        // Extract distances for the proper tumorType
-        distances = file.distances.filter(
-            function(x){return x.tumorType==tumorType.identifier
-                       })[0].distances
-
-
-        distances = distances.filter(function(x){return x[1].length==1 && x[2].length==1})
 
         // Coordinate available range as the minimum and maximum coordinate in the data
         dataRange = {
@@ -59,37 +93,41 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         }
 
         // Initialize the slider
-        if($scope.slider.noUiSlider != null)
-            $scope.slider.noUiSlider.destroy() 
+        if($scope.slider.noUiSlider == null) {
 
-        noUiSlider.create($scope.slider, {
-            start: [selectedRange.min, selectedRange.max],
-            connect: true,
-            range: {
-                'min': dataRange.min,
-                'max': dataRange.max
-            },
-            // Show a scale with the slider
-            pips: {
-                mode: 'positions',
-                values: [0, 25, 50, 75, 100],
-                density: 4
-            },
+            noUiSlider.create($scope.slider, {
+                start: [selectedRange.min, selectedRange.max],
+                connect: true,
+                range: {
+                    'min': dataRange.min,
+                    'max': dataRange.max
+                },
+                // Show a scale with the slider
+                pips: {
+                    mode: 'positions',
+                    values: [0, 25, 50, 75, 100],
+                    density: 4
+                },
 
-            tooltips: false,
+                tooltips: false,
 
-            format: wNumb({
-                decimals: 0
-            })
-        });
+                format: wNumb({
+                    decimals: 0
+                })
+            });
+
+        }
 
         // Generate the plot
-        $scope.plot.d3graph = uc1(distances, 
+        $scope.plot.d3graph = uc1($rootScope.getDistances(file,tumorType), 
                                   $scope.plot.binSize, 
                                   selectedRange,
                                   $scope.getSelectedTypes(), 
                                   $rootScope.mutationTypes.stacked, 
                                   $scope.plot.showTotal);
+
+        $scope.setDefaultArea();
+        $scope.drawArea();
 
         // Set callback on slider change
         $scope.slider.noUiSlider.on('set.one', function () { 
@@ -101,13 +139,16 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
             // Rescale the plot according to the new coordinate range. 
             // rescaleX function is defined in uc1.js.
-            uc1_rescaleX(distances,
+            uc1_rescaleX($rootScope.getDistances(file,tumorType),
                          $scope.plot.d3graph,
                          $scope.plot.binSize, 
                          selectedRange,
                          $scope.getSelectedTypes(),
                          $rootScope.mutationTypes.stacked,
                          $scope.plot.showTotal);
+
+            //$scope.setDefaultArea();
+            $scope.drawArea();
 
         });
 
@@ -124,16 +165,23 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
     // Update the plot
     $scope.updatePlot = function(file, tumorType) {
 
-        distances = file.distances.filter(function(x){return x.tumorType==tumorType.identifier})[0].distances;
+        console.log(file);
+
 
         // Update function is defined in uc1.js.
-        uc1_update(distances,
+        uc1_update( $rootScope.getDistances(file, tumorType),
                    $scope.plot.d3graph,
                    $scope.plot.binSize,
                    $scope.getSelectedTypes(),
                    $rootScope.mutationTypes.stacked, 
                    $scope.plot.showTotal);
+
+        // $scope.setDefaultArea();
+        $scope.drawArea();
+
     } 
+
+
 
 
     // Update the plot according to the new mutation type
@@ -168,10 +216,60 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
             $rootScope.mutationTypes.invalidSelection = true;
         } else {
             $rootScope.mutationTypes.invalidSelection = false;
-            $scope.updatePlot($scope.selectedFile, $rootScope.tumorTypes.current);
+            $scope.updatePlot($scope.file_selector.file, $rootScope.tumorTypes.current);
         }
     };
 
+    // Set Default area
+    $scope.setDefaultArea = function() {
+
+        $scope.test.area.from = Math.floor($scope.slider.noUiSlider.get()[0]/3)-1;
+        $scope.test.area.to = Math.ceil($scope.slider.noUiSlider.get()[1]/3);
+        $scope.test.area.fromPosition = -$scope.plot.binSize/2; 
+        $scope.test.area.fromPosition = $scope.plot.binSize/2; 
+
+    }
+
+    // Draw Area
+    $scope.drawArea = function() {
+        if( isNaN(parseInt($scope.test.area.from) )|| isNaN(parseInt($scope.test.area.to)) )
+            return;
+
+        if($scope.test.area.from>$scope.test.area.to)
+            return;
+
+        //todo: improve
+        min = $scope.slider.noUiSlider.get()[0];
+        max = $scope.slider.noUiSlider.get()[1];
+
+        ticks = getTicks(min, max, $scope.plot.binSize);
+
+        //left = -$scope.plot.binSize/2 +$scope.test.area.from*$scope.plot.binSize;
+        //right = $scope.plot.binSize/2 +$scope.test.area.to*$scope.plot.binSize;
+
+        left = Math.round(($scope.test.area.from)/$scope.plot.binSize)*$scope.plot.binSize-$scope.plot.binSize/2;
+        right = Math.round(($scope.test.area.to)/$scope.plot.binSize)*$scope.plot.binSize+$scope.plot.binSize/2;
+
+        console.log("left: "+left)
+        console.log("right: "+left)
+
+        if( left <= min )
+            $scope.test.area.fromPosition = min;
+        else if( left >= max)
+            $scope.test.area.fromPosition = Math.floor(max/$scope.plot.binSize)*$scope.plot.binSize-$scope.plot.binSize/2;
+        else 
+            $scope.test.area.fromPosition = left;
+
+        if( right <= min )
+            $scope.test.area.toPosition = Math.ceil(min/$scope.plot.binSize)*$scope.plot.binSize+$scope.plot.binSize/2;
+        else if( right >= max)
+            $scope.test.area.toPosition = max;
+        else 
+            $scope.test.area.toPosition = right;
+
+
+        uc1_highlightMotif($scope.plot.d3graph, {from:$scope.test.area.fromPosition, to: $scope.test.area.toPosition});
+    }
 
     // Add a new empty condition for mutation types
     $scope.addCondition = function() {

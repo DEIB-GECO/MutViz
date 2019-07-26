@@ -11,7 +11,6 @@
                     <h4 style="margin-top: 15px">Histogram</h4>
                 </div>
 
-
                 <div class="col-md-12" style="margin-top:10px; {{files.length>0 && someAreValid?'background-color:#e6e6e6;':''}} ">
 
                     <div ng-if="files.length==0 && !someAreRead || !someAreValid"
@@ -32,10 +31,10 @@
                     <div ng-show="files.length>0 && someAreReady"
                          style="height: 90px;">
                         <label for="jtSelect">File:</label>
-                        <select class="form-control" id="ttSelect"
-                                ng-model="selectedFile"
-                                ng-change="load(selectedFile, tumorTypes.current)" >
-                            <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file">{{file.name}}</option>
+                        <select class="form-control" id="ttSelect" 
+                                ng-model="file_selector.name"
+                                ng-change="load(file_selector.name, tumorTypes.current)" >
+                            <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
                         </select>
                     </div>
                 </div>
@@ -44,7 +43,7 @@
                     <label for="ttSelect">Tumor type:</label>
                     <select class="form-control" id="ttSelect"
                             ng-model="tumorTypes.current"
-                            ng-change="load(selectedFile, tumorTypes.current)">
+                            ng-change="load(file_selector.name, tumorTypes.current)">
                         <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
                 </div>
@@ -54,7 +53,7 @@
                     <div class="form-group">
                         <label for="inputBins">Bin size (bp):</label>
                         <input type="number" class="form-control" id="inputBins" 
-                               ng-model="plot.binSize" ng-change="updatePlot(selectedFile, tumorTypes.current)">
+                               ng-model="plot.binSize" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
 
                         <br>
                     </div>
@@ -71,13 +70,13 @@
                         <div class="col-md-5">
                             <label class="checkbox-inline float-right">
                                 <input type="checkbox"  data-toggle="toggle" 
-                                       ng-change="updatePlot(selectedFile, tumorTypes.current)"
+                                       ng-change="updatePlot(file_selector.file, tumorTypes.current)"
                                        ng-model="mutationTypes.stacked"> Stacked
                             </label>
 
                             <label class="checkbox-inline float-right">
                                 <input type="checkbox"  data-toggle="toggle" 
-                                       ng-change="updatePlot(selectedFile, tumorTypes.current)"
+                                       ng-change="updatePlot(file_selector.file, tumorTypes.current)"
                                        ng-model="plot.showTotal"> Total
                             </label>
                         </div>
@@ -135,24 +134,65 @@
 
                 </div>
 
-                <div class="col-md-12" style="margin-top:10px;">
+                <div class="col-md-12" style="margin-top:10px;" ng-show="file_selector.name!=null">
                     <div class="row">
 
                         <div class="col-md-12">
                             <b>Statistical test</b>
                         </div>
 
-                        <div class="col-md-12">
-                            <table class="table table-striped">
-                                <tbody>
 
+
+                        <div class="col-md-12" style="margin-top: 10px; margin-bottom: 20px;">
+                            <table class="table table-striped">
+                                <thead>
                                     <tr>
-                                        <td>PValue</td>
-                                        <td>?</td>
+                                        <td></td>
                                         <td>
-                                            <div class="float-right">
-                                                <button class="btn btn-sm btn-info">compute</button>
+                                            Coordinate
+                                        </td>
+                                        <td>
+                                            Bin Coordinate
+                                        </td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="align-middle">From</td>
+                                        <td  style="width: 150px">
+                                            <input type="number" class="form-control {{test.area.from>test.area.to?'is-invalid':''}}" id="inputBins" 
+                                                   ng-model="test.area.from" ng-change="drawArea(test.from, test.to)">
+                                        </td>
+                                        <td class="align-middle">
+                                            {{test.area.fromPosition}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-middle">To</td>
+                                        <td style="width: 40px">
+                                            <input type="number" class="form-control {{test.area.from>test.area.to?'is-invalid':''}}" id="inputBins" 
+                                                   ng-model="test.area.to" ng-change="drawArea(test.from, test.to)">
+                                        </td>
+                                        <td class="align-middle">
+                                            {{test.area.toPosition}}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-middle" rowspan="2"><b>P-value</b></td>
+                                        <td class="align-middle text-center">
+                                            <span ng-if="test.L<test.H">{{test.L}}</span>
+                                            <span ng-if="test.L>=test.H">{{test.H}}</span>
+                                        </td>
+                                        <td class="align-middle text-center" rowspan="2">
+                                            <div class="">
+                                                <button class="btn btn-sm btn-info" ng-click="doTest(file_selector.file, tumorTypes.current)">compute</button>
                                             </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="align-middle text-center" style="background-color: #e9e9e9;">
+                                            <span ng-if="test.L<test.H">hypermutated</span>
+                                            <span ng-if="test.L>=test.H">hypomutated</span>
                                         </td>
                                     </tr>
                                 </tbody>

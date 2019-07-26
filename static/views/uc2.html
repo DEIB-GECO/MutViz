@@ -31,18 +31,18 @@
                 <div class="col-md-12" ng-show="files.length>0 && someAreReady" style="margin-top:10px; background-color:#e6e6e6; height: 90px;">
                     <label for="jtSelect">File 1:</label>
                     <select class="form-control" id="ttSelect"
-                            ng-model="selectedFile1"
-                            ng-change="load(selectedFile1, selectedFile2, tumorTypes.current)">
-                        <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file">{{file.name}}</option>
+                            ng-model="file_selector.name1"
+                            ng-change="load(file_selector.name1, file_selector.name2, tumorTypes.current)">
+                        <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
                     </select>
                 </div>
 
                 <div class="col-md-12"  ng-show="files.length>0 && someAreReady" style="margin-top:0px; background-color:#e6e6e6; height: 90px;">
                     <label for="jtSelect">File 2:</label>
                     <select class="form-control" id="ttSelect"
-                            ng-model="selectedFile2"
-                            ng-change="load(selectedFile1, selectedFile2, tumorTypes.current)">
-                        <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file">{{file.name}}</option>
+                            ng-model="file_selector.name2"
+                            ng-change="load(file_selector.name1, file_selector.name2, tumorTypes.current)">
+                        <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
                     </select>
                 </div>
 
@@ -50,7 +50,7 @@
                     <label for="ttSelect">Tumor type:</label>
                     <select class="form-control" id="ttSelect"
                             ng-model="tumorTypes.current"
-                            ng-change="load(selectedFile1, selectedFile2, tumorTypes.current)">
+                            ng-change="load(file_selector.name1, file_selector.name2, tumorTypes.current)">
                         <option ng-repeat="type in tumorTypes.available" ng-value="type">{{type.name}}</option>
                     </select>
                     <hr>
@@ -117,11 +117,46 @@
                     <div class="form-group">
                         <label for="inputBins">Bin size (bp):</label>
                         <input type="number" class="form-control" id="inputBins" 
-                               ng-model="plot.binSize" ng-change="updatePlot(selectedFile1, selectedFile2, tumorTypes.current)">
+                               ng-model="plot.binSize" ng-change="updatePlot(file_selector.file1, file_selector.file2, tumorTypes.current)">
 
                         <br>
                     </div>
                 </div>
+
+                <div class="col-md-12" style="margin-top:10px;" ng-show="file_selector.name1!=null && file_selector.name2!=null">
+                    <div class="row">
+
+                        <div class="col-md-12">
+                            <b>Statistical test</b>
+                        </div>
+
+
+
+                        <div class="col-md-12" style="margin-top: 10px; margin-bottom: 20px;">
+                            <table class="table table-striped">
+                                <thead>
+                                <tbody>
+  
+                                    <tr>
+                                        <td class="align-middle" rowspan="2"><b>P-value</b></td>
+                                        <td class="align-middle text-center">
+                                           {{test.pvalue==null?'?':test.pvalue}}
+                                        </td>
+                                        <td class="align-middle text-center" rowspan="1">
+                                            <div class="">
+                                                <button class="btn btn-sm btn-info" ng-click="doTest()">compute</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
 
             </div>
         </div>

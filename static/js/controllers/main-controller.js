@@ -49,6 +49,23 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
 
     }
 
+    $rootScope.getSelectedFile = function(fileName) {
+        return $rootScope.files.filter(function(f){return f.name == fileName})[0];
+    }
+
+    $rootScope.getDistances = function(file, tumorType) {
+        // Extract distances for the proper tumorType
+        distances = file.distances.filter(
+            function(x){return x.tumorType==tumorType.identifier
+                       })[0].distances
+
+
+        distances = distances.filter(function(x){return x[1].length==1 && x[2].length==1})
+
+        return distances;
+    }
+
+
     // Polling for API R01
     $rootScope.pollR01 = function(file) {
 

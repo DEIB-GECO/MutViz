@@ -16,7 +16,7 @@ function yVal(bin) {
 }
 
 // Highlith on the x-axis the interval corresponding to the the motif
-function highlightMotif(g) {
+function uc2_highlightMotif(g) {
     g.svg.selectAll("line.motif").remove()
     g.svg.append("line")
         .attr("class", "motif")
@@ -69,10 +69,7 @@ function uc2_getFilteredData(data, mutationTypes) {
 function uc2_update(data, g, binSize, mutationTypes) {
 
     // bins intervals centered on 0
-    positive_side = d3.range(0-binSize/2, g.xAxisScale.domain()[1] + 1, binSize);
-    negative_side = d3.range(binSize/2, -g.xAxisScale.domain()[0]+1, binSize).map(function(i){return -i}).reverse();
-
-    ticks = negative_side.concat(positive_side);
+    ticks = getTicks(g.xAxisScale.domain()[0], g.xAxisScale.domain()[1], binSize);
 
     // Configure the histogram function
     var histogram = d3.histogram()
@@ -126,7 +123,6 @@ function uc2_update(data, g, binSize, mutationTypes) {
 
     uc2_addTracks(g, data);
 
-    highlightMotif(g);
 
 }
 

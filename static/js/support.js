@@ -1,3 +1,61 @@
+//#### DATA BINNING
+// Filter data taking only mutations with type in mutationTypes (array of selected mutation types: A->C, C->* ... )
+function getFilteredData(data, mutationTypes) {
+
+    return data.filter( function(mutation) {
+
+        return mutationTypes.map( 
+            function(t){ 
+                if(t.from=="*") 
+                    return t.to==mutation[2]  
+                if(t.to=="*") 
+                    return t.from==mutation[1]  
+
+                return t.from == mutation[1] && t.to==mutation[2]
+            }
+        ).reduce( function(t1,t2){ return t1 || t2 });
+
+    });
+
+}
+
+function get_bins(data, mutationTypes, binSize, minX, maxX) {
+    
+    console.log(data);
+
+    filtered = getFilteredData(data, mutationTypes);
+
+    ticks = getTicks(minX, maxX, binSize);
+
+    // Configure the histogram function
+    var histogram = d3.histogram().value(function(d) {return d[0];})
+    .domain([minX, maxX])       
+    .thresholds(ticks); 
+
+    return histogram(filtered);
+}
+
+
+function onlyUnique(value, index, self) { 
+    return self.indexOf(value) === index;
+}
+
+
+function getTicks(min, max, binSize) {
+    // Ticks
+    b = Number.parseInt(binSize)
+    m = Number.parseInt(min);
+    M = Number.parseInt(max);
+
+    positive_side = d3.range(0-b/2, M, b);
+    negative_side = d3.range(b/2, -m+1, b).map(function(i){return -i}).reverse();
+
+    ticks = negative_side.concat(positive_side).filter(onlyUnique);
+
+    return ticks;
+}
+
+
 function compress_regions(csv_txt, peak) {
 
     output = ""
@@ -8,17 +66,17 @@ function compress_regions(csv_txt, peak) {
     correctly_parsed = 0;
     empty_lines=0;
     parsing_log = "";
-    
+
     if(csv_txt.trim()=="")
         parsing_log+="Empty file."
 
     for(var i=0; i<lines.length;i++) {
-        
+
         if (lines[i].trim() == "") {  //skip empty lines
             empty_lines+=1;
             continue;
         }
-        
+
         cols = lines[i].split(new RegExp("\\s"));
 
         if(peak && cols.length<10 || !peak &&  cols.length<3) {
@@ -42,7 +100,7 @@ function compress_regions(csv_txt, peak) {
         } else {
             center= Math.floor((start+stop)/2+offset);
         }
-        
+
         if(output!="")
             output += "\n";
 
