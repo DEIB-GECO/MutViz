@@ -9,7 +9,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     $scope.plot = {binSize: 10, d3graph: null}
     $scope.loaded = false;
-    
+
     $scope.test = {pvalue:null}
 
     // Selected File
@@ -192,33 +192,52 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
     $scope.doTest = function() {
         file1 = $scope.file_selector.file1;
         file2 = $scope.file_selector.file2;
-        
+
         dist1 = $rootScope.getDistances(file1,$rootScope.tumorTypes.current)
         dist2 = $rootScope.getDistances(file2,$rootScope.tumorTypes.current)
-        
+
         console.log(dist1);
         console.log(dist2);
-        
+
         bins1 = get_bins(dist1, $scope.mutationTypes.selectedTypes, $scope.plot.binSize,
                          $scope.slider.noUiSlider.get()[0], $scope.slider.noUiSlider.get()[1]);
         bins2 = get_bins(dist2, $scope.mutationTypes.selectedTypes, $scope.plot.binSize,
                          $scope.slider.noUiSlider.get()[0], $scope.slider.noUiSlider.get()[1]);
-        
-        
+
+
         mbins1 = bins1.map(function(bin){
             return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
         })
-        
+
         mbins2 = bins2.map(function(bin){
             return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
         })
-        
+
         console.log("bins");
         console.log(mbins1);
         console.log(mbins2);
         
-        $scope.test.pvalue = 0.01;
         
+        request_body = {"expected":mbins1, "observed":mbins2};
+
+        // Call the API
+        $http({
+            method: 'POST',
+            data: request_body,
+            headers: {'Content-Type': 'application/json'},
+            url: API_T02
+        }).then(
+            function success(response) {
+                console.log(response);
+                $scope.test.pvalue = response.data.pvalue.toFixed(3);
+            },
+            function error(response) {
+                console.log(response);
+                $scope.test.pvalue = "error";
+            }
+        );
+
+
     }
 
     $scope.getData = function(file1, file2, tumorType)  {

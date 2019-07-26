@@ -13,6 +13,8 @@ from api.db import *
 from api.jobs import register_job, update_job, get_job_result, unregister_job
 from api.utils import *
 
+from scipy.stats import chisquare, ks_2samp
+
 # documentation:
 # https://docs.google.com/document/d/1kNJ7mogv5Jj6Wu2WOU4jCeX-Nav250l4tMHm6YFGANU/edit#
 
@@ -44,6 +46,8 @@ app.config['EXECUTOR_PROPAGATE_EXCEPTIONS'] = True
 db.init_app(app)
 
 executor = Executor(app)
+
+job_counter = 0
 
 
 @app.before_first_request
@@ -119,7 +123,9 @@ def get_distances():
     regions, error_regions = parse_input_regions(regions)
 
     # Generate a jobID
-    jobID = str(uuid.uuid1()).replace('-', '_')
+    global job_counter
+    job_counter = job_counter + 1
+    jobID = str(uuid.uuid1()).replace('-', '_') + str(job_counter)
     register_job(jobID)
     # jobs[jobID] = None
 
@@ -239,32 +245,23 @@ def get_test1_r(jobID):
 # API T02
 @app.route(base_url + '/api/t02/', methods=['POST'])
 def get_test2():
-    repoId1 = request.form.get('repoId1')
-    repoId2 = request.form.get('repoId2')
-    regions_1 = request.form.get('regions_1')
-    regions_2 = request.form.get('regions_2')
-    regionsFormat_1 = request.form.get('regionsFormat_1')
-    regionsFormat_2 = request.form.get('regionsFormat_2')
-    tumorType = request.form.get('tumorType')
-    mutations = request.form.get('mutations')
-    maxDistance = int(request.form.get('maxDistance'))
 
-    if not ((repoId1 or regions_1 and regionsFormat_1) and
-            (repoId2 or regions_2 and regionsFormat_2) and
-            maxDistance and tumorType and mutations):
-        abort(400)
+    observed = request.get_json()['observed']
+    expected = request.get_json()['expected']
 
-    if regions_1 == "file non parsabile ..." or regions_2 == "file non parsabile ...":
-        abort(422)
+    print(observed)
+    print(expected)
+    #observed = [0,0,0,1,2,3]
+    #expected = [1,0,1,3,2,1]
 
-    # Generate a jobID
-    jobID = str(uuid.uuid1())
+    pi = ks_2samp(observed, expected, alternative='two-sided', mode='auto')[1]
+    #pi = fisher_exact(observed, f_exp=expected)[1]
 
     ### Asynchronous computation
-    trans_arr = json.loads(mutations)  # parse mutations array
-    update_job(jobID, {"pvalue": 0.1})
+    #trans_arr = json.loads(mutations)  # parse mutations array
+    #update_job(jobID, {"pvalue": 0.1})
 
-    return json.dumps({"jobID": jobID})
+    return json.dumps({"pvalue": pi})
 
 
 # API T02r

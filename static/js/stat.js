@@ -14,7 +14,7 @@ function getRandomSubarray(arr, size) {
 // Permutation test todo, exclude smaller bins
 function uc1_test(full, selected) {
     
-    TIMES = 1000;
+    TIMES = 10000;
     
     N = selected.length;
     x_selected = selected.reduce(function(a,b){return a+b})/N;
