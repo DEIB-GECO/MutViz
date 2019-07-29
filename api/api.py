@@ -3,17 +3,17 @@ import uuid
 from collections import defaultdict
 from logging.config import dictConfig
 
+import sqlalchemy
 from flask import Flask, json, request, abort
 from flask_cors import CORS
 from flask_executor import Executor
+from scipy.stats import ks_2samp
 from sqlalchemy import between
 from sqlalchemy import func
 
 from api.db import *
 from api.jobs import register_job, update_job, get_job_result, unregister_job
 from api.utils import *
-
-from scipy.stats import chisquare, ks_2samp
 
 # documentation:
 # https://docs.google.com/document/d/1kNJ7mogv5Jj6Wu2WOU4jCeX-Nav250l4tMHm6YFGANU/edit#
@@ -67,7 +67,15 @@ with app.app_context():
     res = TumorType.query.all()
     tumor_type_dict = dict([(x.tumor_type_id, (x.tumor_type, x.description)) for x in res])
     tumor_type_reverse_dict = dict([(x.tumor_type, x.tumor_type_id) for x in res])
-    repositories = Repository.query.all()
+
+    res = Repository.query.all()
+    repositories_dict = dict()
+    for r in res:
+        r_count = db.engine.execute(sqlalchemy.text(f"SELECT COUNT(*) FROM {r.repository_id}")).fetchone()
+        if r_count:
+            repositories_dict[r.repository_id] = (r.name, r.description, r_count[0])
+    print(repositories_dict)
+    del res
 
 
 # Serve static content
@@ -89,11 +97,20 @@ def get_tumor_types():
 # API L02
 @app.route(base_url + '/api/repository/')
 def get_repository():
-    res = list(map(lambda x: {"identifier": x.repository_id,
-                              "name": x.name,
-                              "description": x.description},
-                   repositories))
-    return json.dumps(res)
+    repositories = [{"identifier": identifier,
+                     "name": name,
+                     "description": description,
+                     "count": count,
+                     }
+                    for identifier, (name, description, count) in
+                    sorted(repositories_dict.items(), key=lambda x: x[1][0])  # sort by name
+                    ]
+
+    # list(map(lambda x: {"identifier": x.repository_id,
+    #                       "name": x.name,
+    #                       "description": x.description},
+    #            res))
+    return json.dumps(repositories)
 
 
 # API R01
@@ -114,18 +131,22 @@ def get_distances():
 
     if not ((repoId or regions) and maxDistance):
         abort(400)
+    # if repoId and
 
     try:
         maxDistance = int(maxDistance)
     except ValueError:
         abort(400, 'max distance integer')
-
-    regions, error_regions = parse_input_regions(regions)
+    error_regions = []
+    if not repoId:
+        regions, error_regions = parse_input_regions(regions)
 
     # Generate a jobID
     global job_counter
     job_counter = job_counter + 1
-    jobID = str(uuid.uuid1()).replace('-', '_') + str(job_counter)
+    if job_counter >= 100000:
+        job_counter = 1
+    jobID = str(uuid.uuid1()).replace('-', '_') + "_" + str(job_counter)
     register_job(jobID)
     # jobs[jobID] = None
 
@@ -139,10 +160,14 @@ def get_distances():
             session = db.session
             session.execute("set enable_seqscan=false")
 
-            table_name = "t_" + jobID
-            logger.debug(f"{jobID} -> {table_name}")
+            if not repoId:
+                table_name = "t_" + jobID
+                logger.debug(f"{jobID} -> {table_name}")
 
-            temp_table = create_upload_table(session, table_name, regions)
+                temp_table = create_upload_table(session, table_name, regions)
+            else:
+                table_name = repoId
+                temp_table = create_upload_table(session, table_name, create=False, upload=False)
 
             query = session \
                 .query(MutationGroup.tumor_type_id,
@@ -157,6 +182,8 @@ def get_distances():
                           MutationGroup.mutation_code_id)
             if tumorType:
                 query = query.filter(MutationGroup.tumor_type_id == tumor_type_reverse_dict[tumorType])
+
+
 
             logger.debug(f"query: {query}")
 
@@ -188,15 +215,15 @@ def get_distances():
             logger.info('JOB DONE: ' + jobID)
         except Exception as e:
             unregister_job(jobID)
-            # logger.error("Async error", e)
-            raise
+            logger.error("Async error", e)
+            raise e
 
     executor.submit(async_function)
     # async_function()
     ### End of asynchronous computation
 
     return json.dumps(
-        {**{"jobID": jobID, 'correct_region_size': len(regions)},
+        {**{"jobID": jobID, 'correct_region_size': len(regions) if not repoId else repositories_dict[repoId][2]},
          **({"error": error_regions} if error_regions else {})}
     )
 
@@ -245,21 +272,20 @@ def get_test1_r(jobID):
 # API T02
 @app.route(base_url + '/api/t02/', methods=['POST'])
 def get_test2():
-
     observed = request.get_json()['observed']
     expected = request.get_json()['expected']
 
     print(observed)
     print(expected)
-    #observed = [0,0,0,1,2,3]
-    #expected = [1,0,1,3,2,1]
+    # observed = [0,0,0,1,2,3]
+    # expected = [1,0,1,3,2,1]
 
     pi = ks_2samp(observed, expected, alternative='two-sided', mode='auto')[1]
-    #pi = fisher_exact(observed, f_exp=expected)[1]
+    # pi = fisher_exact(observed, f_exp=expected)[1]
 
     ### Asynchronous computation
-    #trans_arr = json.loads(mutations)  # parse mutations array
-    #update_job(jobID, {"pvalue": 0.1})
+    # trans_arr = json.loads(mutations)  # parse mutations array
+    # update_job(jobID, {"pvalue": 0.1})
 
     return json.dumps({"pvalue": pi})
 

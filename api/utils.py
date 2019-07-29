@@ -43,24 +43,30 @@ def parse_input_regions(regions):
     return result, error_results
 
 
-def create_upload_table(session, table_name, regions, temp=True):
-    temp_table = db.Table(table_name,
-                          db.Column('chrom', db.SmallInteger),
-                          db.Column('pos', db.Integer),
-                          prefixes=['TEMPORARY'] if temp else [],
-                          )
+def create_upload_table(session, table_name, regions=[], temp=True, create=True, upload=True):
 
-    session.execute(CreateTable(temp_table))
+    if table_name in db.metadata.tables:
+        temp_table =db.metadata.tables[table_name]
+    else:
+        temp_table = db.Table(table_name,
+                              db.Column('chrom', db.SmallInteger),
+                              db.Column('pos', db.Integer),
+                              prefixes=['TEMPORARY'] if temp else [],
+                              extend_existing=True,
+                              )
 
-    # logger.debug("temp_table => " + str(session.query(temp_table).all()))
-    session.flush()
+    if create:
+        session.execute(CreateTable(temp_table))
+        # logger.debug("temp_table => " + str(session.query(temp_table).all()))
+        session.flush()
 
-    for i, inp in enumerate(regions):
-        if i % 1000 == 0:
-            session.flush()
-            print(f"{table_name} {i}")
-        # session.execute(temp_table_insert.values(inp)) #.values(chrom=chrom, pos=pos))
-        session.execute(temp_table.insert(values=inp))  # .values(chrom=chrom, pos=pos))
+    if upload:
+        for i, inp in enumerate(regions):
+            if i % 1000 == 0:
+                session.flush()
+                print(f"{table_name} {i}")
+            # session.execute(temp_table_insert.values(inp)) #.values(chrom=chrom, pos=pos))
+            session.execute(temp_table.insert(values=inp))  # .values(chrom=chrom, pos=pos))
 
     # logger.debug("temp_table => " + str(session.query(temp_table).all()))
     return temp_table
