@@ -190,7 +190,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
 
             }, 
             function error(response) {
-                window.alert("error");
+                console.error("error");
             });
 
     }

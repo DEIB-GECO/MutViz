@@ -13,6 +13,8 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
                          maxDistance: $rootScope.maxDistance, count:0, source:null, ready:false, jobID:null};
     $scope.adding_file = clone($scope.empty_file);
 
+    $scope.downloader = {file:null, tumorType:null}
+
     // On form submitted
     $scope.submit = function() {
 
@@ -94,10 +96,90 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
 
 
     $scope.removeFile = function(index) {
+        if(!confirm("This file will be removed from the workspace. Do you want to proceede?"))
+            return;
         $rootScope.files.splice(index,1);
         $rootScope.someAreReady = $rootScope.files.every(function(x){return x.ready}, false);
         $rootScope.someAreValid = $rootScope.files.every(function(x){return x.valid}, false);
         $rootScope.persistData();
+    }
+
+    function download(filename, text) {
+        var element = document.createElement('a');
+        var createAText = document.createTextNode("click");
+        element.appendChild(createAText);
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+        element.setAttribute('id', "download_element");
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+
+        document.body.removeChild(element);
+    }
+
+    function groupBy(xs, key) {
+        return xs.reduce(function(rv, x) {
+            (rv[x[key]] = rv[x[key]] || []).push(x);
+            return rv;
+        }, {});
+    };
+
+    $scope.download = function(index) {
+        $scope.downloader.file = $rootScope.files[index];
+        $('#download_modal').modal();
+    }
+
+    $scope.downloadResults = function(file, tumorType) {
+
+        console.log(file);
+
+        if(file==null ||tumorType==null)
+            return;
+
+        codes = ["A->G","G->A","C->T","T->C","A->C","A->T","C->A","C->G","G->C","G->T","T->A","T->G"];
+
+        csv ="distance\tA->G\tG->A\tC->T\tT->C\tA->C\tA->T\tC->A\tC->G\tG->C\tG->T\tT->A\tT->G\ttotal\n";
+        name = file.name;
+
+        console.log("downloading file "+name+" ct "+tumorType.identifier);
+
+        distances = file.distances.filter(function(d){return d.tumorType==tumorType.identifier})[0].distances;
+
+        console.log(distances);
+        gp_ds = groupBy(distances, 0);
+
+
+
+        for( distance in gp_ds) {
+
+            mutations = gp_ds[distance];
+
+            
+
+            counts = codes.map( function(c) {
+                ex_f = function(m){mcode = m[1]+"->"+m[2]; return mcode==c;}
+                if( mutations.filter(ex_f).length>0 )
+                    return mutations.filter(ex_f)[0][3];
+                else return 0;
+            });
+
+
+
+
+            code_string = counts.reduce(function(x,y){return x+"\t"+y;});
+            total = counts.reduce(function(x,y){return x+y;});
+            csv=csv+distance+"\t"+code_string+"\t"+total+"\n";
+
+        }
+
+
+
+
+        console.log(csv);
+
+        download(name+"_"+tumorType.identifier+".csv", csv);
     }
 
 });

@@ -31,9 +31,9 @@
                      style="margin-top:10px; background-color:#e6e6e6; height: 90px;">
                     <label for="jtSelect">File:</label>
                     <select class="form-control" id="ttSelect"
-                            ng-model="selectedFile"
-                            ng-change="load(selectedFile, selectedTumorTypes)">
-                        <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file">{{file.name}}</option>
+                            ng-model="files_selector.name"
+                            ng-change="load(files_selector.name, selectedTumorTypes)" >
+                        <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
                     </select>
                 </div>
 
@@ -77,7 +77,7 @@
                     <div class="form-group">
                         <label for="inputBins">Bin size (bp):</label>
                         <input type="number" class="form-control" id="inputBins" 
-                               ng-model="plot.binSize" ng-change="updatePlot(selectedFile, selectedTumorTypes)">
+                               ng-model="plot.binSize" ng-change="updatePlot(files_selector.name, selectedTumorTypes)">
 
                         <br>
                     </div>
@@ -139,6 +139,41 @@
 
                 </div>
 
+                <div class="col-md-12" style="margin-top:10px;" ng-show="files_selector.name!=null">
+                    <div class="row">
+
+                        <div class="col-md-12">
+                            <b>Statistical test</b>
+                        </div>
+
+                        <div class="col-md-12" style="margin-top: 10px; margin-bottom: 30px;" ng-show="selectedTumorTypes.length!=2">
+                            Select exactly two tumor types to perform the test.
+                        </div>
+                        <div class="col-md-12" style="margin-top: 10px; margin-bottom: 20px;" ng-show="selectedTumorTypes.length==2">
+                            <table class="table table-striped">
+                                <thead>
+                                <tbody>
+
+                                    <tr>
+                                        <td class="align-middle" rowspan="2"><b>P-value</b></td>
+                                        <td class="align-middle text-center">
+                                            {{test.pvalue==null?'?':test.pvalue}}
+                                        </td>
+                                        <td class="align-middle text-center" rowspan="1">
+                                            <div class="">
+                                                <button class="btn btn-sm btn-info" ng-click="doTest()">compute</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                </tbody>
+
+                            </table>
+                        </div>
+
+                    </div>
+                </div>
+
             </div>
         </div>
     </nav>
@@ -160,6 +195,15 @@
                 <div id="uc1">
                     <svg></svg>
                 </div>
+            </div>
+
+            <div class="col-md-12 my-auto text-center" ng-if="loaded">
+
+                <button class="btn" 
+                        ng-click="downloadPlot()"
+                        type="submit"><i class="fa fa-download"></i> Download as SVG</button>
+                <a id="dwn" target="_blank" style="display: none"></a>
+
             </div>
 
         </div>

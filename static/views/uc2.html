@@ -130,17 +130,15 @@
                             <b>Statistical test</b>
                         </div>
 
-
-
                         <div class="col-md-12" style="margin-top: 10px; margin-bottom: 20px;">
                             <table class="table table-striped">
                                 <thead>
                                 <tbody>
-  
+
                                     <tr>
                                         <td class="align-middle" rowspan="2"><b>P-value</b></td>
                                         <td class="align-middle text-center">
-                                           {{test.pvalue==null?'?':test.pvalue}}
+                                            {{test.pvalue==null?'?':test.pvalue}}
                                         </td>
                                         <td class="align-middle text-center" rowspan="1">
                                             <div class="">
@@ -148,7 +146,7 @@
                                             </div>
                                         </td>
                                     </tr>
-                                    
+
                                 </tbody>
 
                             </table>
@@ -156,7 +154,6 @@
 
                     </div>
                 </div>
-
 
             </div>
         </div>
@@ -179,6 +176,15 @@
                 <div id="uc1">
                     <svg></svg>
                 </div>
+            </div>
+            
+            <div class="col-md-12 my-auto text-center" ng-if="loaded">
+
+                <button class="btn" 
+                        ng-click="downloadPlot()"
+                        type="submit"><i class="fa fa-download"></i> Download as SVG</button>
+                <a id="dwn" target="_blank" style="display: none"></a>
+
             </div>
 
 

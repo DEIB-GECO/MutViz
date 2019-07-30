@@ -10,8 +10,12 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.plot = {binSize: 10, d3graph: null}
     $scope.loaded = false;
 
-    $scope.selectedFile = null;
     $scope.selectedTumorTypes = [];
+
+    $scope.test = {area:{from:0, to:0, fromPosition:-$scope.plot.binSize/2, toPosition:$scope.plot.binSize/2, visible: true, L:null, H:null}};
+
+    // Selected File
+    $scope.files_selector = {name : null, file: null};
 
     // Initialize with the first tumor type
     if($rootScope.tumorTypes.available.length>0) {
@@ -26,11 +30,19 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
-    $scope.load = function(file, selectedTumorTypes) {
+    $scope.load = function(filename, selectedTumorTypes) {
+
+        console.log("carico file "+filename);
+
+        $scope.loaded = true;
+
+        file = $rootScope.getSelectedFile(filename);
+        $scope.files_selector.file = file;
+
 
         if(file==null)
             return;
-        $scope.loaded = true;
+
 
         // Coordinate available range as the minimum and maximum coordinate in the data
         dataRange = {
@@ -149,10 +161,66 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             $scope.mutationTypes.invalidSelection = true;
         } else {
             $scope.mutationTypes.invalidSelection = false;
-            $scope.updatePlot($scope.selectedFile, $scope.selectedTumorTypes);
+            $scope.updatePlot($scope.files_selector.name, $scope.selectedTumorTypes);
         }
     };
 
+    $scope.doTest = function() {
+        
+        if($scope.selectedTumorTypes.length =! 2)
+            return;
+        
+        file = $scope.file_selector.file;
+        
+        type1 = $scope.selectedTumorTypes[0]
+        type2 = $scope.selectedTumorTypes[1]
+
+        dist1 = $rootScope.getDistances(file,type1)
+        dist2 = $rootScope.getDistances(file,type2)
+
+        console.log(dist1);
+        console.log(dist2);
+
+        bins1 = get_bins(dist1, $scope.mutationTypes.selectedTypes, $scope.plot.binSize,
+                         $scope.slider.noUiSlider.get()[0], $scope.slider.noUiSlider.get()[1]);
+        bins2 = get_bins(dist2, $scope.mutationTypes.selectedTypes, $scope.plot.binSize,
+                         $scope.slider.noUiSlider.get()[0], $scope.slider.noUiSlider.get()[1]);
+
+
+        mbins1 = bins1.map(function(bin){
+            return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
+        })
+
+        mbins2 = bins2.map(function(bin){
+            return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
+        })
+
+        console.log("bins");
+        console.log(mbins1);
+        console.log(mbins2);
+
+
+        request_body = {"expected":mbins1, "observed":mbins2};
+
+        // Call the API
+        $http({
+            method: 'POST',
+            data: request_body,
+            headers: {'Content-Type': 'application/json'},
+            url: API_T03
+        }).then(
+            function success(response) {
+                console.log(response);
+                $scope.test.pvalue = response.data.pvalue.toFixed(3);
+            },
+            function error(response) {
+                console.log(response);
+                $scope.test.pvalue = "error";
+            }
+        );
+
+
+    }
 
     $scope.getData = function(file, selectedTumorTypes){
 
@@ -172,7 +240,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.addTumorType = function(type) {
         if(type!=undefined) { 
             $scope.selectedTumorTypes.push(type);
-            $scope.load($scope.selectedFile, $scope.selectedTumorTypes); 
+            $scope.load($scope.files_selector.name, $scope.selectedTumorTypes); 
 
         }
     }
@@ -180,7 +248,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.removeTumorType = function(type) {
         $scope.selectedTumorTypes = $scope.selectedTumorTypes.filter(function(t){return t!=type});
         if($scope.selectedTumorTypes.length>0)
-            $scope.load($scope.selectedFile, $scope.selectedTumorTypes)
+            $scope.load($scope.files_selector.name, $scope.selectedTumorTypes)
     }
 
 
@@ -202,7 +270,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.mutationTypes.selectedTypes = [ {from: "C", to: "T"}, {from: "G", to: "A"} ];
         $scope.selectedTumorTypes = $rootScope.tumorTypes.available.slice(0,4);
 
-        $scope.load($scope.selectedFile, $scope.selectedTumorTypes)
+        $scope.load($scope.files_selector.name, $scope.selectedTumorTypes)
     }
 
 });

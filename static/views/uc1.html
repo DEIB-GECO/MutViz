@@ -11,6 +11,8 @@
                     <h4 style="margin-top: 15px">Histogram</h4>
                 </div>
 
+
+
                 <div class="col-md-12" style="margin-top:10px; {{files.length>0 && someAreValid?'background-color:#e6e6e6;':''}} ">
 
                     <div ng-if="files.length==0 && !someAreRead || !someAreValid"
@@ -37,15 +39,6 @@
                             <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="col-md-12" style="margin-top:10px;">
-                    <label for="ttSelect">Tumor type:</label>
-                    <select class="form-control" id="ttSelect"
-                            ng-model="tumorTypes.current"
-                            ng-change="load(file_selector.name, tumorTypes.current)">
-                        <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
-                    </select>
                 </div>
 
 
@@ -220,10 +213,20 @@
                 <div id="slider"></div>
             </div>
 
+
             <div class="col-md-12">
                 <div id="uc1">
                     <svg></svg>
                 </div>
+            </div>
+
+            <div class="col-md-12 my-auto text-center" ng-if="loaded">
+
+                <button class="btn" 
+                        ng-click="downloadPlot()"
+                        type="submit"><i class="fa fa-download"></i> Download as SVG</button>
+                <a id="dwn" target="_blank" style="display: none"></a>
+
             </div>
 
         </div>
