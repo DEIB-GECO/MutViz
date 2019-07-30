@@ -167,10 +167,10 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     $scope.doTest = function() {
         
-        if($scope.selectedTumorTypes.length =! 2)
+        if($scope.selectedTumorTypes.length != 2)
             return;
         
-        file = $scope.file_selector.file;
+        file = $scope.files_selector.file;
         
         type1 = $scope.selectedTumorTypes[0]
         type2 = $scope.selectedTumorTypes[1]

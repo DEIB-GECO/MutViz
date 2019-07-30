@@ -134,8 +134,6 @@
                             <b>Statistical test</b>
                         </div>
 
-
-
                         <div class="col-md-12" style="margin-top: 10px; margin-bottom: 20px;">
                             <table class="table table-striped">
                                 <thead>
@@ -196,6 +194,15 @@
                     </div>
                 </div>
 
+                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-bottom: 20px!important;">
+
+                    <button class="btn" 
+                            ng-click="downloadPlot()"
+                            type="submit"><i class="fa fa-download"></i> Download plot as SVG</button>
+                    <a id="dwn" target="_blank" style="display: none"></a>
+
+                </div>
+
             </div>
         </div>
     </nav>
@@ -220,14 +227,7 @@
                 </div>
             </div>
 
-            <div class="col-md-12 my-auto text-center" ng-if="loaded">
 
-                <button class="btn" 
-                        ng-click="downloadPlot()"
-                        type="submit"><i class="fa fa-download"></i> Download as SVG</button>
-                <a id="dwn" target="_blank" style="display: none"></a>
-
-            </div>
 
         </div>
     </div>
