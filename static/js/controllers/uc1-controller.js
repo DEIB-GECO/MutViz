@@ -194,7 +194,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
             others = types.filter(function(o){return o!=t});
 
-            // exists the same condition than once
+            // exists the same condition more than once
             if(types.filter(function(t1){return t1.from==t.from && t1.to==t.to}).length>1)
                 return false;
 

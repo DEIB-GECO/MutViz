@@ -15,6 +15,6 @@ var MUTATION_TYPES = [
     { displayed: "T > C", from: "T", to: "C", filter: function(d) {return d.from == "T" && d.to == "C"} },
     { displayed: "T > G", from: "T", to: "G", filter: function(d) {return d.from == "T" && d.to == "G"} },
     { displayed: "T > *", from: "T", filter: function(d) {return d.from == "T"} },
-    { displayed: "insertion", from: "-", to: "*", filter: function(d) {return d.from == "-" } },
-    { displayed: "deletion", from: "*", to: "-", filter: function(d) {return d.to == "-"} }
+    //{ displayed: "insertion", from: "-", to: "*", filter: function(d) {return d.from == "-" } },
+    //{ displayed: "deletion", from: "*", to: "-", filter: function(d) {return d.to == "-"} }
 ]

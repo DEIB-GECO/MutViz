@@ -3,10 +3,10 @@
    ########################################################## */
 app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $interval) {
 
-    // Mutations (- is used for deletions or insertions)
+    // Mutations
     $rootScope.mutationTypes = {
-        fromList: ["A","C","T","G","*","-"],
-        toList: ["A","C","T","G","*","-"],
+        fromList: ["A","C","T","G","*"],
+        toList: ["A","C","T","G","*"],
         selectedTypes : [ {from: "A", to: "C"} ],
         invalidSelection: false, // to check whether conditions are mutually exclusive
         stacked: true // whether to use different colors for different mutation types or plot them with a single color
