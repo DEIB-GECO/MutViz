@@ -1,7 +1,7 @@
 /* ##########################################################
    Main Controller - Always active independently on the view
    ########################################################## */
-app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $interval) {
+app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $timeout) {
 
     // Mutations
     $rootScope.mutationTypes = {
@@ -67,48 +67,43 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
 
 
     // Polling for API R01
-    $rootScope.pollR01 = function(file) {
+    $rootScope.pollR01 = function getDist(file) {
 
-        console.log(file);
+        console.log("Polling for file: "+file.name+" with jobId"+file.jobID);
 
-        return $interval( function(file) {
+        // Call the API
+        $http({method: 'GET', url: API_R01+file.jobID
+              }).then(
+            function success(response) {
+                if( response.data.ready == true) {
+                    file.ready = true;
+                    console.log("result for "+file.jobID+" is ready");
 
-            console.log("polling for file: "+file.name+" with jobId"+file.jobID);
+                    // Add the new file to the local list of files together with the answer
+                    file.distances = response.data.result;
+                    $rootScope.someAreReady=true;
 
-            // Call the API
-            $http({method: 'GET', url: API_R01+file.jobID
-                  }).then(
-                function success(response) {
-                    if( response.data.ready == true) {
-                        file.ready = true;
-                        console.log("result for "+file.jobID+" is ready");
-
-                        // Add the new file to the local list of files together with the answer
-                        file.distances = response.data.result;
-                        $rootScope.someAreReady=true;
-
-                        // Stop timer
-                        $interval.cancel(file.timer);
-
-                        // Persist
-                        $rootScope.persistData();
-                    }
-                }, 
-                function error(response) {
-                    $interval.cancel(file.timer);
-                    //window.alert("Error. File "+file.name+" will be removed.");
-                    //index =  $rootScope.files.indexOf(file);
-                    //$rootScope.files.splice(index, 1);
-
-                    // Attempt another computation
-                    console.log("Attempting another computation.");
-                    $rootScope.computeDistances(file);
-
+                    // Persist
                     $rootScope.persistData();
-                });
+                } else {
 
+                    // schedule another call
+                    $timeout($rootScope.pollR01, POLLING_TIMEOUT, true, file);
 
-        }, POLLING_TIMEOUT, 0, true, file);
+                }
+            }, 
+            function error(response) {
+                //window.alert("Error. File "+file.name+" will be removed.");
+                //index =  $rootScope.files.indexOf(file);
+                //$rootScope.files.splice(index, 1);
+
+                // Attempt another computation
+                console.log("Attempting another computation.");
+                $rootScope.computeDistances(file);
+
+                $rootScope.persistData();
+            });
+
     }
 
     // Recover files from local storage
@@ -128,7 +123,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
                 if(f.valid) {
                     $rootScope.someAreValid = true;
                     f.ready = false;
-                    f.timer = $rootScope.pollR01(f);
+                    $rootScope.pollR01(f);
                 }
             });
         }
@@ -182,7 +177,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $inte
                     file.valid = true;
 
                     // Start polling
-                    file.timer = $rootScope.pollR01(file);
+                    $rootScope.pollR01(file);
                 }
 
                 // Persist
