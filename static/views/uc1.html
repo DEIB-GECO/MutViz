@@ -41,6 +41,15 @@
                     </div>
                 </div>
 
+                <div class="col-md-12" style="margin-top:10px;">
+                    <label for="ttSelect">Tumor type:</label>
+                    <select class="form-control" id="ttSelect"
+                            ng-model="tumorTypes.current"
+                            ng-change="load(file_selector.name, tumorTypes.current)">
+                        <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
+                    </select>
+                </div>
+
 
                 <div class="col-md-12" style="margin-top:10px;">
                     <div class="form-group">
