@@ -161,7 +161,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             $scope.mutationTypes.invalidSelection = true;
         } else {
             $scope.mutationTypes.invalidSelection = false;
-            $scope.updatePlot($scope.file_selector.file, $scope.selectedTumorTypes);
+            $scope.updatePlot($scope.files_selector.file, $scope.selectedTumorTypes);
         }
     };
 
