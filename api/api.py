@@ -64,8 +64,9 @@ with app.app_context():
     res = MutationCode.query.all()
     mutation_code_dict = dict([(x.mutation_code_id, (x.from_allele, x.to_allele)) for x in res])
     mutation_code_reverse_dict = dict([((x.from_allele, x.to_allele), x.mutation_code_id) for x in res])
+
     res = TumorType.query.all()
-    tumor_type_dict = dict([(x.tumor_type_id, (x.tumor_type, x.description)) for x in res])
+    tumor_type_dict = dict([(x.tumor_type_id, (x.tumor_type, x.description, x.mutation_count)) for x in res])
     tumor_type_reverse_dict = dict([(x.tumor_type, x.tumor_type_id) for x in res])
 
     res = Repository.query.all()
@@ -88,7 +89,8 @@ def root():
 @app.route(base_url + '/api/tumor_types/')
 def get_tumor_types():
     result = [{"name": x[0] + " - " + x[1],
-               "identifier": x[0]}
+               "identifier": x[0],
+               "mutation_count": x[2],}
               for x in sorted(tumor_type_dict.values())
               ]
     return json.dumps(result)
