@@ -53,5 +53,6 @@ class TumorType(db.Model):
     __tablename__ = 'tumor_type'
 
     tumor_type_id = db.Column(db.SmallInteger, primary_key=True)
-    tumor_type = db.Column(db.String(4), unique=True)
+    tumor_type = db.Column(db.String(8), nullable=False, unique=True)
     description = db.Column(db.String)
+    mutation_count = db.Column(db.Integer)
