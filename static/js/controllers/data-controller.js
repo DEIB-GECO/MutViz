@@ -17,6 +17,11 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
 
     // On form submitted
     $scope.submit = function() {
+        
+        if($rootScope.files.map(function(f){return f.name}).includes($scope.adding_file.name) ) {
+            window.alert("A dataset with this name is already in the workspace.");
+            return;
+        }
 
         input = document.getElementById("newFile");
         if ('files' in input && input.files.length > 0) {

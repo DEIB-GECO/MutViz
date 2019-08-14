@@ -45,10 +45,13 @@ TADs are particular three-dimensional structures that can be found in chromosome
             <ul>
 
                 <li>
-                    Mutations from a  specific <b>Tumor Type:</b> Available tumor types are:
-                    <ul>
-                        <li ng-repeat="t in tumorTypes.available">{{t.name}}</li>
-                    </ul>
+                    Mutations from a  specific <b>Tumor Type:</b> Available tumor types are:<br>
+                
+                        <select style="margin-bottom: 5px;">
+                             <option ng-repeat="t in tumorTypes.available">{{t.name}}</option>
+                        </select>
+                       
+                
                 </li>
                 <li>
                     <b>Mutation Type:</b> consider only subsets of all the possible mutations. The following are three examples of the notation used for denoting a mutation:
