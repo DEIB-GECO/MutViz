@@ -44,7 +44,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             return;
 
         // Slider
-        if($scope.slider.noUiSlider == null) {
+        if($scope.slider == null) {
             $scope.slider = document.getElementById("slider");
             dataRange = {
                 min : -file.maxDistance,
