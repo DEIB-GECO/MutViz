@@ -212,13 +212,18 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
         mbins2 = bins2.map(function(bin){
             return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
         })
+        
+        mutation_count = $rootScope.tumorTypes.current.mutation_count;
+        
+        norm1 = mbins1.map(function(x){return x/mutation_count});
+        norm2 = mbins2.map(function(x){return x/mutation_count});
 
         console.log("bins");
-        console.log(mbins1);
-        console.log(mbins2);
+        console.log(norm1);
+        console.log(norm2);
         
         
-        request_body = {"expected":mbins1, "observed":mbins2};
+        request_body = {"expected":norm1, "observed":norm2};
 
         // Call the API
         $http({
