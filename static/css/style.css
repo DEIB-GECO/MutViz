@@ -19,6 +19,7 @@ body {  background: white;}
 .btn-download {
     color: black;
     border-color: #8a7d7d;
+    background-color: white;
 }
 
 .btn-download:active, .btn-download:hover {
