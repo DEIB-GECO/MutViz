@@ -1,4 +1,31 @@
 body {  background: white;}
+
+.bg-dark {
+    background-color: #183144!important;
+}
+
+.btn-addws {
+    color: #fff;
+    background-color: #7d93a3;
+    border-color: white;
+}
+
+.btn-addws:active, .btn-addws:hover {
+    color: #fff;
+    background-color: #65737e;
+    border-color: #65737e;
+}
+
+.btn-download {
+    color: black;
+    border-color: #8a7d7d;
+}
+
+.btn-download:active, .btn-download:hover {
+    background-color: #eaeaea;
+}
+
+
 .wrapper {
     display: flex;
     width: 100%;

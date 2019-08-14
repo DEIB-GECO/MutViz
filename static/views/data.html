@@ -66,7 +66,7 @@ required="true" placeholder="Enter email"/-->
                                 <div style="padding: 0px">
                                     <div class="form-group my-auto">
                                         <label style="font-size: 0.9em; visibility: hidden "><b>*</b></label><br>
-                                        <button type="submit" class="btn btn-primary  float-right">Add to Workspace<!--i class="fa fa-plus"></i--></button>
+                                        <button type="submit" class="btn btn-addws  float-right">Add to Workspace<!--i class="fa fa-plus"></i--></button>
                                         <!--small id="nameHelp" class="form-text text-muted">A name to identify the uploaded region file.</small-->
                                     </div> 
                                 </div>
@@ -95,7 +95,7 @@ required="true" placeholder="Enter email"/-->
 
                             <div class="col-md-4 my-auto" >
                                 <div class="form-group">
-                                    <button style="bottom:0;"  type="submit" class="btn btn-primary  float-right"
+                                    <button style="bottom:0;"  type="submit" class="btn btn-addws  float-right"
                                             ng-click="submitRepo(repoEl)">Add to Workspace<!--i class="fa fa-plus"></i--></button>
                                 </div> 
                             </div>
@@ -129,7 +129,7 @@ required="true" placeholder="Enter email"/-->
                                         <div class="btn-group">
                                             <button class="btn btn-sm btn-danger " ng-click="removeFile($index)"><i class="fa fa-trash"></i></button>
 
-                                            <button class="btn btn-sm btn-primary" ng-click="download($index)"><i class="fa fa-download"></i></button>
+                                            <button class="btn btn-sm btn-default btn-download" ng-click="download($index)"><i class="fa fa-download"></i></button>
                                         </div>
                                     </div>
                                 </div>
@@ -195,21 +195,19 @@ required="true" placeholder="Enter email"/-->
                         <div class="modal-body">
                             <p id="modal_description">Select a tumor type and press the download button:</p>
                             <div class="row">
-                                <div class="col-md-8">
+                                <div class="col-md-12">
                                     <select class="form-control" id="ttSelect"
                                             ng-model="downloader.tumorType">
                                         <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                                     </select>
                                 </div>
 
-                                <div class="col-md-4 my-auto">
-                                    <button class="btn btn-sm btn-primary" ng-click="downloadResults(downloader.file, downloader.tumorType)">Download</button>
-                                </div>
+                            
                             </div>
 
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                             <button class="btn btn btn-addws" ng-click="downloadResults(downloader.file, downloader.tumorType)">Download</button>
                         </div>
                     </div>
                 </div>
