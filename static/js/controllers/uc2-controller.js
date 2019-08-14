@@ -45,8 +45,11 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
         // Coordinate available range as the minimum and maximum coordinate in the data
         minMaxDistance = Math.min(file1.maxDistance, file2.maxDistance);
-       
-        if($scope.slider.noUiSlider == null) {
+
+
+        // Slider
+        if($scope.slider == null) {
+            $scope.slider = document.getElementById("slider");
             dataRange = {
                 min : -file.maxDistance,
                 max : +file.maxDistance
@@ -58,10 +61,6 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
                 max : $scope.slider.noUiSlider.get()[1]
             };
         }
-
-
-        // Slider
-        $scope.slider = document.getElementById("slider");
 
         // Initial selected range set between 1/4 and 3/4 of the coordinate space
         selectedRange = {
@@ -221,17 +220,17 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
         mbins2 = bins2.map(function(bin){
             return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
         })
-        
+
         mutation_count = $rootScope.tumorTypes.current.mutation_count;
-        
+
         norm1 = mbins1.map(function(x){return x/mutation_count});
         norm2 = mbins2.map(function(x){return x/mutation_count});
 
         console.log("bins");
         console.log(norm1);
         console.log(norm2);
-        
-        
+
+
         request_body = {"expected":norm1, "observed":norm2};
 
         // Call the API

@@ -43,9 +43,9 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         if(file==null)
             return;
 
-
-        // Coordinate available range as the minimum and maximum coordinate in the data
+        // Slider
         if($scope.slider.noUiSlider == null) {
+            $scope.slider = document.getElementById("slider");
             dataRange = {
                 min : -file.maxDistance,
                 max : +file.maxDistance
@@ -57,10 +57,6 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                 max : $scope.slider.noUiSlider.get()[1]
             };
         }
-
-
-        // Slider
-        $scope.slider = document.getElementById("slider");
 
         // Initial selected range set between 1/4 and 3/4 of the coordinate space
         selectedRange = {
