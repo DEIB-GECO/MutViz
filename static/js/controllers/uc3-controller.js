@@ -60,30 +60,33 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             max: dataRange.min+1*(dataRange.max-dataRange.min)
         }
 
+
+
         // Initialize the slider
-        if($scope.slider.noUiSlider != null)
-            $scope.slider.noUiSlider.destroy() 
+        if($scope.slider.noUiSlider == null) {
 
-        noUiSlider.create($scope.slider, {
-            start: [selectedRange.min, selectedRange.max],
-            connect: true,
-            range: {
-                'min': dataRange.min,
-                'max': dataRange.max
-            },
-            // Show a scale with the slider
-            pips: {
-                mode: 'positions',
-                values: [0, 25, 50, 75, 100],
-                density: 4
-            },
+            noUiSlider.create($scope.slider, {
+                start: [selectedRange.min, selectedRange.max],
+                connect: true,
+                range: {
+                    'min': dataRange.min,
+                    'max': dataRange.max
+                },
+                // Show a scale with the slider
+                pips: {
+                    mode: 'positions',
+                    values: [0, 25, 50, 75, 100],
+                    density: 4
+                },
 
-            tooltips: false,
+                tooltips: false,
 
-            format: wNumb({
-                decimals: 0
-            })
-        });
+                format: wNumb({
+                    decimals: 0
+                })
+            });
+
+        }
 
         // Generate the plot
         data = $scope.getData(file, selectedTumorTypes);
