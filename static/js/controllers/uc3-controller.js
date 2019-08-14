@@ -166,12 +166,12 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     };
 
     $scope.doTest = function() {
-        
+
         if($scope.selectedTumorTypes.length != 2)
             return;
-        
+
         file = $scope.files_selector.file;
-        
+
         type1 = $scope.selectedTumorTypes[0]
         type2 = $scope.selectedTumorTypes[1]
 
@@ -195,12 +195,19 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
         })
 
+        mutation_count_1 = type1.mutation_count;
+        mutation_count_2 = type2.mutation_count;
+
+        norm1 = mbins1.map(function(x){return x/mutation_count_1});
+        norm2 = mbins2.map(function(x){return x/mutation_count_2});
+
+
         console.log("bins");
-        console.log(mbins1);
-        console.log(mbins2);
+        console.log(norm1);
+        console.log(norm2);
 
 
-        request_body = {"expected":mbins1, "observed":mbins2};
+        request_body = {"expected":norm1, "observed":norm2};
 
         // Call the API
         $http({
