@@ -14,7 +14,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     // Selected File
     $scope.file_selector = {name : null, file: null};
-    
+
 
     // Initialize with the first tumor type or with the example
     if($rootScope.tumorTypes.available.length>0) {
@@ -65,12 +65,12 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     // Asks the backend to compute distances (if needed) and plots the result
     $scope.load = function(filename, tumorType) {
-        
+
         //$("#uc1 svg").css("height", window.innerHeight);
-        
+
         file = $rootScope.getSelectedFile(filename);
         $scope.file_selector.file = file;
-        
+
         console.log("loading "+filename);
 
         $scope.loaded = true;
@@ -81,10 +81,18 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         }
 
         // Coordinate available range as the minimum and maximum coordinate in the data
-        dataRange = {
-            min : -file.maxDistance,
-            max : +file.maxDistance
-        };
+        if($scope.slider.noUiSlider == null) {
+            dataRange = {
+                min : -file.maxDistance,
+                max : +file.maxDistance
+            };
+        } else {
+            $scope.slider.noUiSlider.get()[0];
+            dataRange = {
+                min : $scope.slider.noUiSlider.get()[0],
+                max : $scope.slider.noUiSlider.get()[1]
+            };
+        }
 
         // Slider
         $scope.slider = document.getElementById("slider");
