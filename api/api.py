@@ -34,10 +34,10 @@ dictConfig({
     }
 })
 
-base_url = "/sombrero"
+base_url = "/mutviz"
 
 app = Flask(__name__, static_url_path=base_url + '', static_folder='../static')
-cors = CORS(app, resources={r"/sombrero/api/*": {"origins": "*"}})
+cors = CORS(app, resources={r"/mutviz/api/*": {"origins": "*"}})
 
 app.config['SQLALCHEMY_DATABASE_URI'] = get_db_uri()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
