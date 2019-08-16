@@ -1,106 +1,103 @@
 <!doctype html>
 <html lang="en" class="h-100">
-    <head>
+    <head profile="http://www.w3.org/2005/10/profile">
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="Mutation Visualizer">
         <meta name="author" content="Andrea Gulino">
+        <link rel="icon" 
+              type="image/png" 
+              href="img/logo-black.png">
 
-        <head profile="http://www.w3.org/2005/10/profile">
-            <link rel="icon" 
-                  type="image/png" 
-                  href="img/logo-black.png">
+        <title>MutViz</title>
 
-            <title>MutViz</title>
+        <!-- Libs CSS -->
+        <link href="libs/bootstrap-4/css/bootstrap.min.css" type="text/css" rel="stylesheet">
+        <link href="libs/fontawesome/css/all.min.css" type="text/css" rel="stylesheet">
+        <link href="libs/noUiSlider/nouislider.min.css" type="text/css" rel="stylesheet">
 
-            <!-- Libs CSS -->
-            <link href="libs/bootstrap-4/css/bootstrap.min.css" type="text/css" rel="stylesheet">
-            <link href="libs/fontawesome/css/all.min.css" type="text/css" rel="stylesheet">
-            <link href="libs/noUiSlider/nouislider.min.css" type="text/css" rel="stylesheet">
+        <!-- Custom CSS -->
+        <link href="css/style.css?v=1.0.0" type="text/css" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 
-            <!-- Custom CSS -->
-            <link href="css/style.css" type="text/css" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-            
-            <link href="https://fonts.googleapis.com/css?family=Titillium+Web&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Titillium+Web&display=swap" rel="stylesheet">
 
-            <style>
-                body {font-family: 'Titillium Web',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}
-            </style>
+        <style>
+            body {font-family: 'Titillium Web',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"}
+        </style>
 
-        </head>
-        <body class="d-flex flex-column h-100" ng-app="app" ng-controller="main_ctrl as main">
-            <header>
+    </head>
+    <body class="d-flex flex-column h-100" ng-app="app" ng-controller="main_ctrl as main">
+        <header>
 
-                <!-- Fixed navbar -->
-                <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-                    <a class="navbar-brand" href="/"><img src="img/logo-white.png" height="30px"/></a>
-                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarCollapse">
-                        <ul class="navbar-nav mr-auto">
-                            <li class="nav-item {{active_menu=='home'?'active':''}}">
-                                <a class="nav-link" href="#!/home">Home</a>
-                            </li>
-                            <li class="nav-item {{active_menu=='data'?'active':''}}">
-                                <a class="nav-link" href="#!/data">Data</a>
-                            </li>
-                            <li class="nav-item {{active_menu=='uc1'?'active':''}}">
-                                <a class="nav-link" href="#!/uc1">Histogram</a>
-                            </li>
-                            <li class="nav-item {{active_menu=='uc2'?'active':''}}">
-                                <a class="nav-link" href="#!/uc2" tabindex="-1" aria-disabled="true">Regions</a>
-                            </li>
-                            <li class="nav-item {{active_menu=='uc3'?'active':''}}">
-                                <a class="nav-link" href="#!/uc3" tabindex="-1" aria-disabled="true">Tumors</a>
-                            </li>
-                        </ul>
+            <!-- Fixed navbar -->
+            <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+                <a class="navbar-brand" href="/"><img src="img/logo-white.png" height="30px"/></a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarCollapse">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item {{active_menu=='home'?'active':''}}">
+                            <a class="nav-link" href="#!/home">Home</a>
+                        </li>
+                        <li class="nav-item {{active_menu=='data'?'active':''}}">
+                            <a class="nav-link" href="#!/data">Data</a>
+                        </li>
+                        <li class="nav-item {{active_menu=='uc1'?'active':''}}">
+                            <a class="nav-link" href="#!/uc1">Histogram</a>
+                        </li>
+                        <li class="nav-item {{active_menu=='uc2'?'active':''}}">
+                            <a class="nav-link" href="#!/uc2" tabindex="-1" aria-disabled="true">Regions</a>
+                        </li>
+                        <li class="nav-item {{active_menu=='uc3'?'active':''}}">
+                            <a class="nav-link" href="#!/uc3" tabindex="-1" aria-disabled="true">Tumors</a>
+                        </li>
+                    </ul>
 
-                    </div>
-                </nav>
-
-            </header>
-
-            <div id="ngview" ng-view></div>  
-
-
-
-            <footer class="footer mt-auto py-3">
-                <div class="container">
-                    <span class="text-muted">&copy; GeCo Team - Politecnico di Milano - View it on <a target="_blank" href="https://github.com/andreagulino/MutViz">GitHub</a>.</span>
                 </div>
-            </footer>
+            </nav>
 
-            <!-- JS -->
-            <script src="js/api.js"></script>
+        </header>
 
-            <script src="libs/jquery/jquery-3.3.1.min.js"></script>
-            <script src="libs/bootstrap-4/js/bootstrap.min.js"></script>
-            <script src="libs/fontawesome/js/fontawesome.min.js"></script>
-            <script src="libs/wnumb-1.1.0/wNumb.js"></script>
-            <script src="libs/noUiSlider/nouislider.min.js"></script>
-            <script src="libs/angularjs/angular.min.js"></script>
-            <script src="libs/angularjs/angular-route.min.js"></script>
-            <script src="libs/angularjs/angular-animate.min.js"></script>
-            <script src="libs/d3/d3.v4.js"></script>
-            <script src="libs/simple-statistics.min.js"></script>
+        <div id="ngview" ng-view></div>  
 
-            <script src="js/support.js"></script>
-            <script src="js/stat.js"></script>
-            <script src="data/mutation_types.js"></script>
-            <script src="js/d3/uc1.js"></script>
-            <script src="js/d3/uc2.js"></script>
-            <script src="js/d3/uc3.js"></script>
 
-            <script src="js/app.js"></script>
 
-            <script src="js/controllers/main-controller.js"></script>
-            <script src="js/controllers/data-controller.js"></script>
-            <script src="js/controllers/uc1-controller.js"></script>
-            <script src="js/controllers/uc2-controller.js"></script>
-            <script src="js/controllers/uc3-controller.js"></script>
+        <footer class="footer mt-auto py-3">
+            <div class="container">
+                <span class="text-muted">&copy; GeCo Team - Politecnico di Milano - View it on <a target="_blank" href="https://github.com/andreagulino/MutViz">GitHub</a>.</span>
+            </div>
+        </footer>
 
-        </body>
-        </html>
+        <!-- JS -->
+        <script src="js/api.js"></script>
 
+        <script src="libs/jquery/jquery-3.3.1.min.js"></script>
+        <script src="libs/bootstrap-4/js/bootstrap.min.js"></script>
+        <script src="libs/fontawesome/js/fontawesome.min.js"></script>
+        <script src="libs/wnumb-1.1.0/wNumb.js"></script>
+        <script src="libs/noUiSlider/nouislider.min.js"></script>
+        <script src="libs/angularjs/angular.min.js"></script>
+        <script src="libs/angularjs/angular-route.min.js"></script>
+        <script src="libs/angularjs/angular-animate.min.js"></script>
+        <script src="libs/d3/d3.v4.js"></script>
+        <script src="libs/simple-statistics.min.js"></script>
+
+        <script src="js/support.js?v=1.0.0"></script>
+        <script src="js/stat.js?v=1.0.0"></script>
+        <script src="data/mutation_types.js?v=1.0.0"></script>
+        <script src="js/d3/uc1.js?v=1.0.0?v=1.0.0"></script>
+        <script src="js/d3/uc2.js?v=1.0.0?v=1.0.0"></script>
+        <script src="js/d3/uc3.js?v=1.0.0?v=1.0.0"></script>
+
+        <script src="js/app.js?v=1.0.0"></script>
+
+        <script src="js/controllers/main-controller.js?v=1.0.0"></script>
+        <script src="js/controllers/data-controller.js?v=1.0.0"></script>
+        <script src="js/controllers/uc1-controller.js?v=1.0.0"></script>
+        <script src="js/controllers/uc2-controller.js?v=1.0.0"></script>
+        <script src="js/controllers/uc3-controller.js?v=1.0.0"></script>
+
+    </body>
+</html>
