@@ -32,6 +32,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
     $scope.load = function(filename, selectedTumorTypes) {
 
+        $scope.test.pvalue = null;
+
         console.log("carico file "+filename);
 
         $scope.loaded = true;
@@ -96,6 +98,9 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         // Set callback on slider change
         $scope.slider.noUiSlider.on('set.one', function () { 
 
+            $scope.test.pvalue = null;
+            $scope.$apply();
+
             selectedRange = {
                 min: $scope.slider.noUiSlider.get()[0],
                 max: $scope.slider.noUiSlider.get()[1]
@@ -122,6 +127,9 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // Update the plot
     $scope.updatePlot = function(file, selectedTumorTypes) {
+
+        $scope.test.pvalue = null;
+
         // update function is defined in uc3.js.
         uc3_update($scope.getData(file, selectedTumorTypes),
                    $scope.plot.d3graph,
@@ -132,6 +140,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // Update the plot according to the new bin size
     $scope.changeMutationType  =  function() {
+
+        $scope.test.pvalue = null;
 
         types = $scope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.to!=null});
 
@@ -202,15 +212,10 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         norm1 = mbins1.map(function(x){return x/mutation_count_1});
         norm2 = mbins2.map(function(x){return x/mutation_count_2});
 
-        console.log("bins");
-        console.log(norm1);
-        console.log(norm2);
-        
+
         $scope.test.pvalue = uc23_test(norm1, norm2);
-        
+
         /*
-
-
         request_body = {"expected":norm1, "observed":norm2};
 
         // Call the API

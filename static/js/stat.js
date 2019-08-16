@@ -58,7 +58,7 @@ function uc23_test(arr1, arr2) {
         }
     }
 
-    p = (v.filter(function(x){return x>=D}).length / TIMES).toFixed(3);
+    p = (v.filter(function(x){return x<=D}).length / TIMES).toFixed(3);
 
     return p;
 

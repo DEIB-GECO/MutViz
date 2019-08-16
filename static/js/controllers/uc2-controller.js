@@ -29,6 +29,8 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
     // Asks the backend to compute distances (if needed) and plots the result
     $scope.load = function(filename1, filename2, tumorType) {
 
+        $scope.test.pvalue = null;
+
         $scope.file_selector.file1 = $rootScope.getSelectedFile(filename1);
         $scope.file_selector.file2 = $rootScope.getSelectedFile(filename2);
 
@@ -99,6 +101,9 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
         // Set callback on slider change
         $scope.slider.noUiSlider.on('set.one', function () { 
 
+            $scope.test.pvalue = null;
+            $scope.$apply();
+
             selectedRange = {
                 min: $scope.slider.noUiSlider.get()[0],
                 max: $scope.slider.noUiSlider.get()[1]
@@ -127,7 +132,9 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     // Update the plot
     $scope.updatePlot = function(file1, file2, tumorType) {
-        console.log(tumorType)
+
+        $scope.test.pvalue = null;
+
         // update function is defined in uc2.js.
 
         uc2_update($scope.getData(file1, file2, tumorType),
@@ -139,6 +146,8 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     // Update the plot according to the new bin size
     $scope.changeMutationType =  function() {
+
+        $scope.test.pvalue = null;
 
         types = $scope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.to!=null});
 
@@ -221,7 +230,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
         norm1 = mbins1.map(function(x){return x/mutation_count});
         norm2 = mbins2.map(function(x){return x/mutation_count});
-        
+
         $scope.test.pvalue = uc23_test(norm1, norm2);
 
         // request_body = {"expected":norm1, "observed":norm2};

@@ -181,7 +181,8 @@
                                         <td class="align-middle" rowspan="2"><b>P-value</b></td>
                                         <td class="align-middle text-center">
                                             <span ng-if="test.L<test.H">{{test.L}}</span>
-                                            <span ng-if="test.L>=test.H">{{test.H}}</span>
+                                            <span ng-if="test.L!=null && test.L>=test.H">{{test.H}}</span>
+                                            <span ng-if="test.L==null || test.H==null">?</span>
                                         </td>
                                         <td class="align-middle text-center" rowspan="2">
                                             <div class="">
@@ -192,7 +193,8 @@
                                     <tr>
                                         <td class="align-middle text-center" style="background-color: #e9e9e9;">
                                             <span ng-if="test.L<test.H">hypermutated</span>
-                                            <span ng-if="test.L>=test.H">hypomutated</span>
+                                            <span ng-if="test.L!=null && test.L>=test.H">hypomutated</span>
+                                            <span ng-if="test.L==null || test.H==null">?</span>
                                         </td>
                                     </tr>
                                 </tbody>

@@ -66,6 +66,9 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
     // Asks the backend to compute distances (if needed) and plots the result
     $scope.load = function(filename, tumorType) {
 
+        $scope.test.L = null;
+        $scope.test.H = null;
+
         //$("#uc1 svg").css("height", window.innerHeight);
 
         file = $rootScope.getSelectedFile(filename);
@@ -94,7 +97,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
                 min: dataRange.min+0*(dataRange.max-dataRange.min),
                 max: dataRange.min+1*(dataRange.max-dataRange.min)
             }
-            
+
             noUiSlider.create($scope.slider, {
                 start: [selectedRange.min, selectedRange.max],
                 connect: true,
@@ -137,6 +140,10 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         // Set callback on slider change
         $scope.slider.noUiSlider.on('set.one', function () { 
 
+            $scope.test.L = null;
+            $scope.test.H = null;
+            $scope.$apply();
+
             selectedRange = {
                 min: $scope.slider.noUiSlider.get()[0],
                 max: $scope.slider.noUiSlider.get()[1]
@@ -170,8 +177,8 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
     // Update the plot
     $scope.updatePlot = function(file, tumorType) {
 
-        console.log(file);
-
+        $scope.test.L = null;
+        $scope.test.H = null;
 
         // Update function is defined in uc1.js.
         uc1_update( $rootScope.getDistances(file, tumorType),
@@ -191,6 +198,9 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     // Update the plot according to the new mutation type
     $scope.changeMutationType =  function() {
+
+        $scope.test.L = null;
+        $scope.test.H = null;
 
         types = $rootScope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.to!=null});
 
