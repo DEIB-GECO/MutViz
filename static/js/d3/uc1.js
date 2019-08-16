@@ -118,10 +118,10 @@ function uc1_addBars(g, groupId, bins, alreadyAddedMutations, color) {
 
 
 function uc1_addLegendItem(g, index, color, text) {
-
+    
     //append legend colour blocks
     g.legend.append("rect")
-        .attr("x", g.width - 305)
+        .attr("x", 0)
         .attr("y", 12*index)
         .attr("width", 10)
         .attr("height", 10)
@@ -129,7 +129,7 @@ function uc1_addLegendItem(g, index, color, text) {
 
     //append legend texts
     g.legend.append("text")
-        .attr("x", g.width - 310)
+        .attr("x", -10)
         .attr("y", 5+12*index)
         .attr("dy", "0.32em")
         .text(text);
@@ -208,7 +208,7 @@ function uc1_update(data, g, binSize, mutationTypes, stacked, showTotal) {
         .attr("font-family", "sans-serif")
         .attr("font-size", 12)
         .attr("text-anchor", "end")
-        .attr("transform", "translate("+(g.width-250)+",0)");
+        .attr("transform", "translate("+(g.width)+",0)");
 
     // Bars representing the amount of mutations in a bin, independently on the type of mutation
     if (showTotal) {
@@ -282,14 +282,17 @@ function uc1_rescaleX(data, g, binSize, range, mutationTypes, stacked, showTotal
 }
 
 /* Build the graph with an initial number of bins */
-function uc1(data, binSize, range, mutationTypes, stacked, showTotal) {
+function uc1(data, binSize, range, mutationTypes, stacked, showTotal, width, height) {
+    
+    console.log("width: "+width)
+    console.log("height: "+height)
 
     var g = {} // here we put all useful objects describing our plot
 
     // Set the dimensions and margins of the plot
-    g.margin = {top: 10, right: 50, bottom: 30, left: 55},
-        g.width  = 700 - g.margin.left - g.margin.right,
-        g.height = 400 - g.margin.top - g.margin.bottom;
+    g.margin = {top: 0, left: 100}, //bottom
+        g.width  = width - 2*g.margin.left ,
+        g.height = height - 2*g.margin.top ;
     
     console.log("deleting");
 
@@ -326,7 +329,7 @@ function uc1(data, binSize, range, mutationTypes, stacked, showTotal) {
     // Label for the y axis
     g.svg.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("y", -2 - g.margin.left)
+        .attr("y", -60)
         .attr("x",0 - (g.height / 2))
         .attr("dy", "0.8em")
         .style("text-anchor", "middle")

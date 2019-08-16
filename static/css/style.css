@@ -78,11 +78,18 @@ svg {
 }
 
 
+svg {
+    margin-top: 70px;
+    width:  700px;;
+    min-height: 700px;
+    background-color: white;
+} 
+
 /* USE CASE 1 */
 #uc1 svg {
     margin-top: 70px;
-    width: 700px;
-    height: 500px;
+    width: 100%;
+    min-height: 700px;
     background-color: white;
 } 
 

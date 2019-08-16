@@ -28,6 +28,8 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     // Asks the backend to compute distances (if needed) and plots the result
     $scope.load = function(filename1, filename2, tumorType) {
+        
+        $("svg").css("height", window.innerHeight);
 
         $scope.test.pvalue = null;
 

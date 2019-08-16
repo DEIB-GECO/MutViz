@@ -150,10 +150,10 @@ function uc2(data, binSize, range, mutationTypes, stacked) {
         g.height = 400 - g.margin.top - g.margin.bottom;
 
     // Remove any pre-existing plot
-    d3.select("#uc1 svg").html("");
+    d3.select("#uc2 svg").html("");
 
     // Setup the plot container
-    g.svg = d3.select("#uc1 svg")  
+    g.svg = d3.select("#uc2 svg")  
         .append("g")
         .attr("transform","translate(" + g.margin.left + "," + g.margin.top + ")");
 

@@ -32,6 +32,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
     $scope.load = function(filename, selectedTumorTypes) {
 
+        $("svg").css("height", 100+145*selectedTumorTypes.length);
+
         $scope.test.pvalue = null;
 
         console.log("carico file "+filename);

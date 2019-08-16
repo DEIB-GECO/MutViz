@@ -1,3 +1,4 @@
+'use strict';
 var app = angular.module('app',['ngRoute', 'ngAnimate']);
 app.config(['$routeProvider', '$locationProvider',
   function($routeProvider, $locationProvider) {
@@ -41,3 +42,20 @@ app.filter('reverse', function() {
     return items.slice().reverse();
   };
 });
+
+
+
+app.directive('windowResize', ['$window', function ($window) {
+
+     return {
+        link: link,
+        restrict: 'A'           
+     };
+
+     function link(scope, element, attrs){
+
+       angular.element($window).bind('resize', function(){
+           scope.reload();
+       });    
+     }    
+ }]);

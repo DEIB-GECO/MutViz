@@ -135,7 +135,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
     // Extract the svg of the plot and download it
     $scope.downloadPlot = function() {
 
-        $('#dwn').attr('href', 'data:application/octet-stream;base64,' + btoa($("#uc1").html())); 
+        $('#dwn').attr('href', 'data:application/octet-stream;base64,' + btoa($(".plot-container").first().html())); 
         $('#dwn').attr('download', 'plot.svg');
         $('#dwn').click();
 

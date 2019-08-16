@@ -69,8 +69,6 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         $scope.test.L = null;
         $scope.test.H = null;
 
-        //$("#uc1 svg").css("height", window.innerHeight);
-
         file = $rootScope.getSelectedFile(filename);
         $scope.file_selector.file = file;
 
@@ -126,13 +124,25 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
             }
         }
 
+        // Plot area size
+        width = 600;
+        height = 400;
+        if($("#uc1").width()>width)
+            width = $("#uc1").width();
+        if(window.innerHeight-250>height)
+            height=window.innerHeight-250;
+        $("svg").css("height", window.innerHeight);
+
+
         // Generate the plot
         $scope.plot.d3graph = uc1($rootScope.getDistances(file,tumorType), 
                                   $scope.plot.binSize, 
                                   selectedRange,
                                   $scope.getSelectedTypes(), 
                                   $rootScope.mutationTypes.stacked, 
-                                  $scope.plot.showTotal);
+                                  $scope.plot.showTotal,
+                                  width,
+                                  height);
 
         $scope.setDefaultArea();
         $scope.drawArea();
@@ -165,6 +175,10 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         });
 
 
+    }
+    
+    $scope.reload = function() {
+        $scope.load($scope.file_selector.name, $rootScope.tumorTypes.current);
     }
 
     // Returns the valid mutation types selected in the interface
