@@ -221,16 +221,13 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
         norm1 = mbins1.map(function(x){return x/mutation_count});
         norm2 = mbins2.map(function(x){return x/mutation_count});
+        
+        $scope.test.pvalue = uc23_test(norm1, norm2);
 
-        console.log("bins");
-        console.log(norm1);
-        console.log(norm2);
-
-
-        request_body = {"expected":norm1, "observed":norm2};
+        // request_body = {"expected":norm1, "observed":norm2};
 
         // Call the API
-        $http({
+        /*$http({
             method: 'POST',
             data: request_body,
             headers: {'Content-Type': 'application/json'},
@@ -244,9 +241,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
                 console.log(response);
                 $scope.test.pvalue = "error";
             }
-        );
-
-
+        );*/
     }
 
     $scope.getData = function(file1, file2, tumorType)  {

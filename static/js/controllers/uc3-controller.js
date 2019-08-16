@@ -202,10 +202,13 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         norm1 = mbins1.map(function(x){return x/mutation_count_1});
         norm2 = mbins2.map(function(x){return x/mutation_count_2});
 
-
         console.log("bins");
         console.log(norm1);
         console.log(norm2);
+        
+        $scope.test.pvalue = uc23_test(norm1, norm2);
+        
+        /*
 
 
         request_body = {"expected":norm1, "observed":norm2};
@@ -225,7 +228,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                 console.log(response);
                 $scope.test.pvalue = "error";
             }
-        );
+        );*/
 
 
     }
