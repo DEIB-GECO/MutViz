@@ -1,4 +1,5 @@
-# MutViz
+# MutViz - Analysis and Visualization of Mutation Enrichments for Selected Genomic Regions and Cancer Types"
+
 
 Try MutViz: http://gmql.eu/mutviz/
 
