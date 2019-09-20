@@ -23,11 +23,11 @@ chr10	102639678	102639697	*
 - Or choosing a dataset from our public repository.
 
 ```javascript
-distance	A->G	G->A	C->T	T->C	A->C	A->T	C->A	C->G	G->C	G->T	T->A	T->G	total
-0	2	0	2	0	0	0	1	0	0	0	0	0	5 10
-1	0	0	2	0	0	0	2	0	0	0	0	0	4 8
-2	0	0	0	3	0	0	0	0	2	0	0	0	5 10
-3	0	0	0	0	0	0	0	0	0	1	0	0	1 2
+distance	A->G	G->A	C->T	T->C	A->C	A->T	C->A	C->G	G->C	G->T	T->A  T->G	total
+0	2	0	2	0	0	0	1	0	0	0	0	0	5	10
+1	0	0	2	0	0	0	2	0	0	0	0	0	4	8
+2	0	0	0	3	0	0	0	0	2	0	0	0	5	10
+3	0	0	0	0	0	0	0	0	0	1	0	0	1	2
 ```
 where the first column represents the distance from a region in the dataset, the following 12 columns represent the number of mutations found at that distance for one of the 12 possible types of mutation, and the last column represents the total number of mutations at that distance (i.e. the sum of the previous 12 cells).
 
