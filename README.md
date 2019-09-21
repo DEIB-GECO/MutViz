@@ -1,9 +1,9 @@
-# MutViz - Analysis and Visualization of Mutation Enrichments for Selected Genomic Regions and Cancer Types"
+# MutViz - Analysis and Visualization of Mutation Enrichments for Selected Genomic Regions and Cancer Types
 
 
 Try MutViz: http://gmql.eu/mutviz/
 
-# Introuction
+# Introduction
 
 This tool is designed to help analysts visualize the mutation activity in the surroundings of user-provided DNA regions or in the surroundings of regions contained in one of the datasets available in our repository, with the possibility of selecting among:
 - Several **tumors types**: we use a big database with mutations from more than 30 different tumor tyoes
