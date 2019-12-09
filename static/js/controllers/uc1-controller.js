@@ -7,7 +7,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
     window.scroll(0, 0);
     $rootScope.active_menu = "uc1";
 
-    $scope.plot = {binSize: 10, d3graph: null, showTotal: true, minY:400}
+    $scope.plot = {binSize: 10, d3graph: null, showTotal: true, minY:10}
     $scope.loaded = false;
 
     $scope.test = {area:{from:0, to:0, fromPosition:-$scope.plot.binSize/2, toPosition:$scope.plot.binSize/2, visible: true, L:null, H:null}};
