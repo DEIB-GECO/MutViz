@@ -136,7 +136,7 @@ function uc1_addLegendItem(g, index, color, text) {
 }
 
 // This function (re-)builds the graph g provided the number of bins and selected mutation types
-function uc1_update(data, g, binSize, mutationTypes, stacked, showTotal) {
+function uc1_update(data, g, binSize, minY, mutationTypes, stacked, showTotal) {
 
     console.log("Building an histogram with "+binSize+" binSize.");
 
@@ -175,7 +175,11 @@ function uc1_update(data, g, binSize, mutationTypes, stacked, showTotal) {
      * we can complete the definition of yAxisScale and then build the yAxis.
      * The max function iterates over the bins, and for each bin (another array) takes the number of contained items (length * of the array containing the items) */
 
-    g.yAxisScale.domain([0, d3.max(bins, function(d) { return yVal(d) }) + 20]);
+    dataMin = d3.max(bins, function(d) { return yVal(d)})
+        yMin = dataMin + 20
+    if(minY > dataMin)
+        yMin = minY + 20
+    g.yAxisScale.domain([0,yMin])//.domain([0,  + 20]);
 
     g.yAxis
         .transition()
@@ -278,7 +282,7 @@ function uc1_rescaleX(data, g, binSize, range, mutationTypes, stacked, showTotal
         .duration(1000)
         .call(d3.axisBottom(g.xAxisScale).tickFormat(function(d) { return d3.format(".2s")(d); }));
 
-    uc1_update(data, g, binSize, mutationTypes,stacked, showTotal);
+    uc1_update(data, g, binSize, range.minY, mutationTypes,stacked, showTotal);
 }
 
 /* Build the graph with an initial number of bins */
@@ -292,7 +296,7 @@ function uc1(data, binSize, range, mutationTypes, stacked, showTotal, width, hei
     // Set the dimensions and margins of the plot
     g.margin = {top: 0, left: 100}, //bottom
         g.width  = width - 2*g.margin.left ,
-        g.height = height - 2*g.margin.top ;
+        g.height = height - 2*g.margin.top 
     
     console.log("deleting");
 
@@ -339,7 +343,7 @@ function uc1(data, binSize, range, mutationTypes, stacked, showTotal, width, hei
 
 
     // Build the histogram with the provided number of bins
-    uc1_update(data, g, binSize, mutationTypes, stacked, showTotal);
+    uc1_update(data, g, binSize, range.minY, mutationTypes, stacked, showTotal);
 
     // return a reference to the graph
     return g;

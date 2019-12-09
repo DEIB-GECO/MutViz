@@ -7,7 +7,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
     window.scroll(0, 0);
     $rootScope.active_menu = "uc1";
 
-    $scope.plot = {binSize: 10, d3graph: null, showTotal: true}
+    $scope.plot = {binSize: 10, d3graph: null, showTotal: true, minY:400}
     $scope.loaded = false;
 
     $scope.test = {area:{from:0, to:0, fromPosition:-$scope.plot.binSize/2, toPosition:$scope.plot.binSize/2, visible: true, L:null, H:null}};
@@ -93,7 +93,8 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
             selectedRange = {
                 min: dataRange.min+0*(dataRange.max-dataRange.min),
-                max: dataRange.min+1*(dataRange.max-dataRange.min)
+                max: dataRange.min+1*(dataRange.max-dataRange.min),
+                minY: $scope.plot.minY
             }
 
             noUiSlider.create($scope.slider, {
@@ -120,7 +121,8 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         } else {
             selectedRange = {
                 min: $scope.slider.noUiSlider.get()[0],
-                max: $scope.slider.noUiSlider.get()[1]
+                max: $scope.slider.noUiSlider.get()[1],
+                minY: $scope.plot.minY
             }
         }
 
@@ -156,7 +158,8 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
             selectedRange = {
                 min: $scope.slider.noUiSlider.get()[0],
-                max: $scope.slider.noUiSlider.get()[1]
+                max: $scope.slider.noUiSlider.get()[1],
+                minY: $scope.plot.minY
             };
 
             // Rescale the plot according to the new coordinate range. 
@@ -198,6 +201,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         uc1_update( $rootScope.getDistances(file, tumorType),
                    $scope.plot.d3graph,
                    $scope.plot.binSize,
+                   $scope.plot.minY,
                    $scope.getSelectedTypes(),
                    $rootScope.mutationTypes.stacked, 
                    $scope.plot.showTotal);

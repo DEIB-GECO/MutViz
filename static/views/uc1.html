@@ -51,7 +51,7 @@
                 </div>
 
 
-                <div class="col-md-12" style="margin-top:10px;">
+                <div class="col-md-6" style="margin-top:10px;">
                     <div class="form-group">
                         <label for="inputBins">Bin size (bp):</label>
                         <input type="number" class="form-control" id="inputBins" 
@@ -61,6 +61,15 @@
                     </div>
                 </div>
 
+                 <div class="col-md-6" style="margin-top:10px;">
+                    <div class="form-group">
+                        <label for="inputBins">Min Y:</label>
+                        <input type="number" class="form-control" id="inputBins" 
+                               ng-model="plot.minY" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
+
+                        <br>
+                    </div>
+                </div>
 
                 <div class="col-md-12" style="margin-top:10px;">
 
