@@ -130,7 +130,7 @@ function uc1_addLegendItem(g, index, color, text) {
     //append legend texts
     g.legend.append("text")
         .attr("x", -10)
-        .attr("y", 8+16*index)
+        .attr("y", 8+17*index)
         .attr("dy", "0.32em")
         .text(text);
 }
