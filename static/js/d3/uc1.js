@@ -122,15 +122,15 @@ function uc1_addLegendItem(g, index, color, text) {
     //append legend colour blocks
     g.legend.append("rect")
         .attr("x", 0)
-        .attr("y", 12*index)
-        .attr("width", 10)
-        .attr("height", 10)
+        .attr("y", 17*index)
+        .attr("width", 13)
+        .attr("height", 13)
         .attr("fill", color);
 
     //append legend texts
     g.legend.append("text")
         .attr("x", -10)
-        .attr("y", 5+12*index)
+        .attr("y", 8+16*index)
         .attr("dy", "0.32em")
         .text(text);
 }
@@ -210,7 +210,7 @@ function uc1_update(data, g, binSize, minY, mutationTypes, stacked, showTotal) {
     g.legend = g.svg.append("g")
         .attr("class","legend")
         .attr("font-family", "sans-serif")
-        .attr("font-size", 12)
+        .attr("font-size", "1em")
         .attr("text-anchor", "end")
         .attr("transform", "translate("+(g.width)+",0)");
 
@@ -312,8 +312,8 @@ function uc1(data, binSize, range, mutationTypes, stacked, showTotal, width, hei
     g.yAxisScale = d3.scaleLinear().range([g.height, 0]); // domain depends on the bins
 
     // Append to groups, one of each axis. xAxis must be moved down by the height of the graph
-    g.xAxis = g.svg.append("g").attr("transform", "translate(0," + g.height + ")")
-    g.yAxis = g.svg.append("g")
+    g.xAxis = g.svg.append("g").attr("transform", "translate(0," + g.height + ")").style("font-size", "1em")
+    g.yAxis = g.svg.append("g").style("font-size", "1em")
 
     // xAxis (yAxis) is a Selection of one element
 
@@ -325,19 +325,19 @@ function uc1(data, binSize, range, mutationTypes, stacked, showTotal, width, hei
     g.svg.append("text")             
         .attr("transform",
               "translate(" + (g.width/2) + " ," + 
-              (g.height + g.margin.top + 30) + ")")
+              (g.height + g.margin.top + 40) + ")")
         .style("text-anchor", "middle")
-        .style("font-size", "0.8em")
+        .style("font-size", "1em")
         .text("distance (bp)");
 
     // Label for the y axis
     g.svg.append("text")
         .attr("transform", "rotate(-90)")
-        .attr("y", -60)
+        .attr("y", -70)
         .attr("x",0 - (g.height / 2))
-        .attr("dy", "0.8em")
+        .attr("dy", "1em")
         .style("text-anchor", "middle")
-        .style("font-size", "0.8em")
+        .style("font-size", "1em")
         .text("number of mutations per bin");      
 
 
