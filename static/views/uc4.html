@@ -8,14 +8,14 @@
             <div class="row">
 
                 <div class="col-md-12 text-center">
-                    <h4 style="margin-top: 15px">Histogram</h4>
+                    <h4 style="margin-top: 15px">Trinucleotides</h4>
                 </div>
 
 
 
                 <div class="col-md-12" style="margin-top:10px; {{files.length>0 && someAreValid?'background-color:#e6e6e6;':''}} ">
 
-                    <div ng-if="files.length==0 && !someAreRead || !someAreValid"
+                    <div ng-if="files.length==0 && !someAreReady || !someAreValid"
                          class="col-md-12 text-center"
                          style="padding-top: 20px;padding-bottom: 20px; background-color: #ffe28d">
                         No valid file in your <a href="#!/data">workspace</a>. Please, upload a region file or add a file from the repository.
@@ -50,18 +50,7 @@
                     </select>
                 </div>
 
-
-                <div class="col-md-6" style="margin-top:10px;">
-                    <div class="form-group">
-                        <label for="inputBins">Bin size (bp):</label>
-                        <input type="number" class="form-control" id="inputBins" 
-                               ng-model="plot.binSize" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
-
-                        <br>
-                    </div>
-                </div>
-
-                 <div class="col-md-6" style="margin-top:10px;">
+                 <div class="col-md-12" style="margin-top:10px;">
                     <div class="form-group">
                         <label for="minY">Min Y:</label>
                         <input type="number" class="form-control" id="minY" 

@@ -1,5 +1,5 @@
-var API_ROOT = "/mutviz/";
-//var API_ROOT = "http://geco.deib.polimi.it/mutviz/";
+//var API_ROOT = "/mutviz/";
+var API_ROOT = "http://geco.deib.polimi.it/mutviz/";
 
 var API_L01 = API_ROOT+"api/tumor_types/";
 var API_L02 = API_ROOT+"api/repository/";
