@@ -5,8 +5,11 @@ import os
 import sys
 import time
 
-def spark_intersect(mutation_table_name, regions_table_name, region_file_id, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=True):
+def spark_intersect(mutation_table_name, regions_table_name, region_file_id, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=False):
 
+    # SQL VS MINE: 1507 (25min), 3888 (1h)
+
+    numBins = os.getenv('MUTVIZ_NUM_BINS', 5)
     start_time = time.time()
 
     os.environ["SPARK_HOME"] = "/var/lib/spark-2.4.5-bin-hadoop2.7"
@@ -50,8 +53,9 @@ def spark_intersect(mutation_table_name, regions_table_name, region_file_id, reg
      regions = regions_df.collect()
      regions_broadcast = sc.broadcast( sorted(regions, key=itemgetter('start', 'stop')))
 
-     partitioned = mutations.repartition("chrom")
+     partitioned = mutations.withColumn("bin", mutations["position"]%numBins).repartition("chrom", "bin")
 
+     print("number of partitions: "+str(partitioned.rdd.getNumPartitions()))
      def partitionWork( p):
          matched = []
          localMutations = list(p)
