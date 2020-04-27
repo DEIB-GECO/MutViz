@@ -70,10 +70,10 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         console.log("loading file "+filename);
 
-        data = {"COCA": {"C[C>T]C": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}, "LUSC": {"C[C>T]A": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]A"}}, "MELA": {"C[C>T]C": {"count": 2, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}, "OV": {"C[C>T]T": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]T"}}, "PACA": {"G[C>T]G": {"count": 1, "mutation": "C>T", "trinucleotide": "G[C>T]G"}}, "SKCA": {"C[C>T]C": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}}
+        /*data = {"COCA": {"C[C>T]C": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}, "LUSC": {"C[C>T]A": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]A"}}, "MELA": {"C[C>T]C": {"count": 2, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}, "OV": {"C[C>T]T": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]T"}}, "PACA": {"G[C>T]G": {"count": 1, "mutation": "C>T", "trinucleotide": "G[C>T]G"}}, "SKCA": {"C[C>T]C": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}}
 
         $scope.load(data);
-        return
+        return*/
 
 
 
