@@ -68,7 +68,7 @@ def spark_intersect(mutation_table_name, regions_table_name, region_file_id, reg
 
          if localMutations:
              chrom=localMutations[0]["chrom"]
-             print("chrom "+str(chrom))
+             #print("chrom "+str(chrom))
 
              localRegions = filter(lambda r : r['chrom']==chrom, regions_broadcast.value)
 
