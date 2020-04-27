@@ -61,6 +61,16 @@ class MutationCode(db.Model):
 
 
 
+t_mutation_trinucleotide = db.Table(
+    'mutation_trinucleotide',
+    db.Column('donor_id', db.Integer),
+    db.Column('tumor_type_id', db.SmallInteger),
+    db.Column('chrom', db.SmallInteger),
+    db.Column('position', db.Integer),
+    db.Column('mutation_code_id', db.SmallInteger),
+    db.Column('trinucleotide_id_r', db.SmallInteger)
+)
+
 t_mutation_trinucleotide_test = db.Table(
     'mutation_trinucleotide_test',
     db.Column('donor_id', db.Integer),

@@ -211,7 +211,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         }
     );
 
-    // Retrieve the list of available tumor types
+    // Retrieve the list of available repository
     $http({method: 'GET', url:  API_L02})
         .then(
         function success (response) {

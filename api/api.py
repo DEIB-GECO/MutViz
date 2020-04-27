@@ -60,6 +60,7 @@ def activate_job_cleaner():
 
 
 with app.app_context():
+    DEBUG_MODE = False
     logger = flask.current_app.logger
 
 chromosome_dict = dict([(str(x), x) for x in range(1, 23)] + [('x', 23), ('y', 24), ('mt', 25), ('m', 25), ])
@@ -246,7 +247,7 @@ def get_distances_r(jobID):
 
 
 # API R02
-@app.route(base_url + '/api/donor/', methods=['POST'])
+@app.route(base_url + '/api/trinucleotide/', methods=['POST'])
 def get_donors():
     repoId = request.form.get('repoId')
     logger.debug(f"repoId: {repoId}")
@@ -284,19 +285,17 @@ def get_donors():
     def async_function():
         try:
 
-            mutations =  spark_intersect(t_mutation_trinucleotide_test.name, t_regions.name, repositories_dict[repoId][0], groupby=["tumor_type_id", "trinucleotide_id_r"])
+            if DEBUG_MODE:
+                mutations =  spark_intersect(t_mutation_trinucleotide_test.name, t_regions.name, repositories_dict[repoId][0], groupby=["tumor_type_id", "trinucleotide_id_r"])
+            else:
+                mutations =  spark_intersect(t_mutation_trinucleotide.name, t_regions.name, repositories_dict[repoId][0], groupby=["tumor_type_id", "trinucleotide_id_r"])
 
             result  = defaultdict(dict)
             mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  trinucleotides_dict[x[1]][0], x[2]], mutations))
 
             for m in mutations:
-                result[m[0]][m[1]] = m[2]
+                result[m[0]][m[1]] = {"trinucleotide":m[1], "mutation":m[1][2:-2], "count" : m[2]}
 
-            result = [
-                {
-                    "count" : result
-                }
-            ]
             # print(result)
 
             update_job(jobID, result)
@@ -317,7 +316,7 @@ def get_donors():
 
 
 # API R02r
-@app.route(base_url + '/api/donor/<string:jobID>', methods=['GET'])
+@app.route(base_url + '/api/trinucleotide/<string:jobID>', methods=['GET'])
 def get_donor_r(jobID):
     # print(jobID)
     return get_job_result(jobID)
