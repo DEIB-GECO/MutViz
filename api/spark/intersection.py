@@ -19,6 +19,8 @@ def spark_intersect(mutation_table_name, regions_table_name, region_file_id, reg
             .master("local")      \
             .appName("Word Count") \
             .config("spark.jars", jdbc_jar) \
+            .config("spark.driver.extraJavaOptions", jdbc_jar) \
+            .config("spark.extraJavaOptions", "-Xmx50GB") \
             .getOrCreate()
 
     sql_ctx = SQLContext(spark.sparkContext)
