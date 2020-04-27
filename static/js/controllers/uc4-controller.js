@@ -78,7 +78,7 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
 
         if( filename in $scope.uc4_files && "result" in $scope.uc4_files[filename] ) 
-        $scope.load( $scope.uc4_files[filename])
+            $scope.load( $scope.uc4_files[filename].result)
         else {
 
             request_body = {
