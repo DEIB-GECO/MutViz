@@ -5,7 +5,7 @@ import os
 import sys
 import time
 
-def spark_intersect(mutation_table_name, regions_table_name, region_file_id, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None):
+def spark_intersect(mutation_table_name, regions_table_name, region_file_id, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=True):
 
     start_time = time.time()
 
@@ -34,51 +34,65 @@ def spark_intersect(mutation_table_name, regions_table_name, region_file_id, reg
         url='jdbc:%s' % url, table=regions_table_name, properties=properties
     ).rdd.filter(lambda r: r["file_id"]==region_file_id).toDF()
 
-    regions = regions_df.collect()
-    regions_broadcast = sc.broadcast( sorted(regions, key=itemgetter('start', 'stop')))
+    # new
+    if useSQL :
+        mutations.registerTempTable("mutations")
+        regions_df.registerTempTable("regions")
 
-    partitioned = mutations.repartition("chrom")
+        sql_res = spark.sql("SELECT m.tumor_type_id, m.trinucleotide_id_r, count(*) from mutations as m, regions as r WHERE m.chrom=r.chrom AND m.position >= r.start AND m.position <= r.stop GROUP BY m.tumor_type_id, m.trinucleotide_id_r")
 
-    def partitionWork( p):
-        matched = []
-        localMutations = list(p)
+        res = sql_res.rdd.map(lambda r: [r["tumor_type_id"], r["trinucleotide_id_r"], r["count(1)"]]).collect()
+        print("Spark execution took %s seconds ---" % (time.time() - start_time))
+    #print(sql_res.collect())
 
-        if localMutations:
-            chrom=localMutations[0]["chrom"]
+    else:
 
-            localRegions = filter(lambda r : r['chrom']==chrom, regions_broadcast.value)
+     regions = regions_df.collect()
+     regions_broadcast = sc.broadcast( sorted(regions, key=itemgetter('start', 'stop')))
 
-            if localRegions:
-                sorted_mutations = sorted(localMutations, key=itemgetter('position'))
-                sorted_regions = sorted(localRegions, key=itemgetter('start', 'stop'))
+     partitioned = mutations.repartition("chrom")
 
-                cur_reg_idx = 0
-                cur_mut_idx = 0
+     def partitionWork( p):
+         matched = []
+         localMutations = list(p)
 
-                while( cur_mut_idx < len(sorted_mutations)  and cur_reg_idx < len(sorted_regions) ):
+         if localMutations:
+             chrom=localMutations[0]["chrom"]
 
-                    cur_reg = sorted_regions[cur_reg_idx]
-                    cur_mut = sorted_mutations[cur_mut_idx]
+             localRegions = filter(lambda r : r['chrom']==chrom, regions_broadcast.value)
 
-                    if cur_mut["position"] < cur_reg["start"]:
-                        cur_mut_idx += 1
-                    elif cur_mut["position"] <= cur_reg["stop"]:
-                        matched.append(cur_mut)
-                        cur_mut_idx += 1
-                    else:
-                        cur_reg_idx += 1
+             if localRegions:
+                 sorted_mutations = sorted(localMutations, key=itemgetter('position'))
+                 sorted_regions = sorted(localRegions, key=itemgetter('start', 'stop'))
 
-        return matched
+                 cur_reg_idx = 0
+                 cur_mut_idx = 0
 
-    res = partitioned.rdd.mapPartitions(partitionWork)
+                 while( cur_mut_idx < len(sorted_mutations)  and cur_reg_idx < len(sorted_regions) ):
+
+                     cur_reg = sorted_regions[cur_reg_idx]
+                     cur_mut = sorted_mutations[cur_mut_idx]
+
+                     if cur_mut["position"] < cur_reg["start"]:
+                         cur_mut_idx += 1
+                     elif cur_mut["position"] <= cur_reg["stop"]:
+                         matched.append(cur_mut)
+                         cur_mut_idx += 1
+                     else:
+                         cur_reg_idx += 1
+
+         return matched
+
+     res = partitioned.rdd.mapPartitions(partitionWork)
 
     # Grouping
-    if groupby:
-        res = res.toDF().groupBy(groupby).count().rdd.map(lambda r: [r["tumor_type_id"],r["trinucleotide_id_r"], r["count"] ])
+     if groupby:
+         res = res.toDF().groupBy(groupby).count().rdd.map(lambda r: [r["tumor_type_id"],r["trinucleotide_id_r"], r["count"] ])
 
-    res = res.collect()
+     res = res.collect()
 
-    print(partitioned)
+    # print(partitioned)
+    #
+     print("Spark execution took %s seconds ---" % (time.time() - start_time))
 
-    print("Spark execution took %s seconds ---" % (time.time() - start_time))
     return res
