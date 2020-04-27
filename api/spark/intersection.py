@@ -7,9 +7,11 @@ import time
 
 def spark_intersect(mutation_table_name, regions_table_name, region_file_id, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=False):
 
-    # SQL VS MINE: 1507 (25min), 3888 (1h)
+    # SQL VS MINE: 1507 (25min), 3888 (1h,  no bins), 1101 (5 bins)
 
-    numBins = os.getenv('MUTVIZ_NUM_BINS', 5)
+
+    numBins = int(os.getenv('MUTVIZ_NUM_BINS', 5))
+    print("USING "+str(numBins)+" BINS.")
     start_time = time.time()
 
     os.environ["SPARK_HOME"] = "/var/lib/spark-2.4.5-bin-hadoop2.7"
