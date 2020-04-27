@@ -19,9 +19,9 @@ function yVal(bin) {
 
 // Highlith on the x-axis the interval corresponding to the the motif
 function uc3_highlightMotif(g) {
-    
+
     return;
-    
+
     g.svg.selectAll("line.motif").remove()
     g.svg.append("line")
         .attr("class", "motif")
@@ -123,7 +123,7 @@ function uc3_update(data, g, binSize, mutationTypes) {
     // Add the tracks to the plot
     uc3_addTracks(g, union);
 
-    
+
 
 }
 
@@ -147,9 +147,9 @@ function uc3(data, binSize, range, mutationTypes) {
     var g = {} // here we put all useful objects describing our plot
 
     // Set the dimensions and margins of the plot
-    g.margin = {top: 10, right: 30, bottom: 30, left: 40},
-        g.width  = 700 - g.margin.left - g.margin.right,
-        g.height = 150*data.length - g.margin.top - g.margin.bottom;
+    g.margin = {top: 10, right: 30, bottom: 30, left: 40};
+    g.width  = 700 - g.margin.left - g.margin.right;
+    g.height = 150*data.length - g.margin.top - g.margin.bottom;
 
     // Remove any pre-existing plot
     d3.select("#uc3 svg").html("");

@@ -8,20 +8,20 @@
             <div class="row">
 
                 <div class="col-md-12 text-center">
-                    <h4 style="margin-top: 15px">Trinucleotides</h4>
+                    <h4 style="margin-top: 15px">Box-plot</h4>
                 </div>
 
 
 
-                <div class="col-md-12" style="margin-top:10px; {{files_fake.length>0 && someAreValid?'background-color:#e6e6e6;':''}} ">
+                <div class="col-md-12" style="margin-top:10px; {{files.length>0 && someAreValid?'background-color:#e6e6e6;':''}} ">
 
-                    <div ng-if="files_fake.length==0 && !someAreReady || !someAreValid"
+                    <div ng-if="files.length==0 && !someAreReady || !someAreValid"
                          class="col-md-12 text-center"
                          style="padding-top: 20px;padding-bottom: 20px; background-color: #ffe28d">
                         No valid file in your <a href="#!/data">workspace</a>. Please, upload a region file or add a file from the repository.
                     </div>
 
-                    <div ng-if="files_fake.length>0 && !someAreReady && someAreValid"
+                    <div ng-if="files.length>0 && !someAreReady && someAreValid"
                          class="col-md-12 text-center"
                          style="padding-top: 20px;padding-bottom: 20px;">
                         Loading your workspace
@@ -30,13 +30,13 @@
                         </div>
                     </div>
 
-                    <div ng-show="files_fake.length>0 && someAreReady"
+                    <div ng-show="files.length>0 && someAreReady"
                          style="height: 90px;">
                         <label for="jtSelect">File:</label>
                         <select class="form-control" id="ttSelect" 
                                 ng-model="file_selector.name"
-                                ng-change="load(file_selector.name, true)" >
-                            <option ng-repeat="file in files_fake | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
+                                ng-change="load(file_selector.name, tumorTypes.current)" >
+                            <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
                         </select>
                     </div>
                 </div>
@@ -45,20 +45,20 @@
                     <label for="ttSelect">Tumor type:</label>
                     <select class="form-control" id="ttSelect"
                             ng-model="tumorTypes.current"
-                            ng-change="load(file_selector.name, true)">
+                            ng-change="load(file_selector.name, tumorTypes.current)">
                         <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
                 </div>
 
                 <!--div class="col-md-12" style="margin-top:10px;">
-                    <div class="form-group">
-                        <label for="minY">Min Y:</label>
-                        <input type="number" class="form-control" id="minY" 
-                               ng-model="plot.minY" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
+<div class="form-group">
+<label for="minY">Min Y:</label>
+<input type="number" class="form-control" id="minY" 
+ng-model="plot.minY" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
 
-                        <br>
-                    </div>
-                </div-->
+<br>
+</div>
+</div-->
 
                 <div class="col-md-12" style="margin-top:30px;">
 
@@ -67,19 +67,8 @@
                         <div class="col-md-7">
                             <b>Mutation types</b>
                         </div>
-                        <!--div class="col-md-5">
-                            <label class="checkbox-inline float-right">
-                                <input type="checkbox"  data-toggle="toggle" 
-                                       ng-change="updatePlot(file_selector.file, tumorTypes.current)"
-                                       ng-model="mutationTypes.stacked"> Stacked
-                            </label>
-
-                            <label class="checkbox-inline float-right">
-                                <input type="checkbox"  data-toggle="toggle" 
-                                       ng-change="updatePlot(file_selector.file, tumorTypes.current)"
-                                       ng-model="plot.showTotal"> Total
-                            </label>
-                        </div-->
+                        <div class="col-md-5 right">
+ <input type="checkbox" ng-model="show_percentage" ng-change="load(file_selector.name)"/>
 
                     </div>
 
@@ -100,13 +89,13 @@
                         </div>
 
                     </div>
-                    
+
                     <div class="row" ng-if="selectedTypes.length<defaultMutationTypes.length" style="margin-top: 25px;">
                         <div class="col-md-6">
                             <select class="form-control" id="ttSelect" ng-model="addingType">
                                 <option ng-repeat="addType in defaultMutationTypes" ng-value="addType" ng-if="!selectedTypes.includes(addType)">{{addType.from}}>{{addType.to}}</option>
                             </select>
-                    
+
                         </div>
 
                         <div class="col-md-6">
@@ -116,7 +105,7 @@
                         </div>
                     </div>
 
-                
+
 
                 </div>
 
@@ -130,6 +119,9 @@
                     <a id="dwn" target="_blank" style="display: none"></a>
 
                 </div>
+                
+               
+ 
 
             </div>
         </div>
@@ -142,8 +134,12 @@
                 Select a file.
             </div>
 
-            <div class="col-md-12" window-resize="load(file_selector.name,false)">
-                <div id="uc4" class="plot-container">
+            <div class="col-md-12" style="padding-left: 50px; padding-right: 50px;">
+                <div id="slider"></div>
+            </div>
+
+            <div class="col-md-12" window-resize="load(file_selector.name, tumorTypes.current)">
+                <div id="uc5" class="plot-container">
                     <svg></svg>
                 </div>
             </div>

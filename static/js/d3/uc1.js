@@ -71,7 +71,7 @@ function uc1_highlightMotif(g, area) {
         .attr("fill", 'rgba(0, 169, 190, 0.17)')
         .attr("width", g.xAxisScale(area.to)-g.xAxisScale(area.from))
         .attr("height", g.height);
-    
+
 }
 
 
@@ -118,7 +118,7 @@ function uc1_addBars(g, groupId, bins, alreadyAddedMutations, color) {
 
 
 function uc1_addLegendItem(g, index, color, text) {
-    
+
     //append legend colour blocks
     g.legend.append("rect")
         .attr("x", 0)
@@ -176,7 +176,7 @@ function uc1_update(data, g, binSize, minY, mutationTypes, stacked, showTotal) {
      * The max function iterates over the bins, and for each bin (another array) takes the number of contained items (length * of the array containing the items) */
 
     dataMin = d3.max(bins, function(d) { return yVal(d)})
-        yMin = dataMin + 20
+    yMin = dataMin + 20
     if(minY > dataMin)
         yMin = minY + 20
     g.yAxisScale.domain([0,yMin])//.domain([0,  + 20]);
@@ -287,17 +287,17 @@ function uc1_rescaleX(data, g, binSize, range, mutationTypes, stacked, showTotal
 
 /* Build the graph with an initial number of bins */
 function uc1(data, binSize, range, mutationTypes, stacked, showTotal, width, height) {
-    
+
     console.log("width: "+width)
     console.log("height: "+height)
 
     var g = {} // here we put all useful objects describing our plot
 
     // Set the dimensions and margins of the plot
-    g.margin = {top: 0, left: 100}, //bottom
-        g.width  = width - 2*g.margin.left ,
-        g.height = height - 2*g.margin.top 
-    
+    g.margin = {top: 0, left: 100}; //bottom
+    g.width  = width - 2*g.margin.left;
+    g.height = height - 2*g.margin.top 
+
     console.log("deleting");
 
     d3.select("#uc1 svg").html("");

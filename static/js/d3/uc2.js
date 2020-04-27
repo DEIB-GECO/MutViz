@@ -81,7 +81,7 @@ function uc2_update(data, g, binSize, mutationTypes) {
     console.log(data);
     filtered_f1   = uc2_getFilteredData(data.f1.distances, mutationTypes);
     filtered_f2 = uc2_getFilteredData(data.f2.distances, mutationTypes);
-    
+
     console.log(filtered_f1)
 
     var binsf1    = histogram(filtered_f1);
@@ -145,9 +145,9 @@ function uc2(data, binSize, range, mutationTypes, stacked) {
     var g = {} // here we put all useful objects describing our plot
 
     // Set the dimensions and margins of the plot
-    g.margin = {top: 10, right: 30, bottom: 30, left: 40},
-        g.width  = 700 - g.margin.left - g.margin.right,
-        g.height = 400 - g.margin.top - g.margin.bottom;
+    g.margin = {top: 10, right: 30, bottom: 30, left: 40};
+    g.width  = 700 - g.margin.left - g.margin.right;
+    g.height = 400 - g.margin.top - g.margin.bottom;
 
     // Remove any pre-existing plot
     d3.select("#uc2 svg").html("");

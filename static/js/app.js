@@ -33,6 +33,15 @@ app.config(['$routeProvider', '$locationProvider',
         templateUrl: 'views/uc4.html',
         controller: 'uc4_ctrl',
         controllerAs: 'uc4c'
+      })
+      .when('/uc5', {
+        templateUrl: 'views/uc5.html',
+        controller: 'uc5_ctrl',
+        controllerAs: 'uc5c'
+      }).when('/uc6', {
+        templateUrl: 'views/uc6.html',
+        controller: 'uc6_ctrl',
+        controllerAs: 'uc6c'
       }).otherwise('/home');
 
 }]);
@@ -45,7 +54,7 @@ app.filter('reverse', function() {
 
 
 
-app.directive('windowResize', ['$window', function ($window) {
+/*app.directive('windowResize', ['$window', function ($window) {
 
      return {
         link: link,
@@ -54,8 +63,8 @@ app.directive('windowResize', ['$window', function ($window) {
 
      function link(scope, element, attrs){
 
-       angular.element($window).bind('resize', function(){
-           scope.reload();
-       });    
+       angular.element($window).bind('resize', function(scope){
+               scope.reload();
+       },scope);    
      }    
- }]);
+ }]);*/

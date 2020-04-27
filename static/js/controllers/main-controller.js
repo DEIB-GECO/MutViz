@@ -200,6 +200,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         .then(
         function success (response) {
             $rootScope.tumorTypes.available = response.data;
+            $rootScope.tumorTypes.current = response.data[0];
             console.log("loaded tumor types");
 
         }).catch(

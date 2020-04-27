@@ -1,9 +1,8 @@
 var RECT_HEIGHT = 50;
 
-// Function that builds the color scale
-var uc4_getColor = d3.scaleLinear()
-.range(["white", "#e6194B"])
-.domain([0,1]);
+// List of available colors
+var uc4_colors = ["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#808000", "#ffd8b1", "#000075", "#a9a9a9", "#ffffff", "#000000"];
+
 
 // Get y value
 function yVal(bin) {
@@ -19,9 +18,9 @@ function yVal(bin) {
 
 // Highlith on the x-axis the interval corresponding to the the motif
 function uc4_highlightMotif(g) {
-    
+
     return;
-    
+
     g.svg.selectAll("line.motif").remove()
     g.svg.append("line")
         .attr("class", "motif")
@@ -123,7 +122,7 @@ function uc4_update(data, g, binSize, mutationTypes) {
     // Add the tracks to the plot
     uc4_addTracks(g, union);
 
-    
+
 
 }
 
@@ -142,46 +141,178 @@ function uc4_rescaleX(data, g, binSize, range, mutationTypes) {
 }
 
 /* Build the graph with an initial number of bins */
-function uc4(data, mutationTypes) {
-    
+function uc4(data, mutationTypes, tumorType, width, height, animate) {
+
+
+    console.log("width: "+width);
+
     console.log("called uc4 with data: ");
-    console.log(data);
     console.log(mutationTypes);
+    console.log(tumorType);
 
     var g = {} // here we put all useful objects describing our plot
+    console.log(mutationTypes.length);
 
+    g.titleBoxHeight = 25;
+
+    g.distance = 10; // between successive plots
     // Set the dimensions and margins of the plot
-    g.margin = {top: 10, right: 30, bottom: 30, left: 40},
-        g.width  = 700 - g.margin.left - g.margin.right,
-        g.height = 150*data.length - g.margin.top - g.margin.bottom;
+    g.margin = {top: 0, right: 0, bottom: 30, left: 50};
+    g.width  = (width-1.5*g.margin.left-g.distance*(mutationTypes.length-1))/mutationTypes.length;
+    g.height = height - 2*g.margin.top;
+
+    console.log("width: "+g.width)
 
     // Remove any pre-existing plot
     d3.select("#uc4 svg").html("");
 
-    // Setup the plot container
-    g.svg = d3.select("#uc4 svg")  
-        .append("g")
-        .attr("transform","translate(" + g.margin.left + "," + g.margin.top + ")");
+    g.html = d3.select("#uc4 svg");
 
-    // Setup the x axis
-    g.xAxisScale = d3.scaleLinear().domain([range.min,range.max]).range([0, g.width]);
-    g.xAxis = g.svg.append("g").attr("transform", "translate(0," + g.height + ")");
-    g.xAxis.call(d3.axisBottom(g.xAxisScale));
+    g.svg = [];
+    g.xAxis = [];
+    g.yAxis = [];
 
-    // Add the y axis (just the svg element, later it will be configured)
-    g.yAxis = g.svg.append("g").attr("class","y-axis");
+    g.xAxisDistance = 0;
+
+    g.yMax = Math.max.apply(null, data.filter(function(t){return t.tumorType==tumorType.identifier})[0].data.filter(
+        function(entry){
+            return mutationTypes.map(function(el){return el.from+"-"+el.to}).includes(entry[0]+"-"+entry[1]);
+        }).map(function(entry){return entry[4]}));
+
+    // leave same space above the maximum
+    g.yMax =  g.yMax + 0.1* g.yMax;
+
+    console.log("yMax: "+g.yMax);
+
+    mutationTypes.forEach(function(mutationType,index) {
+
+        actual_data = data.filter(function(t){return t.tumorType==tumorType.identifier})[0].data.filter(
+            function(entry){
+                return entry[0]==mutationType.from && entry[1]==mutationType.to && entry[0]!=entry[1];
+            });
+
+        // Setup the plot container
+        x_translate = (g.margin.left + index*g.width+index*g.distance);
+        g.svg[index]  = g.html 
+            .append("g")
+            .attr("transform","translate(" +x_translate + "," + (g.margin.top+g.titleBoxHeight) + ")");
+
+        // Setup the x axis
+
+        // set the ranges
+        g.xAxis[index] = d3.scaleBand()
+            .range([0, g.width])
+            .padding(0.1);
+        g.yAxis[index] = d3.scaleLinear()
+            .range([g.height-20, 0]);
+
+        var tip = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function(d) {
+            return "<strong>"+d[2]+"-"+d[3]+"</strong> <span style='color:yellow'>" + d[4].toFixed(3) + "</span>";
+        });
+
+        g.svg[index].call(tip);
+
+        // Scale the range of the data in the domains
+        g.xAxis[index].domain(actual_data.map(function(d) { return d[2]+"-"+d[3]; }));
+        g.yAxis[index].domain([0, g.yMax]);
+
+        // append the rectangles for the bar chart
+        if(animate){
+            g.svg[index].selectAll(".bar")
+                .data(actual_data)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", function(d) { return g.xAxis[index](d[2]+"-"+d[3]); })
+                .attr("width", g.xAxis[index].bandwidth())
+                .attr("height", function(d) { return g.height + g.titleBoxHeight- g.yAxis[index](0); }) // always equal to 0
+                .attr("y", function(d) { return g.yAxis[index](0); })
+            //.attr("y", function(d) { return g.yAxis[index](d[4])+g.titleBoxHeight  })
+            //.attr("height", function(d) { return g.height - g.yAxis[index](d[4]); })
+                .style("fill",uc4_colors[index])
+                .on('mouseover', tip.show)
+                .on('mouseout', tip.hide);
+        } else {
+            g.svg[index].selectAll(".bar").data(actual_data)
+                .enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", function(d) { return g.xAxis[index](d[2]+"-"+d[3]); })
+                .attr("width", g.xAxis[index].bandwidth())
+                .attr("y", function(d) { return g.yAxis[index](d[4])+g.titleBoxHeight  })
+                .attr("height", function(d) { return g.height - g.yAxis[index](d[4]); })
+                .style("fill",uc4_colors[index])
+                .on('mouseover', tip.show)
+                .on('mouseout', tip.hide);
+        }
+
+        g.svg[index].selectAll("rect")
+            .transition()
+            .duration(1000)
+            .attr("y", function(d) { return g.yAxis[index](d[4])+g.titleBoxHeight; })
+            .attr("height", function(d) { return g.height - g.yAxis[index](d[4]); })
+            .delay(function(d,i){console.log(i) ; return(i*100)})
+
+        // add the x Axis
+        g.svg[index].append("g")
+            .attr("class", "xaxis")
+            .attr("transform", "translate(0," + (g.height +g.xAxisDistance + g.titleBoxHeight)+ ")")
+            .style("font-size", "0.7em")
+            .call(d3.axisBottom(g.xAxis[index]));
+
+        g.svg[index].selectAll(".xaxis text").attr("transform", "translate(-13,+20) rotate(-90)");
+
+        // add the y Axis
+        if(index==0){
+            g.svg[index].append("g")
+                .attr("transform", "translate(-5,"+g.titleBoxHeight+")")
+                .style("font-size", "0.8em")
+                .call(d3.axisLeft(g.yAxis[index]));
+        }
+
+        g.svg[index].append("rect")
+            .attr("x", 0)
+            .attr("y", g.titleBoxHeight)
+            .attr("height", g.height+g.xAxisDistance)
+            .attr("width", g.width)
+            .style("stroke", "black")
+            .style("fill", "none")
+            .style("stroke-width", 2);
+
+
+
+        g.svg[index].append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("height", g.titleBoxHeight)
+            .attr("width", g.width)
+            .style("stroke", "black")
+            .style("fill", "#efefef")
+            .style("stroke-width", 2);
+
+        g.svg[index].append("text")
+            .attr("x", g.width/2)
+            .attr("y", g.titleBoxHeight / 2)
+            .attr("dy", ".35em")
+            .style("stroke", "black")
+            .text(mutationType.from+">"+mutationType.to);
+
+    });
+
 
     // Label for the x axis 
-    g.svg.append("text")             
+    /*g.svg.append("text")             
         .attr("transform",
               "translate(" + (g.width/2) + " ," + 
               (g.height + g.margin.top + 30) + ")")
         .style("text-anchor", "middle")
         .style("font-size", "0.8em")
-        .text("distance (bp)");
+        .text("triplets");*/
+
 
     // Compute the bins and build the plot
-    uc4_update(data, g, binSize, mutationTypes);
+    //uc4_update(data, g, binSize, mutationTypes);
 
     // Return the plot description
     return g;
