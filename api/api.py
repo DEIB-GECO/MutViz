@@ -11,8 +11,11 @@ from scipy.stats import ks_2samp
 from sqlalchemy import between
 from sqlalchemy import func
 
+from api.spark import *
+
 from api.db import *
 from api.jobs import register_job, update_job, get_job_result, unregister_job
+from api.spark.intersection import spark_intersect
 from api.utils import *
 
 # documentation:
@@ -69,12 +72,16 @@ with app.app_context():
     tumor_type_dict = dict([(x.tumor_type_id, (x.tumor_type, x.description, x.mutation_count)) for x in res])
     tumor_type_reverse_dict = dict([(x.tumor_type, x.tumor_type_id) for x in res])
 
-    res = Repository.query.all()
+    res = TrinucleotideEncoded.query.all()
+    trinucleotides_dict = dict([(x.id, (x.mutation, x.triplet, x.from_allele, x.to_allele)) for x in res])
+
+
+    res = UserFile.query.all()
     repositories_dict = dict()
     for r in res:
-        r_count = db.engine.execute(sqlalchemy.text(f"SELECT COUNT(*) FROM {r.repository_id}")).fetchone()
+        r_count = db.engine.execute(sqlalchemy.text(f"SELECT COUNT(*) FROM regions WHERE file_id={r.id}")).fetchone()
         if r_count:
-            repositories_dict[r.repository_id] = (r.name, r.description, r_count[0])
+            repositories_dict[r.name] = (r.id, r.name, r.description, r_count[0])
     print(repositories_dict)
     del res
 
@@ -99,13 +106,13 @@ def get_tumor_types():
 # API L02
 @app.route(base_url + '/api/repository/')
 def get_repository():
-    repositories = [{"identifier": identifier,
+    repositories = [{"identifier": id,
                      "name": name,
                      "description": description,
                      "count": count,
                      }
-                    for identifier, (name, description, count) in
-                    sorted(repositories_dict.items(), key=lambda x: x[1][0])  # sort by name
+                    for identifier, (id, name, description, count) in
+                    sorted(repositories_dict.items(), key=lambda x: x[1][1])  # sort by name
                     ]
 
     # list(map(lambda x: {"identifier": x.repository_id,
@@ -225,7 +232,7 @@ def get_distances():
     ### End of asynchronous computation
 
     return json.dumps(
-        {**{"jobID": jobID, 'correct_region_size': len(regions) if not repoId else repositories_dict[repoId][2]},
+        {**{"jobID": jobID, 'correct_region_size': len(regions) if not repoId else repositories_dict[repoId][3]},
          **({"error": error_regions} if error_regions else {})}
     )
 
@@ -233,6 +240,85 @@ def get_distances():
 # API R01r
 @app.route(base_url + '/api/distance/<string:jobID>', methods=['GET'])
 def get_distances_r(jobID):
+    # print(jobID)
+    return get_job_result(jobID)
+
+
+
+# API R02
+@app.route(base_url + '/api/donor/', methods=['POST'])
+def get_donors():
+    repoId = request.form.get('repoId')
+    logger.debug(f"repoId: {repoId}")
+
+    regions = request.form.get('regions')
+    if not regions:
+        logger.debug(f"regions: {regions}")
+
+    tumorType = request.form.get('tumorType')
+    logger.debug(f"tumorType: {tumorType}")
+
+    if not (repoId or regions):
+        abort(400)
+    # if repoId and
+
+    error_regions = []
+    if not repoId:
+        regions, error_regions = parse_input_regions(regions)
+        #todo: cambia
+
+    # Generate a jobID
+    global job_counter
+    job_counter = job_counter + 1
+    if job_counter >= 100000:
+        job_counter = 1
+    jobID = str(uuid.uuid1()).replace('-', '_') + "_" + str(job_counter)
+    register_job(jobID)
+    # jobs[jobID] = None
+
+    logger.debug(f"jobID: {jobID}")
+
+    # TODO remove after testing
+    # regions = list(regions)[:1000]
+    ### Asynchronous computation
+    def async_function():
+        try:
+
+            mutations =  spark_intersect(t_mutation_trinucleotide_test.name, t_regions.name, repositories_dict[repoId][0], groupby=["tumor_type_id", "trinucleotide_id_r"])
+
+            result  = defaultdict(dict)
+            mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  trinucleotides_dict[x[1]][0], x[2]], mutations))
+
+            for m in mutations:
+                result[m[0]][m[1]] = m[2]
+
+            result = [
+                {
+                    "count" : result
+                }
+            ]
+            # print(result)
+
+            update_job(jobID, result)
+            logger.info('JOB DONE: ' + jobID)
+        except Exception as e:
+            unregister_job(jobID)
+            logger.error("Async error", e)
+            raise e
+
+    executor.submit(async_function)
+    # async_function()
+    ### End of asynchronous computation
+
+    return json.dumps(
+        {**{"jobID": jobID, 'correct_region_size': len(regions) if not repoId else repositories_dict[repoId][3]},
+         **({"error": error_regions} if error_regions else {})}
+    )
+
+
+# API R02r
+@app.route(base_url + '/api/donor/<string:jobID>', methods=['GET'])
+def get_donor_r(jobID):
     # print(jobID)
     return get_job_result(jobID)
 
