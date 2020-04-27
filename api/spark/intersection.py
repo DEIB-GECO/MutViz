@@ -35,9 +35,13 @@ def spark_intersect(mutation_table_name, regions_table_name, region_file_id, reg
     mutations = DataFrameReader(sql_ctx).jdbc(
         url='jdbc:%s' % url, table=mutation_table_name, properties=properties
     )
+
+
+
     regions_df = DataFrameReader(sql_ctx).jdbc(
         url='jdbc:%s' % url, table=regions_table_name, properties=properties
     ).rdd.filter(lambda r: r["file_id"]==region_file_id).toDF()
+
 
     # new
     if useSQL :
@@ -55,20 +59,21 @@ def spark_intersect(mutation_table_name, regions_table_name, region_file_id, reg
      regions = regions_df.collect()
      regions_broadcast = sc.broadcast( sorted(regions, key=itemgetter('start', 'stop')))
 
-     partitioned = mutations.withColumn("bin", mutations["position"]%numBins).repartition("chrom", "bin")
+     partitioned = mutations.withColumn("bin", mutations["position"]%numBins).repartition("chrom", "bin").sortWithinPartitions("position")
 
-     print("number of partitions: "+str(partitioned.rdd.getNumPartitions()))
      def partitionWork( p):
+
          matched = []
          localMutations = list(p)
 
          if localMutations:
              chrom=localMutations[0]["chrom"]
+             print("chrom "+str(chrom))
 
              localRegions = filter(lambda r : r['chrom']==chrom, regions_broadcast.value)
 
              if localRegions:
-                 sorted_mutations = sorted(localMutations, key=itemgetter('position'))
+                 sorted_mutations = localMutations #sorted(localMutations, key=itemgetter('position'))
                  sorted_regions = sorted(localRegions, key=itemgetter('start', 'stop'))
 
                  cur_reg_idx = 0
