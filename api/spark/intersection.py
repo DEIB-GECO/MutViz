@@ -7,7 +7,7 @@ import time
 
 def spark_intersect(mutation_table_name, regions_table_name, region_file_id, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=False):
 
-    # SQL VS MINE: 1507 (25min), 3888 (1h,  no bins), 1101 (5 bins)
+    # SQL VS MINE: 1507 (25min), 3888 (1h,  no bins), 1101 (5 bins), 994 [100]
 
 
     numBins = int(os.getenv('MUTVIZ_NUM_BINS', 5))
@@ -39,8 +39,9 @@ def spark_intersect(mutation_table_name, regions_table_name, region_file_id, reg
 
 
     regions_df = DataFrameReader(sql_ctx).jdbc(
-        url='jdbc:%s' % url, table=regions_table_name, properties=properties
-    ).rdd.filter(lambda r: r["file_id"]==region_file_id).toDF()
+        url='jdbc:%s' % url, table=regions_table_name, properties=properties,
+        predicates=["file_id="+str(region_file_id)]
+    )
 
 
     # new
