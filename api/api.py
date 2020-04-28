@@ -13,6 +13,8 @@ from sqlalchemy import func
 
 from api.spark import *
 
+#todo:optin to set spark folder
+
 from api.db import *
 from api.jobs import register_job, update_job, get_job_result, unregister_job
 from api.spark.intersection import spark_intersect
@@ -284,14 +286,36 @@ def get_donors():
     ### Asynchronous computation
     def async_function():
         try:
+            session = db.session
+            #session.execute("set enable_seqscan=false")
 
-            if DEBUG_MODE:
-                mutations =  spark_intersect(t_mutation_trinucleotide_test.name, t_regions.name, repositories_dict[repoId][0], groupby=["tumor_type_id", "trinucleotide_id_r"])
+            exists = db.session.query(db.session.query(TrinucleotideCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
+
+            if exists:
+                mutations = db.session.query(TrinucleotideCache.file_id, TrinucleotideCache.trinucleotide_id, TrinucleotideCache.count).filter_by(file_id=repositories_dict[repoId][0])
             else:
-                mutations =  spark_intersect(t_mutation_trinucleotide.name, t_regions.name, repositories_dict[repoId][0], groupby=["tumor_type_id", "trinucleotide_id_r"])
+                if DEBUG_MODE:
+                    mutations =  spark_intersect(t_mutation_trinucleotide_test.name, t_regions.name, repositories_dict[repoId][0], groupby=["tumor_type_id", "trinucleotide_id_r"])
+                    #values = list(map(
+                    #    lambda m: TrinucleotideCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0],
+                    #                                 trinucleotide_id=m[1], count=m[2]), mutations))
+                    #session.add_all(values)
+                    #session.commit()
+                    #session.close()
+                else:
+                    mutations =  spark_intersect(t_mutation_trinucleotide.name, t_regions.name, repositories_dict[repoId][0], groupby=["tumor_type_id", "trinucleotide_id_r"])
+
+                    values = list(map(lambda m:  TrinucleotideCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], trinucleotide_id=m[1], count=m[2]), mutations))
+                    session.add_all(values)
+                    session.commit()
+                    session.close()
+
 
             result  = defaultdict(dict)
             mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  trinucleotides_dict[x[1]][0], x[2]], mutations))
+
+
+
 
             for m in mutations:
                 result[m[0]][m[1]] = {"trinucleotide":m[1], "mutation":m[1][2:-2], "count" : m[2]}
