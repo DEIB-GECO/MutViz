@@ -22,7 +22,7 @@ def spark_intersect(mutation_table_name, regions_table_name, region_file_id, reg
     driver_class = "org.postgresql.Driver"
 
     spark = SparkSession.builder \
-            .master("local")      \
+            .master("local[*]")      \
             .appName("Word Count") \
             .config("spark.jars", jdbc_jar) \
             .config("spark.driver.memory", memory) \
