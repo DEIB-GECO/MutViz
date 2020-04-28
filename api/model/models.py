@@ -81,6 +81,14 @@ t_mutation_trinucleotide_test = db.Table(
     db.Column('trinucleotide_id_r', db.SmallInteger)
 )
 
+class TrinucleotideCache(db.Model):
+    __tablename__ = 'trinucleotide_cache'
+
+    file_id = db.Column(db.SmallInteger, primary_key=True, nullable=False)
+    tumor_type_id = db.Column(db.SmallInteger, primary_key=True, nullable=False)
+    trinucleotide_id = db.Column(db.SmallInteger, primary_key=True, nullable=False)
+    count = db.Column(db.Integer, nullable=False)
+
 
 
 t_regions = db.Table(
