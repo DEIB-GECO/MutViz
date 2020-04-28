@@ -7,10 +7,11 @@ import time
 
 def spark_intersect(mutation_table_name, regions_table_name, region_file_id, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=False):
 
-    # SQL VS MINE: 1507 (25min), 3888 (1h,  no bins), 1101 (5 bins), 994 [100]
+    # SQL VS MINE: 3888[1h] , 1507 (25min), 1018[bin=20], (1h,  no bins), 1101 (5 bins), 994 [100] - 952 [200] 916(ctcf) 941[41]
 
 
     numBins = int(os.getenv('MUTVIZ_NUM_BINS', 5))
+    memory = os.getenv('MUTVIZ_DRIVER_MEMORY', "50g")
     print("USING "+str(numBins)+" BINS.")
     start_time = time.time()
 
@@ -24,7 +25,7 @@ def spark_intersect(mutation_table_name, regions_table_name, region_file_id, reg
             .master("local")      \
             .appName("Word Count") \
             .config("spark.jars", jdbc_jar) \
-            .config("spark.driver.memory", "50g") \
+            .config("spark.driver.memory", memory) \
             .getOrCreate()
 
     sql_ctx = SQLContext(spark.sparkContext)
@@ -98,6 +99,7 @@ def spark_intersect(mutation_table_name, regions_table_name, region_file_id, reg
      res = partitioned.rdd.mapPartitions(partitionWork)
 
     # Grouping
+     #todo: if empty
      if groupby:
          res = res.toDF().groupBy(groupby).count().rdd.map(lambda r: [r["tumor_type_id"],r["trinucleotide_id_r"], r["count"] ])
 
