@@ -292,7 +292,7 @@ def get_donors():
             exists = db.session.query(db.session.query(TrinucleotideCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
 
             if exists:
-                mutations = db.session.query(TrinucleotideCache.file_id, TrinucleotideCache.trinucleotide_id, TrinucleotideCache.count).filter_by(file_id=repositories_dict[repoId][0])
+                mutations = db.session.query(TrinucleotideCache.file_id, TrinucleotideCache.tumor_type_id, TrinucleotideCache.trinucleotide_id, TrinucleotideCache.count).filter_by(file_id=repositories_dict[repoId][0])
             else:
                 if DEBUG_MODE:
                     mutations =  spark_intersect(t_mutation_trinucleotide_test.name, t_regions.name, repositories_dict[repoId][0], groupby=["tumor_type_id", "trinucleotide_id_r"])
