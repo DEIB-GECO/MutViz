@@ -304,7 +304,7 @@ def get_donors():
                 if DEBUG_MODE:
                     mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, groupby=["tumor_type_id", "trinucleotide_id_r"])
                 else:
-                    mutations =  spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1], repositories_dict[repoId][0], DB_CONF, groupby=["tumor_type_id", "trinucleotide_id_r"])
+                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, groupby=["tumor_type_id", "trinucleotide_id_r"])
 
                     values = list(map(lambda m:  TrinucleotideCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], trinucleotide_id=m[1], count=m[2]), mutations))
                     session.add_all(values)
