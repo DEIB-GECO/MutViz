@@ -63,6 +63,7 @@ def activate_job_cleaner():
 
 with app.app_context():
     DEBUG_MODE = False
+    #DEBUG_MODE = True
     logger = flask.current_app.logger
 
 chromosome_dict = dict([(str(x), x) for x in range(1, 23)] + [('x', 23), ('y', 24), ('mt', 25), ('m', 25), ])
@@ -82,9 +83,7 @@ with app.app_context():
     res = UserFile.query.all()
     repositories_dict = dict()
     for r in res:
-        r_count = db.engine.execute(sqlalchemy.text(f"SELECT COUNT(*) FROM regions WHERE file_id={r.id}")).fetchone()
-        if r_count:
-            repositories_dict[r.name] = (r.id, r.name, r.description, r_count[0])
+        repositories_dict[str(r.id)] = (r.id, r.name, r.description, r.count)
     print(repositories_dict)
     del res
 
@@ -172,28 +171,32 @@ def get_distances():
             session = db.session
             session.execute("set enable_seqscan=false")
 
-            if not repoId:
-                table_name = "t_" + jobID
-                logger.debug(f"{jobID} -> {table_name}")
+            #if not repoId:
+            #    table_name = "t_" + jobID
+            #    logger.debug(f"{jobID} -> {table_name}")
 
-                temp_table = create_upload_table(session, table_name, regions)
-            else:
-                table_name = repoId
-                temp_table = create_upload_table(session, table_name, create=False, upload=False)
+            #    temp_table = create_upload_table(session, table_name, regions)
+            #else:
+            #    table_name = repoId
+            #    temp_table = create_upload_table(session, table_name, create=False, upload=False)
 
+            #MutationTable = create_upload_table(session, "mutation_trinucleotide", create=False, upload=False)
+            RegionTable = create_upload_table(session, "ctcf_h1", create=False, upload=False)
             query = session \
                 .query(MutationGroup.tumor_type_id,
-                       MutationGroup.pos - temp_table.c.pos,
+                       MutationGroup.pos - RegionTable.c.pos,
                        MutationGroup.mutation_code_id,
                        func.sum(MutationGroup.mutation_count)) \
-                .join(temp_table,
-                      (MutationGroup.chrom == temp_table.c.chrom) &
-                      between(MutationGroup.pos, temp_table.c.pos - maxDistance, temp_table.c.pos + maxDistance)) \
+                .join(RegionTable,
+                      (MutationGroup.chrom == RegionTable.c.chrom)  &
+                      between(MutationGroup.pos, RegionTable.c.pos - maxDistance, RegionTable.c.pos + maxDistance)) \
                 .group_by(MutationGroup.tumor_type_id,
-                          MutationGroup.pos - temp_table.c.pos,
+                          MutationGroup.pos - RegionTable.c.pos,
                           MutationGroup.mutation_code_id)
+
+            query
             if tumorType:
-                query = query.filter(MutationGroup.tumor_type_id == tumor_type_reverse_dict[tumorType])
+                query = query.filter(MutationGrouped.tumor_type_id == tumor_type_reverse_dict[tumorType])
 
 
 
@@ -234,6 +237,10 @@ def get_distances():
     # async_function()
     ### End of asynchronous computation
 
+    print(jobID)
+    print(repositories_dict)
+    print(repositories_dict[repoId])
+
     return json.dumps(
         {**{"jobID": jobID, 'correct_region_size': len(regions) if not repoId else repositories_dict[repoId][3]},
          **({"error": error_regions} if error_regions else {})}
@@ -263,7 +270,6 @@ def get_donors():
 
     if not (repoId or regions):
         abort(400)
-    # if repoId and
 
     error_regions = []
     if not repoId:
@@ -287,23 +293,18 @@ def get_donors():
     def async_function():
         try:
             session = db.session
-            #session.execute("set enable_seqscan=false")
+            session.execute("set enable_seqscan=false")
 
             exists = db.session.query(db.session.query(TrinucleotideCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
 
             if exists:
                 mutations = db.session.query( TrinucleotideCache.tumor_type_id, TrinucleotideCache.trinucleotide_id, TrinucleotideCache.count).filter_by(file_id=repositories_dict[repoId][0])
             else:
+
                 if DEBUG_MODE:
-                    mutations =  spark_intersect(t_mutation_trinucleotide_test.name, t_regions.name, repositories_dict[repoId][0], groupby=["tumor_type_id", "trinucleotide_id_r"])
-                    #values = list(map(
-                    #    lambda m: TrinucleotideCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0],
-                    #                                 trinucleotide_id=m[1], count=m[2]), mutations))
-                    #session.add_all(values)
-                    #session.commit()
-                    #session.close()
+                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, groupby=["tumor_type_id", "trinucleotide_id_r"])
                 else:
-                    mutations =  spark_intersect(t_mutation_trinucleotide.name, t_regions.name, repositories_dict[repoId][0], groupby=["tumor_type_id", "trinucleotide_id_r"])
+                    mutations =  spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1], repositories_dict[repoId][0], DB_CONF, groupby=["tumor_type_id", "trinucleotide_id_r"])
 
                     values = list(map(lambda m:  TrinucleotideCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], trinucleotide_id=m[1], count=m[2]), mutations))
                     session.add_all(values)
@@ -314,13 +315,8 @@ def get_donors():
             result  = defaultdict(dict)
             mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  trinucleotides_dict[x[1]][0], x[2]], mutations))
 
-
-
-
             for m in mutations:
                 result[m[0]][m[1]] = {"trinucleotide":m[1], "mutation":m[1][2:-2], "count" : m[2]}
-
-            # print(result)
 
             update_job(jobID, result)
             logger.info('JOB DONE: ' + jobID)
@@ -330,8 +326,6 @@ def get_donors():
             raise e
 
     executor.submit(async_function)
-    # async_function()
-    ### End of asynchronous computation
 
     return json.dumps(
         {**{"jobID": jobID, 'correct_region_size': len(regions) if not repoId else repositories_dict[repoId][3]},

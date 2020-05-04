@@ -2,6 +2,8 @@
    UC4 Controller
    #################### */
 app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, $http) {
+    
+    
 
     /* # Initialization # */
     window.scroll(0, 0);
@@ -66,7 +68,7 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     }
 
     $scope.loadFile = function(filename) {
-
+        console.log($rootScope.repository)
 
         console.log("loading file "+filename);
 

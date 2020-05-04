@@ -1,10 +1,18 @@
 
 DB_CONF = {
-    "postgres_url":"localhost:5433",
-    "postgres_user":"gulino",
+    "postgres_url":"localhost:5432",
+    "postgres_user":"mutviz",
     "postgres_pw":"stefanoceri",
     "postgres_db":"mutviz"
 }
+
+# DB_CONF = {
+#     "postgres_url":"localhost:5433",
+#     "postgres_user":"gulino",
+#     "postgres_pw":"stefanoceri",
+#     "postgres_db":"mutviz"
+# }
+
 
 
 def get_db_uri():

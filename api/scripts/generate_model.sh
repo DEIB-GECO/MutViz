@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 
-TABLES="user_file,regions,mutation_trinucleotide_test,tumor_type,trinucleotide_encoded,mutation_code"
+#TABLES="user_file,regions,mutation_trinucleotide_test,tumor_type,trinucleotide_encoded,mutation_code"
+TABLES="mutation_trinucleotide"
 
-postgres_url="localhost:5433"
-postgres_user="gulino"
+postgres_url="localhost:5432"
+postgres_user="mutviz"
 postgres_pw="stefanoceri"
 postgres_db="mutviz"
 

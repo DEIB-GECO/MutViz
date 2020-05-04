@@ -1,10 +1,10 @@
 # coding: utf-8
-from sqlalchemy import Boolean, Column, Integer, SmallInteger, String, Table
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, SmallInteger, String, Table
 from sqlalchemy.schema import FetchedValue
 from flask_sqlalchemy import SQLAlchemy
 
 
-db = SQLAlchemy(session_options={"autoflush": False,'autocommit':False,'expire_on_commit':False,})
+db = SQLAlchemy()
 
 
 
@@ -19,24 +19,14 @@ class MutationCode(db.Model):
 
 
 
-t_mutation_trinucleotide_test = db.Table(
-    'mutation_trinucleotide_test',
-    db.Column('donor_id', db.Integer),
-    db.Column('tumor_type_id', db.SmallInteger),
-    db.Column('chrom', db.SmallInteger),
-    db.Column('position', db.Integer),
-    db.Column('mutation_code_id', db.SmallInteger),
-    db.Column('trinucleotide_id_r', db.SmallInteger)
-)
-
-
-
-t_regions = db.Table(
-    'regions',
-    db.Column('file_id', db.SmallInteger, nullable=False, server_default=db.FetchedValue()),
+t_mutation_trinucleotide = db.Table(
+    'mutation_trinucleotide',
+    db.Column('donor_id', db.Integer, nullable=False),
+    db.Column('tumor_type_id', db.SmallInteger, nullable=False),
     db.Column('chrom', db.SmallInteger, nullable=False),
-    db.Column('start', db.Integer, nullable=False),
-    db.Column('stop', db.Integer, nullable=False)
+    db.Column('position', db.Integer, nullable=False),
+    db.Column('mutation_code_id', db.ForeignKey(u'mutation_code.mutation_code_id'), db.ForeignKey(u'trinucleotide_encoded.id'), nullable=False),
+    db.Column('trinucleotide_id_r', db.SmallInteger, nullable=False)
 )
 
 
@@ -49,21 +39,3 @@ class TrinucleotideEncoded(db.Model):
     triplet = db.Column(db.String(3), nullable=False)
     from_allele = db.Column(db.String(1), nullable=False)
     to_allele = db.Column(db.String(1), nullable=False)
-
-
-
-class TumorType(db.Model):
-    __tablename__ = 'tumor_type'
-
-    tumor_type_id = db.Column(db.SmallInteger, primary_key=True)
-    tumor_type = db.Column(db.String(8), nullable=False, unique=True)
-    description = db.Column(db.String)
-    mutation_count = db.Column(db.Integer)
-
-
-
-class UserFile(db.Model):
-    __tablename__ = 'user_file'
-
-    id = db.Column(db.SmallInteger, primary_key=True, server_default=db.FetchedValue())
-    name = db.Column(db.String(100))

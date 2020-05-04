@@ -71,15 +71,48 @@ def create_upload_table(session, table_name, regions=[], temp=True, create=True,
     # logger.debug("temp_table => " + str(session.query(temp_table).all()))
     return temp_table
 
-def create_upload_table_full(session, table_name, regions=[], temp=True, create=True, upload=True):
+def create_upload_table_tri(session, table_name, regions=[], temp=True, create=True, upload=True):
 
     if table_name in db.metadata.tables:
         temp_table =db.metadata.tables[table_name]
     else:
         temp_table = db.Table(table_name,
+                              db.Column('donor_id', db.Integer, nullable=False),
+                              db.Column('tumor_type_id', db.SmallInteger, nullable=False),
+                              db.Column('chrom', db.SmallInteger, nullable=False),
+                              db.Column('position', db.Integer, nullable=False),
+                              db.Column('mutation_code_id', db.ForeignKey(u'mutation_code.mutation_code_id'),
+                                        db.ForeignKey(u'trinucleotide_encoded.id'), nullable=False),
+                              db.Column('trinucleotide_id_r', db.SmallInteger, nullable=False),
+                              prefixes=['TEMPORARY'] if temp else [],
+                              extend_existing=True,
+                              )
+
+    if create:
+        session.execute(CreateTable(temp_table))
+        # logger.debug("temp_table => " + str(session.query(temp_table).all()))
+        session.flush()
+
+    if upload:
+        for i, inp in enumerate(regions):
+            if i % 1000 == 0:
+                session.flush()
+                print(f"{table_name} {i}")
+            # session.execute(temp_table_insert.values(inp)) #.values(chrom=chrom, pos=pos))
+            session.execute(temp_table.insert(values=inp))  # .values(chrom=chrom, pos=pos))
+
+    # logger.debug("temp_table => " + str(session.query(temp_table).all()))
+    return temp_table
+
+def create_upload_table_full(session, table_name, regions=[], temp=True, create=True, upload=True):
+    if table_name in db.metadata.tables:
+        temp_table =db.metadata.tables[table_name]
+    else:
+
+        temp_table = db.Table(table_name,
                               db.Column('chrom', db.SmallInteger),
-                              db.Column('pos_start', db.Integer),
-                              db.Column('pos_stop', db.Integer),
+                              db.Column('start', db.Integer),
+                              db.Column('stop', db.Integer),
                               prefixes=['TEMPORARY'] if temp else [],
                               extend_existing=True,
                               )

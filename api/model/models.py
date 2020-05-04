@@ -63,12 +63,14 @@ class MutationCode(db.Model):
 
 t_mutation_trinucleotide = db.Table(
     'mutation_trinucleotide',
-    db.Column('donor_id', db.Integer),
-    db.Column('tumor_type_id', db.SmallInteger),
-    db.Column('chrom', db.SmallInteger),
-    db.Column('position', db.Integer),
-    db.Column('mutation_code_id', db.SmallInteger),
-    db.Column('trinucleotide_id_r', db.SmallInteger)
+    db.Column('donor_id', db.Integer, nullable=False),
+    db.Column('tumor_type_id', db.SmallInteger, nullable=False, index=True),
+    db.Column('chrom', db.SmallInteger, nullable=False, index=True),
+    db.Column('position', db.Integer, nullable=False),
+    db.Column('mutation_code_id', db.ForeignKey(u'mutation_code.mutation_code_id'), db.ForeignKey(u'trinucleotide_encoded.id'), nullable=False),
+    db.Column('trinucleotide_id_r', db.SmallInteger, nullable=False),
+    db.Index('mutation_trinucleotide_chrom_position_index', 'chrom', 'position'),
+    db.Index('mutation_trinucleotide_tumor_type_id_chrom_position_index', 'tumor_type_id', 'chrom', 'position')
 )
 
 t_mutation_trinucleotide_test = db.Table(
@@ -96,9 +98,9 @@ t_regions = db.Table(
     db.Column('file_id', db.SmallInteger, nullable=False, server_default=db.FetchedValue()),
     db.Column('chrom', db.SmallInteger, nullable=False),
     db.Column('start', db.Integer, nullable=False),
-    db.Column('stop', db.Integer, nullable=False)
+    db.Column('stop', db.Integer, nullable=False),
+    db.Column('middle', db.Integer, nullable=True)
 )
-
 
 
 class TrinucleotideEncoded(db.Model):
@@ -128,3 +130,13 @@ class UserFile(db.Model):
     id = db.Column(db.SmallInteger, primary_key=True, server_default=db.FetchedValue())
     name = db.Column(db.String(100))
     description = db.Column(db.String(100))
+    count = db.Column(db.Integer)
+
+class MutationGrouped(db.Model):
+    __tablename__ = 'mutation_grouped'
+
+    tumor_type_id = db.Column(db.SmallInteger, primary_key=True, nullable=False, index=True)
+    chrom = db.Column(db.SmallInteger, primary_key=True, nullable=False, index=True)
+    position = db.Column(db.Integer, primary_key=True, nullable=False, index=True)
+    mutation_code_id = db.Column(db.SmallInteger, primary_key=True, nullable=False)
+    count = db.Column(db.BigInteger)
