@@ -5,7 +5,7 @@ import os
 import sys
 import time
 
-def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=False):
+def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_format, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=False):
 
     # SQL VS MINE8: 388[1h] , 1507 (25min), 1018[bin=20], (1h,  no bins), 1101 (5 bins), 994 [100] - 952 [200] 916(ctcf) 941[41]
     # 590 ETS1
@@ -104,7 +104,7 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, regions=No
     # Grouping
      #todo: if empty
      if groupby:
-         res = res.toDF().groupBy(groupby).count().rdd.map(lambda r: [r["tumor_type_id"],r["trinucleotide_id_r"], r["count"] ])
+         res = res.toDF().groupBy(groupby).count().rdd.map(output_format)
 
      res = res.collect()
 

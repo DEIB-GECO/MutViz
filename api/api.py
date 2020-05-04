@@ -257,7 +257,7 @@ def get_distances_r(jobID):
 
 # API R02
 @app.route(base_url + '/api/trinucleotide/', methods=['POST'])
-def get_donors():
+def get_trinucleotide():
     repoId = request.form.get('repoId')
     logger.debug(f"repoId: {repoId}")
 
@@ -302,9 +302,9 @@ def get_donors():
             else:
 
                 if DEBUG_MODE:
-                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, groupby=["tumor_type_id", "trinucleotide_id_r"])
+                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"],r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id", "trinucleotide_id_r"], )
                 else:
-                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, groupby=["tumor_type_id", "trinucleotide_id_r"])
+                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"],r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id", "trinucleotide_id_r"])
 
                     values = list(map(lambda m:  TrinucleotideCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], trinucleotide_id=m[1], count=m[2]), mutations))
                     session.add_all(values)
@@ -332,10 +332,92 @@ def get_donors():
          **({"error": error_regions} if error_regions else {})}
     )
 
-
 # API R02r
 @app.route(base_url + '/api/trinucleotide/<string:jobID>', methods=['GET'])
-def get_donor_r(jobID):
+def get_trinucleotide_r(jobID):
+    # print(jobID)
+    return get_job_result(jobID)
+# API R03
+@app.route(base_url + '/api/donors/', methods=['POST'])
+def get_uc5():
+    repoId = request.form.get('repoId')
+    logger.debug(f"repoId: {repoId}")
+
+    regions = request.form.get('regions')
+    if not regions:
+        logger.debug(f"regions: {regions}")
+
+    tumorType = request.form.get('tumorType')
+    logger.debug(f"tumorType: {tumorType}")
+
+    if not (repoId or regions):
+        abort(400)
+
+    error_regions = []
+    if not repoId:
+        regions, error_regions = parse_input_regions(regions)
+        #todo: cambia
+
+    # Generate a jobID
+    global job_counter
+    job_counter = job_counter + 1
+    if job_counter >= 100000:
+        job_counter = 1
+    jobID = str(uuid.uuid1()).replace('-', '_') + "_" + str(job_counter)
+    register_job(jobID)
+    # jobs[jobID] = None
+
+    logger.debug(f"jobID: {jobID}")
+
+    # TODO remove after testing
+    # regions = list(regions)[:1000]
+    ### Asynchronous computation
+    def async_function():
+        try:
+            session = db.session
+            session.execute("set enable_seqscan=false")
+
+            exists=False
+            #exists = db.session.query(db.session.query(TrinucleotideCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
+
+            if exists:
+                mutations = db.session.query( TrinucleotideCache.tumor_type_id, TrinucleotideCache.trinucleotide_id, TrinucleotideCache.count).filter_by(file_id=repositories_dict[repoId][0])
+            else:
+
+                if DEBUG_MODE:
+                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"],r["mutation_code_id"], r["donor_id"], r["count"]], groupby=["tumor_type_id", "mutation_code_id", "donor_id"])
+                else:
+                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["mutation_code_id"], r["donor_id"], r["count"]], groupby=["tumor_type_id", "mutation_code_id", "donor_id"])
+
+                    #values = list(map(lambda m:  TrinucleotideCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], trinucleotide_id=m[1], count=m[2]), mutations))
+                    #session.add_all(values)
+                    #session.commit()
+                    #session.close()
+
+
+            result  = defaultdict(dict)
+            mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  mutation_code_dict[x[1]][0]+">"+mutation_code_dict[x[1]][1], x[2], x[3]], mutations))
+
+            for m in mutations:
+                result[m[0]][m[1]] = {"donor_id":m[2], "count" : m[2]}
+
+            update_job(jobID, result)
+            logger.info('JOB DONE: ' + jobID)
+        except Exception as e:
+            unregister_job(jobID)
+            logger.error("Async error", e)
+            raise e
+
+    executor.submit(async_function)
+
+    return json.dumps(
+        {**{"jobID": jobID, 'correct_region_size': len(regions) if not repoId else repositories_dict[repoId][3]},
+         **({"error": error_regions} if error_regions else {})}
+    )
+
+# API R03r
+@app.route(base_url + '/api/donors/<string:jobID>', methods=['GET'])
+def get_uc5_r(jobID):
     # print(jobID)
     return get_job_result(jobID)
 
