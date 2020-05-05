@@ -2,7 +2,7 @@
 
 
 #TABLES="user_file,regions,mutation_trinucleotide_test,tumor_type,trinucleotide_encoded,mutation_code"
-TABLES="mutation_trinucleotide"
+TABLES="donors_cache"
 
 postgres_url="localhost:5432"
 postgres_user="mutviz"

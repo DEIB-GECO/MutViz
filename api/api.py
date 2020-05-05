@@ -375,10 +375,10 @@ def get_uc5():
             session.execute("set enable_seqscan=false")
 
             exists=False
-            #exists = db.session.query(db.session.query(TrinucleotideCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
+            exists = db.session.query(db.session.query(DonorsCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
 
             if exists:
-                mutations = db.session.query( TrinucleotideCache.tumor_type_id, TrinucleotideCache.trinucleotide_id, TrinucleotideCache.count).filter_by(file_id=repositories_dict[repoId][0])
+                mutations = db.session.query( DonorsCache.tumor_type_id, DonorsCache.mutation_id,  DonorsCache.donor_id, DonorsCache.count).filter_by(file_id=repositories_dict[repoId][0])
             else:
 
                 if DEBUG_MODE:
@@ -386,10 +386,10 @@ def get_uc5():
                 else:
                     mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["mutation_code_id"], r["donor_id"], r["count"]], groupby=["tumor_type_id", "mutation_code_id", "donor_id"])
 
-                    #values = list(map(lambda m:  TrinucleotideCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], trinucleotide_id=m[1], count=m[2]), mutations))
-                    #session.add_all(values)
-                    #session.commit()
-                    #session.close()
+                    values = list(map(lambda m:  DonorsCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], mutation_id=m[1], donor_id=m[2], count=m[3]), mutations))
+                    session.add_all(values)
+                    session.commit()
+                    session.close()
 
 
             result  = defaultdict(list)
