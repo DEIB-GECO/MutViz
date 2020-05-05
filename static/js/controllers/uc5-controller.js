@@ -14,167 +14,156 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     $scope.plot = { d3graph: null}
     $scope.loaded = false;
-    
+
     $scope.show_percentage = false;
+
+    // cache
+    $scope.uc5_files = {}
 
     // Selected File
     $scope.files_selector = {name : null, file: null};
 
+    $scope.pollUC5 = function(filename) {
+        // Start polling
+        // Call the API
+        $http({method: 'GET', url: API_R02+ $scope.uc5_files[filename].jobID
+              }).then(
+            function success(response) {
+                if( response.data.ready == true) {
+                    $scope.uc5_files[filename].ready = true;
+                    console.log("result for "+ $scope.uc5_files[filename].jobID+" is ready");
 
-    // Load data for the provided tumor type ( the plot is (re)-initialized )
-    $scope.load = function(filename) {
+                    // Add the new file to the local list of files together with the answer
+                    $scope.uc5_files[filename].result = response.data.result;
+                    //$rootScope.someAreReady=true;
 
-        $("svg").css("height", 100+145);
+                    // Persist
+                    //$rootScope.persistData();
 
+                    $scope.load($scope.uc5_files[filename].result);
+                } else {
+
+                    // schedule another call
+                    $timeout($scope.pollUC5, POLLING_TIMEOUT, true, filename);
+
+                }
+            }, 
+            function error(response) {
+                //window.alert("Error. File "+file.name+" will be removed.");
+                //index =  $rootScope.files.indexOf(file);
+                //$rootScope.files.splice(index, 1);
+
+                // Attempt another computation
+                console.log("error  poll uc5.");
+
+
+            }
+        );
+    }
+
+    $scope.loadFile = function(filename) {
+        console.log($rootScope.repository)
 
         console.log("loading file "+filename);
 
+        if(false){
+            data = {"ready": true, "result": {"BLCA": [{"count": 229470, "donor_id": 229470, "mutation": "C>T"}, {"count": 229459, "donor_id": 229459, "mutation": "C>T"}]}}
+            $scope.load(data.result);
+            return
+        }
+
+
+
+        if( filename in $scope.uc5_files && "result" in $scope.uc5_files[filename] ) 
+            $scope.load( $scope.uc5_files[filename].result)
+        else {
+
+            request_body = {
+                repoId: filename,
+                regions: "",
+                regionsFormat: ""
+            }
+
+            // Call the API
+            $http({
+                method: 'POST',
+                data: $.param(request_body),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                url: API_R03
+            }).then(
+                function success(response) {
+
+                    file = {}
+
+                    file.name = filename;
+
+                    file.jobID = response.data.jobID;
+                    file.parsed_lines =  response.data.correct_region_size;
+                    if(response.data.error && response.data.error.length>0)
+                        file.errors = response.data.error;
+                    else
+                        file.errors = [];
+
+                    if(file.parsed_lines==0){
+                        file.valid = false;
+                    } else {
+
+                        //$rootScope.someAreValid = true;
+                        file.valid = true;
+
+                        $scope.uc5_files[file.name] = file;
+
+                        $scope.pollUC5(file.name)
+
+
+                    }
+
+                    // Persist
+                    $rootScope.persistData();
+
+                }, 
+                function error(response) {
+                    console.error("error");
+                }
+            );
+
+
+        }
+
+    }
+
+
+    // Load data for the provided tumor type ( the plot is (re)-initialized )
+    $scope.load = function(data) {
+
+        $("svg").css("height", 100+145);
+
+        console.log("data");
+        console.log(data);
+
+        plot_data = []
+
+        if($rootScope.tumorTypes.current.identifier in data) 
+            plot_data = data[$rootScope.tumorTypes.current.identifier];
+
+
+        console.log("plot_data")
+        console.log(plot_data)
+
+
         $scope.loaded = true;
 
-        file = $rootScope.getSelectedFile(filename);
-        $scope.files_selector.file = file;
 
+        data_tt = {}
 
+        data_tt = plot_data.map(function(e){
 
-        if(file==null)
-            return;
-
-        console.log("file");
-        console.log(file);
-
-
-        average_length = 13;
-
-
-        // Slider
-        if($scope.slider == null) {
-
-            $scope.slider = document.getElementById("slider");
-
-            dataRange = {
-                min : -average_length/2-2*average_length,
-                max : +average_length/2+2*average_length
-            };
-
-            selectedRange = {
-                min:-average_length/2,
-                max: +average_length/2,
-                minY: $scope.plot.minY
-            }
-
-            noUiSlider.create($scope.slider, {
-                start: [selectedRange.min, selectedRange.max],
-                connect: true,
-                range: {
-                    'min': dataRange.min,
-                    'max': dataRange.max
-                },
-                // Show a scale with the slider
-                pips: {
-                    mode: 'positions',
-                    values: [0, 25, 50, 75, 100],
-                    density: 4
-                },
-
-                tooltips: true,
-
-                format: wNumb({
-                    decimals: 0
-                })
-            });
-
-        } else {
-            selectedRange = {
-                min: $scope.slider.noUiSlider.get()[0],
-                max: $scope.slider.noUiSlider.get()[1],
-                minY: $scope.plot.minY
-            }
-        }
-
-
-        // Generate the plot
-        data = file.distances.filter(function(x){
-            return x.tumorType==$rootScope.tumorTypes.current.identifier
-        })[0].distances.map(function(e){
-            pos = e[0];
-            from = e[1];
-            to = e[2];
-            count = e[3];
-
-            if(from=="G" && to=="T") {
-                from="C"; to="A";
-            } else if(from=="G" && to=="C") {
-                from="C"; to="G";  
-            } else if(from=="G" && to=="A") {
-                from="C"; to="T";  
-            } else if(from=="A" && to=="T") {
-                from="T"; to="A";  
-            } else if(from=="A" && to=="G") {
-                from="T"; to="C";  
-            } else if(from=="A" && to=="C") {
-                from="T"; to="G";  
-            } 
-
-
-            return {pos:pos, mutation:from+">"+to, count:count};
-        }).filter(function(el){
-            return el.pos >= $scope.slider.noUiSlider.get()[0] && el.pos <= $scope.slider.noUiSlider.get()[1] && $scope.selectedTypes.map(function(x){return x.from+">"+x.to}).includes(el.mutation);
+            if( e["mutation"]=="T<C" || e["mutation"]=="C>T" )
+                return {"mutation" : "Ti", donor_id:e["donor_id"], count:e["count"]};
+            else
+                return {"mutation" : "Tv", donor_id:e["donor_id"], count:e["count"]};
+                
         });
-
-
-
-        data_tt = data.map(function(e){
-
-            mutation_tt = "Tv"
-
-            if(e.mutation=="T>C" || e.mutation=="C>T") {
-                mutation_tt = "Ti";
-            } 
-
-            return {pos:e.pos, mutation:mutation_tt, count:e.count};
-        });
-
-
-
-        var helper = {};
-        var data = data.reduce(function(r, o) {
-            var key = o.pos + '-' + o.mutation_tt;
-
-            if(!helper[key]) {
-                helper[key] = Object.assign({}, o); // create a copy of o
-                r.push(helper[key]);
-            } else {
-                helper[key].count += o.count;
-            }
-
-            return r;
-        }, []);
-
-
-        var helper_tt = {};
-        var data_tt = data_tt.reduce(function(r, o) {
-            var key = o.pos + '-' + o.mutation;
-
-            if(!helper[key]) {
-                helper[key] = Object.assign({}, o); // create a copy of o
-                r.push(helper[key]);
-            } else {
-                helper[key].count += o.count;
-            }
-
-            return r;
-        }, []);
-
-
-        // Divid by the total count
-        if($scope.show_percentage) {
-            total_count = data.map(function(e){return e.count}).reduce(function(l,r){return l + r});
-            console.log("total_count: "+total_count);
-            data = data.map(function(d){d.count = d.count/total_count; return d;});
-            data_tt = data_tt.map(function(d){d.count = d.count/total_count; return d;});
-        }
-
-
 
         // Plot area size
         width = 600;
@@ -190,12 +179,8 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
 
         $("#uc5 svg").css("height", (data.length*150)+"px");
-        $scope.plot.d3graph = uc5(data, $scope.selectedTypes.map(function(x){return x.from+">"+x.to}),  $rootScope.tumorTypes.current, wiidth_left, height);
-        uc5_tt(data_tt, ["Ti", "Tv"],  $rootScope.tumorTypes.current, wifth_tt, height, wiidth_left);
-
-
-        // Set callback on slider change
-        $scope.slider.noUiSlider.on('change', $scope.updatePlot);
+        uc5(plot_data, $scope.selectedTypes.map(function(x){return x.from+">"+x.to}),wiidth_left, height);
+        uc5_tt(data_tt, ["Ti", "Tv"],  wifth_tt, height, wiidth_left);
 
     }
 
@@ -222,32 +207,16 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.updatePlot($scope.files_selector.file);
     };
 
-    $scope.getData = function(file, tumorType){
+    $scope.getTemplate = function(){
 
-        // reference allele, alternate (mutant) allele, allele_before, allele_after, value
-        alleles = ["A", "C", "G", "T"];
-        data = [];
-        MAX_VAL = 0.25;
-
-        // Generate fake data:
-        alleles.forEach(function(ref){
-            alleles.forEach(function(alternate){
-                alleles.forEach(function(before){
-                    alleles.forEach(function(after){
-                        if(ref!=alternate) {
-                            entry = [ref, alternate, before, after, Math.random()*MAX_VAL];
-                            data.push(entry)
-                        }
-                    });
-                });
-            });
+        res = {}
+        $scope.defaultMutationTypes.forEach(function(m){ 
+            res[m.from+">"+m.to] = [];
         });
-
-
-        return [{tumorType: "BLCA", data: data}];
-
+        return res;
 
     }
+
 
     //todo: remove
     /*$rootScope.files=

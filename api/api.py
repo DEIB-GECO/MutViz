@@ -3,7 +3,6 @@ import uuid
 from collections import defaultdict
 from logging.config import dictConfig
 
-import sqlalchemy
 from flask import Flask, json, request, abort
 from flask_cors import CORS
 from flask_executor import Executor
@@ -11,14 +10,12 @@ from scipy.stats import ks_2samp
 from sqlalchemy import between
 from sqlalchemy import func
 
-from api.spark import *
-
-#todo:optin to set spark folder
-
 from api.db import *
 from api.jobs import register_job, update_job, get_job_result, unregister_job
 from api.spark.intersection import spark_intersect
 from api.utils import *
+
+# todo:optin to set spark folder
 
 # documentation:
 # https://docs.google.com/document/d/1kNJ7mogv5Jj6Wu2WOU4jCeX-Nav250l4tMHm6YFGANU/edit#
@@ -62,8 +59,8 @@ def activate_job_cleaner():
 
 
 with app.app_context():
+    DEBUG_MODE = True
     DEBUG_MODE = False
-    #DEBUG_MODE = True
     logger = flask.current_app.logger
 
 chromosome_dict = dict([(str(x), x) for x in range(1, 23)] + [('x', 23), ('y', 24), ('mt', 25), ('m', 25), ])
@@ -395,11 +392,11 @@ def get_uc5():
                     #session.close()
 
 
-            result  = defaultdict(dict)
+            result  = defaultdict(list)
             mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  mutation_code_dict[x[1]][0]+">"+mutation_code_dict[x[1]][1], x[2], x[3]], mutations))
 
             for m in mutations:
-                result[m[0]][m[1]] = {"donor_id":m[2], "count" : m[2]}
+                result[m[0]].append({"mutation":m[1], "donor_id":m[2], "count" : m[2]})
 
             update_job(jobID, result)
             logger.info('JOB DONE: ' + jobID)

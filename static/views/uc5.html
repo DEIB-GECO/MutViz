@@ -13,30 +13,15 @@
 
 
 
-                <div class="col-md-12" style="margin-top:10px; {{files.length>0 && someAreValid?'background-color:#e6e6e6;':''}} ">
+                <div class="col-md-12" style="margin-top:10px;">
 
-                    <div ng-if="files.length==0 && !someAreReady || !someAreValid"
-                         class="col-md-12 text-center"
-                         style="padding-top: 20px;padding-bottom: 20px; background-color: #ffe28d">
-                        No valid file in your <a href="#!/data">workspace</a>. Please, upload a region file or add a file from the repository.
-                    </div>
-
-                    <div ng-if="files.length>0 && !someAreReady && someAreValid"
-                         class="col-md-12 text-center"
-                         style="padding-top: 20px;padding-bottom: 20px;">
-                        Loading your workspace
-                        <div class="col-md-12 text-center" style="padding-top: 10px;">
-                            <img src="img/loading.gif" style="height: 45px; margin-left: 5px; margin-bottom: 4px;">
-                        </div>
-                    </div>
-
-                    <div ng-show="files.length>0 && someAreReady"
+                    <div ng-show="repository.length>0"
                          style="height: 90px;">
                         <label for="jtSelect">File:</label>
                         <select class="form-control" id="ttSelect" 
                                 ng-model="file_selector.name"
-                                ng-change="load(file_selector.name, tumorTypes.current)" >
-                            <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
+                                ng-change="loadFile(file_selector.name)" >
+                            <option ng-repeat="file in repository track by $index" ng-value="file.identifier">{{file.name}}</option>
                         </select>
                     </div>
                 </div>
@@ -68,84 +53,84 @@ ng-model="plot.minY" ng-change="updatePlot(file_selector.file, tumorTypes.curren
                             <b>Mutation types</b>
                         </div>
                         <div class="col-md-5 right">
- <input type="checkbox" ng-model="show_percentage" ng-change="load(file_selector.name)"/>
+                            <input type="checkbox" ng-model="show_percentage" ng-change="load(file_selector.name)"/>
 
-                    </div>
+                        </div>
 
 
-                    <div class="row" style="margin-top: 5px; margin-bottom: 10px;">
-                        <div class="col-md-6"  ng-repeat="st in selectedTypes track by $index" >
-                            <div class="row" style="margin-top:5px">
-                                <div class="col-md-6" style="line-height: 39px;">
-                                    <span style="margin-left: 10px; padding: 6px; border: 1px solid black;">{{st.from}}>{{st.to}}</span>
+                        <div class="row" style="margin-top: 5px; margin-bottom: 10px;">
+                            <div class="col-md-6"  ng-repeat="st in selectedTypes track by $index" >
+                                <div class="row" style="margin-top:5px">
+                                    <div class="col-md-6" style="line-height: 39px;">
+                                        <span style="margin-left: 10px; padding: 6px; border: 1px solid black;">{{st.from}}>{{st.to}}</span>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <a class="form-control btn btn-default"  ng-click="removeCondition(st)">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
                                 </div>
+                            </div>
 
-                                <div class="col-md-6">
-                                    <a class="form-control btn btn-default"  ng-click="removeCondition(st)">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
+                        </div>
+
+                        <div class="row" ng-if="selectedTypes.length<defaultMutationTypes.length" style="margin-top: 25px;">
+                            <div class="col-md-6">
+                                <select class="form-control" id="ttSelect" ng-model="addingType">
+                                    <option ng-repeat="addType in defaultMutationTypes" ng-value="addType" ng-if="!selectedTypes.includes(addType)">{{addType.from}}>{{addType.to}}</option>
+                                </select>
+
+                            </div>
+
+                            <div class="col-md-6">
+                                <a class="form-control btn btn-default"  ng-click="addCondition(addingType)">
+                                    <i class="fas fa-plus"></i>
+                                </a>
                             </div>
                         </div>
 
-                    </div>
 
-                    <div class="row" ng-if="selectedTypes.length<defaultMutationTypes.length" style="margin-top: 25px;">
-                        <div class="col-md-6">
-                            <select class="form-control" id="ttSelect" ng-model="addingType">
-                                <option ng-repeat="addType in defaultMutationTypes" ng-value="addType" ng-if="!selectedTypes.includes(addType)">{{addType.from}}>{{addType.to}}</option>
-                            </select>
 
-                        </div>
-
-                        <div class="col-md-6">
-                            <a class="form-control btn btn-default"  ng-click="addCondition(addingType)">
-                                <i class="fas fa-plus"></i>
-                            </a>
-                        </div>
                     </div>
 
 
 
+                    <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
+
+                        <button class="btn" 
+                                ng-click="downloadPlot()"
+                                type="submit"><i class="fa fa-download"></i> Download plot as SVG</button>
+                        <a id="dwn" target="_blank" style="display: none"></a>
+
+                    </div>
+
+
+
+
+                </div>
+            </div>
+            </nav>
+
+        <div id="content">
+            <div class="row">
+
+                <div class="col-md-12 text-center my-auto" ng-if="!loaded">
+                    Select a file.
+                </div>
+
+                <div class="col-md-12" style="padding-left: 50px; padding-right: 50px;">
+                    <div id="slider"></div>
+                </div>
+
+                <div class="col-md-12" window-resize="load(file_selector.name, tumorTypes.current)">
+                    <div id="uc5" class="plot-container">
+                        <svg></svg>
+                    </div>
                 </div>
 
 
-
-                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
-
-                    <button class="btn" 
-                            ng-click="downloadPlot()"
-                            type="submit"><i class="fa fa-download"></i> Download plot as SVG</button>
-                    <a id="dwn" target="_blank" style="display: none"></a>
-
-                </div>
-                
-               
- 
 
             </div>
         </div>
-    </nav>
-
-    <div id="content">
-        <div class="row">
-
-            <div class="col-md-12 text-center my-auto" ng-if="!loaded">
-                Select a file.
-            </div>
-
-            <div class="col-md-12" style="padding-left: 50px; padding-right: 50px;">
-                <div id="slider"></div>
-            </div>
-
-            <div class="col-md-12" window-resize="load(file_selector.name, tumorTypes.current)">
-                <div id="uc5" class="plot-container">
-                    <svg></svg>
-                </div>
-            </div>
-
-
-
-        </div>
-    </div>
-</main>
+        </main>

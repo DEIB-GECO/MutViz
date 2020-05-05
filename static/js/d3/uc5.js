@@ -3,7 +3,7 @@ var RECT_HEIGHT = 50;
 // List of available colors
 var uc5_colors = ["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#808000", "#ffd8b1", "#000075", "#a9a9a9", "#ffffff", "#000000"];
 
-function uc5_tt(data, mutationTypes, tumorType, width, height, left_margin) {
+function uc5_tt(data, mutationTypes, width, height, left_margin) {
 
 
     console.log("width: "+width);
@@ -11,7 +11,7 @@ function uc5_tt(data, mutationTypes, tumorType, width, height, left_margin) {
     console.log("called uc5 with data: ");
     console.log(data);
     console.log(mutationTypes);
-    console.log(tumorType);
+
 
     var g = {} // here we put all useful objects describing our plot
     console.log(mutationTypes.length);
@@ -134,7 +134,7 @@ function uc5_tt(data, mutationTypes, tumorType, width, height, left_margin) {
 }
 
 /* Build the graph with an initial number of bins */
-function uc5(data, mutationTypes, tumorType, width, height) {
+function uc5(data, mutationTypes, width, height) {
 
 
     // Remove any pre-existing plot
@@ -143,8 +143,8 @@ function uc5(data, mutationTypes, tumorType, width, height) {
     console.log("width: "+width);
 
     console.log("called uc5 with data: ");
+    console.log(data);
     console.log(mutationTypes);
-    console.log(tumorType);
 
     var g = {} // here we put all useful objects describing our plot
     console.log(mutationTypes.length);
