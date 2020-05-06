@@ -480,7 +480,7 @@ def get_uc6():
                 else:
                     mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"])
 
-                    values = list(map(lambda m:  SignaturesCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], mutation_id=m[1], donor_id=m[2], count=m[3]), mutations))
+                    values = list(map(lambda m:  SignaturesCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], donor_id=m[1], trinucleotide_id_r=m[2], count=m[3]), mutations))
                     session.add_all(values)
                     session.commit()
                     session.close()
