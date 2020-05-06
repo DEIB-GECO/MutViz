@@ -12,8 +12,11 @@ from sqlalchemy import func
 
 from api.db import *
 from api.jobs import register_job, update_job, get_job_result, unregister_job
+from api.signatures.signatures_refitting import get_refitting
 from api.spark.intersection import spark_intersect
 from api.utils import *
+
+import pandas as pd
 
 # todo:optin to set spark folder
 
@@ -68,6 +71,10 @@ with app.app_context():
     res = MutationCode.query.all()
     mutation_code_dict = dict([(x.mutation_code_id, (x.from_allele, x.to_allele)) for x in res])
     mutation_code_reverse_dict = dict([((x.from_allele, x.to_allele), x.mutation_code_id) for x in res])
+
+    res = MutationCodeR.query.all()
+    mutation_code_r_dict = dict([(x.mutation_code_id, x.mutation_r) for x in res])
+
 
     res = TumorType.query.all()
     tumor_type_dict = dict([(x.tumor_type_id, (x.tumor_type, x.description, x.mutation_count)) for x in res])
@@ -376,6 +383,7 @@ def get_uc5():
 
             exists=False
             exists = db.session.query(db.session.query(DonorsCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
+            print("exists: "+str(exists))
 
             if exists:
                 mutations = db.session.query( DonorsCache.tumor_type_id, DonorsCache.mutation_id,  DonorsCache.donor_id, DonorsCache.count).filter_by(file_id=repositories_dict[repoId][0])
@@ -393,10 +401,10 @@ def get_uc5():
 
 
             result  = defaultdict(list)
-            mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  mutation_code_dict[x[1]][0]+">"+mutation_code_dict[x[1]][1], x[2], x[3]], mutations))
+            mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  mutation_code_r_dict[x[1]], x[2], x[3]], mutations))
 
             for m in mutations:
-                result[m[0]].append({"mutation":m[1], "donor_id":m[2], "count" : m[2]})
+                result[m[0]].append({"mutation":m[1], "donor_id":m[2], "count" : m[3]})
 
             update_job(jobID, result)
             logger.info('JOB DONE: ' + jobID)
@@ -416,6 +424,122 @@ def get_uc5():
 @app.route(base_url + '/api/donors/<string:jobID>', methods=['GET'])
 def get_uc5_r(jobID):
     # print(jobID)
+    return get_job_result(jobID)
+
+
+# API R04
+@app.route(base_url + '/api/signatures/', methods=['POST'])
+def get_uc6():
+    repoId = request.form.get('repoId')
+    logger.debug(f"repoId: {repoId}")
+
+    regions = request.form.get('regions')
+    if not regions:
+        logger.debug(f"regions: {regions}")
+
+    tumorType = request.form.get('tumorType')
+    logger.debug(f"tumorType: {tumorType}")
+
+    if not (repoId or regions):
+        abort(400)
+
+    error_regions = []
+    if not repoId:
+        regions, error_regions = parse_input_regions(regions)
+        #todo: cambia
+
+    # Generate a jobID
+    global job_counter
+    job_counter = job_counter + 1
+    if job_counter >= 100000:
+        job_counter = 1
+    jobID = str(uuid.uuid1()).replace('-', '_') + "_" + str(job_counter)
+    register_job(jobID)
+    # jobs[jobID] = None
+
+    logger.debug(f"jobID: {jobID}")
+
+    # TODO remove after testing
+    # regions = list(regions)[:1000]
+    ### Asynchronous computation
+    def async_function():
+        try:
+            session = db.session
+            session.execute("set enable_seqscan=false")
+
+            exists=False
+            exists = db.session.query(db.session.query(SignaturesCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
+            print("exists: "+str(exists))
+
+            if exists:
+                mutations = db.session.query( SignaturesCache.tumor_type_id, SignaturesCache.donor_id, SignaturesCache.trinucleotide_id_r, SignaturesCache.count).filter_by(file_id=repositories_dict[repoId][0])
+            else:
+
+                if DEBUG_MODE:
+                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"])
+                else:
+                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"])
+
+                    values = list(map(lambda m:  SignaturesCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], mutation_id=m[1], donor_id=m[2], count=m[3]), mutations))
+                    session.add_all(values)
+                    session.commit()
+                    session.close()
+
+
+            result  = defaultdict(list)
+            mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  x[1], trinucleotides_dict[x[2]][0], x[3]], mutations))
+
+            for m in mutations:
+                result[m[0]].append([ m[1], m[2],  m[3]])
+
+            def toDataframe(data):
+
+                columns_str = "A[C>A]A A[C>A]C	A[C>A]G	A[C>A]T	C[C>A]A	C[C>A]C	C[C>A]G	C[C>A]T	G[C>A]A	G[C>A]C	G[C>A]G	G[C>A]T	T[C>A]A	T[C>A]C	T[C>A]G	T[C>A]T	A[C>G]A	A[C>G]C	A[C>G]G	A[C>G]T	C[C>G]A	C[C>G]C	C[C>G]G	C[C>G]T	G[C>G]A	G[C>G]C	G[C>G]G	G[C>G]T	T[C>G]A	T[C>G]C	T[C>G]G	T[C>G]T	A[C>T]A	A[C>T]C	A[C>T]G	A[C>T]T	C[C>T]A	C[C>T]C	C[C>T]G	C[C>T]T	G[C>T]A	G[C>T]C	G[C>T]G	G[C>T]T	T[C>T]A	T[C>T]C	T[C>T]G	T[C>T]T	A[T>A]A	A[T>A]C	A[T>A]G	A[T>A]T	C[T>A]A	C[T>A]C	C[T>A]G	C[T>A]T	G[T>A]A	G[T>A]C	G[T>A]G	G[T>A]T	T[T>A]A	T[T>A]C	T[T>A]G	T[T>A]T	A[T>C]A	A[T>C]C	A[T>C]G	A[T>C]T	C[T>C]A	C[T>C]C	C[T>C]G	C[T>C]T	G[T>C]A	G[T>C]C	G[T>C]G	G[T>C]T	T[T>C]A	T[T>C]C	T[T>C]G	T[T>C]T	A[T>G]A	A[T>G]C	A[T>G]G	A[T>G]T	C[T>G]A	C[T>G]C	C[T>G]G	C[T>G]T	G[T>G]A	G[T>G]C	G[T>G]G	G[T>G]T	T[T>G]A	T[T>G]C	T[T>G]G	T[T>G]T"
+                columns = columns_str.split()
+
+                df = pd.DataFrame(data, columns=["donor_id", "trinucleotide_id_t", "count"])
+
+                reshaped = df.pivot("donor_id", "trinucleotide_id_t", "count")
+
+                for col in columns:
+                    if col not in reshaped.columns:
+                        reshaped[col] = 0
+
+                result = reshaped.fillna(0)
+
+                print(result[columns])
+                return result[columns]
+
+            final_results = {}
+
+            print(result.keys())
+            for tumor in result.keys():
+                print("for tumor: "+tumor)
+                table_donors = toDataframe(result[tumor])
+                final_results[tumor] = get_refitting(table_donors).sum().values.tolist()
+
+
+            print(final_results)
+
+            update_job(jobID, final_results)
+            logger.info('JOB DONE: ' + jobID)
+        except Exception as e:
+            unregister_job(jobID)
+            logger.error("Async error", e)
+            raise e
+
+    executor.submit(async_function)
+
+    return json.dumps(
+        {**{"jobID": jobID, 'correct_region_size': len(regions) if not repoId else repositories_dict[repoId][3]},
+         **({"error": error_regions} if error_regions else {})}
+    )
+
+
+
+# API R04r
+@app.route(base_url + '/api/signatures/<string:jobID>', methods=['GET'])
+def get_uc6_r(jobID):
     return get_job_result(jobID)
 
 

@@ -1,9 +1,17 @@
 var RECT_HEIGHT = 50;
 
+Array.prototype.union = function(a) 
+{
+    var r = this.slice(0);
+    a.forEach(function(i) { if (r.indexOf(i) < 0) r.push(i); });
+    return r;
+};
+
+
 // List of available colors
 var uc5_colors = ["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#808000", "#ffd8b1", "#000075", "#a9a9a9", "#ffffff", "#000000"];
 
-function uc5_tt(data, mutationTypes, width, height, left_margin) {
+function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
 
 
     console.log("width: "+width);
@@ -49,7 +57,33 @@ function uc5_tt(data, mutationTypes, width, height, left_margin) {
 
     console.log(sumstat);
 
+    //Outliers computation
+
+    if(showOutliers){
+
+        outliers = []
+
+        sumstat.forEach(function(s){
+
+            console.log("key: "+s.key+ "min:"+ s.value.min+" max: "+s.value.max);
+
+            otl = data.filter(function(d){return d.mutation==s.key && (d.count<s.value.min || d.count>s.value.max)});
+            console.log(data);
+            console.log(otl);
+
+            outliers = outliers.union(otl);
+
+        })
+    }
+
     g.yMax = Math.max.apply(null, sumstat.map(function(entry){return entry.value.max}));
+
+
+    if(showOutliers && outliers.length>0) {
+        maxOutliers = Math.max.apply(null, outliers.map(function(o){return o.count;}))
+        console.log("the real max is "+maxOutliers)
+        if(maxOutliers>g.yMax) g.yMax = maxOutliers;
+    }
     // leave same space above the maximum
     g.yMax =  g.yMax + 0.1*g.yMax;
 
@@ -77,7 +111,7 @@ function uc5_tt(data, mutationTypes, width, height, left_margin) {
     .attr('class', 'd3-tip')
     .offset([-10, 0])
     .html(function(d) {
-       return "<strong style='color:yellow'>"+d.key+"</strong> <br> q1: "+d.value.q1+"<br>median: "+d.value.median+"<br> q3: "+d.value.q3+
+        return "<strong style='color:yellow'>"+d.key+"</strong> <br> q1: "+d.value.q1+"<br>median: "+d.value.median+"<br> q3: "+d.value.q3+
             "<br>interQuantileRange: "+d.value.interQuantileRange+"<br>min: "+d.value.min+"<br>max: "+d.value.max;
         ;
     });
@@ -129,25 +163,48 @@ function uc5_tt(data, mutationTypes, width, height, left_margin) {
         .on('mouseout', tip.hide);
 
 
+
+    // Outliers dots
+    if(showOutliers){
+        var tip_outliers = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function(d) {
+            return "<strong style='color:yellow'>"+d.mutation+"</strong> <br> donor_id: "+d.donor_id+"<br>count: "+d.count;;
+        });
+
+        g.svg.call(tip_outliers);
+
+        // Update outliers.
+        g.svg.selectAll("circle.outlier")
+            .data(outliers)
+            .enter().append("circle", "text")
+            .attr("class", "outlier")
+            .attr("r", 5)
+            .attr("cx", function(d){return x(d.mutation)} )
+            .attr("cy", function(d){return y(d.count)} )
+            .style("opacity", 1)
+            .attr("stroke", "black")
+            .attr("fill", "rgb(240, 249, 255)")
+            .on('mouseover', tip_outliers.show)
+            .on('mouseout', tip_outliers.hide);
+    }
+
+
+
     return g;
 
 }
 
 /* Build the graph with an initial number of bins */
-function uc5(data, mutationTypes, width, height) {
+function uc5(data, showOutliers, mutationTypes, width, height) {
 
 
     // Remove any pre-existing plot
     d3.select("#uc5 svg").html("");
 
-    console.log("width: "+width);
-
-    console.log("called uc5 with data: ");
-    console.log(data);
-    console.log(mutationTypes);
-
     var g = {} // here we put all useful objects describing our plot
-    console.log(mutationTypes.length);
+
 
     g.html = d3.select("#uc5 svg");
 
@@ -180,11 +237,31 @@ function uc5(data, mutationTypes, width, height) {
     })
     .entries(data)
 
-    console.log(sumstat);
+    //Outliers computation
 
+    if(showOutliers){
+        outliers = []
+
+        sumstat.forEach(function(s){
+
+            console.log("key: "+s.key+ "min:"+ s.value.min+" max: "+s.value.max);
+
+            otl = data.filter(function(d){return d.mutation==s.key && (d.count<s.value.min || d.count>s.value.max)});
+            outliers = outliers.union(otl);
+
+        })
+    }
 
 
     g.yMax = Math.max.apply(null, sumstat.map(function(entry){return entry.value.max}));
+
+
+    if(showOutliers && outliers.length>0) {
+        maxOutliers = Math.max.apply(null, outliers.map(function(o){return o.count;}))
+        if(maxOutliers>g.yMax) g.yMax = maxOutliers;
+
+    }
+
     // leave same space above the maximum
     g.yMax =  g.yMax + 0.1*g.yMax;
 
@@ -214,7 +291,7 @@ function uc5(data, mutationTypes, width, height) {
             "<br>interQuantileRange: "+d.value.interQuantileRange+"<br>min: "+d.value.min+"<br>max: "+d.value.max;
         ;
     });
-    
+
     g.svg.call(tip);
 
 
@@ -262,6 +339,37 @@ function uc5(data, mutationTypes, width, height) {
         .style("width", 80)
         .on('mouseover', tip.show)
         .on('mouseout', tip.hide);
+
+
+
+
+
+
+    // Outliers dots
+    if(showOutliers){
+        var tip_outliers = d3.tip()
+        .attr('class', 'd3-tip')
+        .offset([-10, 0])
+        .html(function(d) {
+            return "<strong style='color:yellow'>"+d.mutation+"</strong> <br> donor_id: "+d.donor_id+"<br>count: "+d.count;;
+        });
+
+        g.svg.call(tip_outliers);
+
+        // Update outliers.
+        g.svg.selectAll("circle.outlier")
+            .data(outliers)
+            .enter().append("circle", "text")
+            .attr("class", "outlier")
+            .attr("r", 5)
+            .attr("cx", function(d){return x(d.mutation)} )
+            .attr("cy", function(d){return y(d.count)} )
+            .style("opacity", 1)
+            .attr("stroke", "black")
+            .attr("fill", "rgb(240, 249, 255)")
+            .on('mouseover', tip_outliers.show)
+            .on('mouseout', tip_outliers.hide);
+    }
 
     return g;
 }

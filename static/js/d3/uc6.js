@@ -66,7 +66,7 @@ function uc6(data, width, height) {
     .attr('class', 'd3-tip')
     .offset([-10, 0])
     .html(function(d) {
-        return "<strong>"+d.signature+"</strong> <span style='color:yellow'>" + d.value.toFixed(3) + "</span>";
+        return "<strong>"+d.signature+"</strong> <span style='color:yellow'>" + d.value + "</span>";
     });
 
     g.svg[index].call(tip);
@@ -96,7 +96,7 @@ function uc6(data, width, height) {
         .duration(800)
         .attr("y", function(d) { return g.yAxis[index](d.value); })
         .attr("height", function(d) { return g.height - g.yAxis[index](d.value); })
-        .delay(function(d,i){console.log(i) ; return(i*10)})
+        .delay(function(d,i){console.log(" ") ; return(i*10)})
 
     // add the x Axis
     g.svg[index].append("g")

@@ -30,7 +30,7 @@
                     <label for="ttSelect">Tumor type:</label>
                     <select class="form-control" id="ttSelect"
                             ng-model="tumorTypes.current"
-                            ng-change="load(file_selector.name, tumorTypes.current)">
+                            ng-change="loadFile(file_selector.name)">
                         <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
                 </div>
@@ -44,6 +44,24 @@ ng-model="plot.minY" ng-change="updatePlot(file_selector.file, tumorTypes.curren
 <br>
 </div>
 </div-->
+                <div class="col-md-12" style="margin-top:30px;">
+                    <div class="row">
+
+                        <div class="col-md-8">
+                            Show outliers:
+                        </div>
+
+                        <div class="col-md-4">
+                            <switch size="small" id="enabled" name="enabled"
+                                    ng-model="outliers.show" ng-change="loadFile(file_selector.name)">
+                                ></switch>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
 
                 <div class="col-md-12" style="margin-top:30px;">
 
@@ -53,9 +71,10 @@ ng-model="plot.minY" ng-change="updatePlot(file_selector.file, tumorTypes.curren
                             <b>Mutation types</b>
                         </div>
                         <div class="col-md-5 right">
-                            <input type="checkbox" ng-model="show_percentage" ng-change="load(file_selector.name)"/>
+                        
 
                         </div>
+
 
 
                         <div class="row" style="margin-top: 5px; margin-bottom: 10px;">

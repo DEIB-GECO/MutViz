@@ -19,6 +19,9 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // cache
     $scope.uc5_files = {}
+    
+    // outliers
+    $scope.outliers = {show:true}
 
     // Selected File
     $scope.files_selector = {name : null, file: null};
@@ -26,7 +29,7 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.pollUC5 = function(filename) {
         // Start polling
         // Call the API
-        $http({method: 'GET', url: API_R02+ $scope.uc5_files[filename].jobID
+        $http({method: 'GET', url: API_R03+ $scope.uc5_files[filename].jobID
               }).then(
             function success(response) {
                 if( response.data.ready == true) {
@@ -179,8 +182,8 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
 
         $("#uc5 svg").css("height", (data.length*150)+"px");
-        uc5(plot_data, $scope.selectedTypes.map(function(x){return x.from+">"+x.to}),wiidth_left, height);
-        uc5_tt(data_tt, ["Ti", "Tv"],  wifth_tt, height, wiidth_left);
+        uc5(plot_data, $scope.outliers.show, $scope.selectedTypes.map(function(x){return x.from+">"+x.to}),wiidth_left, height);
+        uc5_tt(data_tt, $scope.outliers.show, ["Ti", "Tv"],  wifth_tt, height, wiidth_left);
 
     }
 
