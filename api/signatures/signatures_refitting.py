@@ -63,8 +63,6 @@ def get_refitting( mut_df ):
     sigs = sigs_df.values
 
 
-    print(sigs_df.shape)
-
     active_signatures = sigs_df.index
 
     # Compute the exposures and output to file
@@ -77,7 +75,5 @@ def get_refitting( mut_df ):
     exp_df = pd.DataFrame(index=mut_df.index, columns=active_signatures,
                           data=exposures*n_muts[:, None])
 
-    print(exp_df)
-    print(exp_df.columns)
     return exp_df
     #exp_df.to_csv('exposures_signatures_brca_all.txt', sep='\t')

@@ -507,21 +507,17 @@ def get_uc6():
 
                 result = reshaped.fillna(0)
 
-                print(result[columns])
+
                 return result[columns]
 
             final_results = {}
 
-            print(result.keys())
+
             for tumor in result.keys():
-                print("for tumor: "+tumor)
                 table_donors = toDataframe(result[tumor])
                 with_donors =  get_refitting(table_donors)
                 num_donors = with_donors.shape[0]
                 final_results[tumor] = (with_donors.sum()/num_donors).values.tolist()
-
-
-            print(final_results)
 
             update_job(jobID, final_results)
             logger.info('JOB DONE: ' + jobID)
