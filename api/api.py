@@ -517,7 +517,7 @@ def get_uc6():
                 print("for tumor: "+tumor)
                 table_donors = toDataframe(result[tumor])
                 with_donors =  get_refitting(table_donors)
-                num_donors = with_donors.shape(0)
+                num_donors = with_donors.shape[0]
                 final_results[tumor] = (with_donors.sum()/num_donors).values.tolist()
 
 
