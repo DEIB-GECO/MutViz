@@ -515,8 +515,8 @@ def get_uc6():
             for tumor in result.keys():
                 table_donors = toDataframe(result[tumor])
                 with_donors =  get_refitting(table_donors)
-                num_donors = with_donors.shape[0]
-                final_results[tumor] = (with_donors.sum()/num_donors).values.tolist()
+                #num_donors = with_donors.shape[0]
+                final_results[tumor] = with_donors.to_dict(orient='list')
 
             update_job(jobID, final_results)
             logger.info('JOB DONE: ' + jobID)

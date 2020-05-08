@@ -98,4 +98,3 @@ def get_refitting( mut_df ):
     prevalence =  getPrevalence(exp_df)
 
     return prevalence
-    #exp_df.to_csv('exposures_signatures_brca_all.txt', sep='\t')

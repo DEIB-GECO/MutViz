@@ -22,9 +22,14 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.getSelectedFile = function(fileName) {
         return $scope.files_fake.filter(function(f){return f.name == fileName})[0];
     }
-    
+
     // cache
     $scope.uc6_files = {}
+
+    // outliers
+    $scope.outliers = {show:true}
+
+    $scope.barPlot = true;
 
     $scope.signatures = ['SBS1', 'SBS2', 'SBS3', 'SBS4', 'SBS5', 'SBS6', 'SBS7a', 'SBS7b',
                          'SBS7c', 'SBS7d', 'SBS8', 'SBS9', 'SBS10a', 'SBS10b', 'SBS11', 'SBS12',
@@ -42,7 +47,7 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             function success(response) {
                 if( response.data.ready == true) {
                     $scope.uc6_files[filename].ready = true;
-                    console.log("result for "+ $scope.uc6_files[filename].jobID+" is ready");
+                    //console.log("result for "+ $scope.uc6_files[filename].jobID+" is ready");
 
                     // Add the new file to the local list of files together with the answer
                     $scope.uc6_files[filename].result = response.data.result;
@@ -147,14 +152,33 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.load = function(data) {
 
         $("svg").css("height", 100+145);
-        
-        console.log(data);
 
-        plot_data =   $scope.signatures.map(function(s){return {signature:s, value:1}});
+        plot_data = $scope.signatures.map(function(s){return {signature:s, value:1}});
 
         if($rootScope.tumorTypes.current.identifier in data) {
             selected_data = data[$rootScope.tumorTypes.current.identifier];
-            plot_data = $scope.signatures.map(function(s){return {signature:s, value:selected_data[$scope.signatures.indexOf(s)]}  })
+            plot_data = $scope.signatures.flatMap(function(s){
+
+                values = selected_data[s]
+
+                // take the average if it is a box-plot
+                if($scope.barPlot) {
+                    mean = values.reduce(function(a,b){return a+b})/values.length;
+                    return  [{
+                        signature:s,
+                        value: mean
+                    }]
+                } else {
+                    return values.map(function(v){
+                        return {
+                            signature:s,
+                            value: v
+                        }
+                    });
+                }
+
+
+            })
         } 
 
         $scope.loaded = true;
@@ -170,52 +194,32 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         $("#uc6 svg").css("height", (data.length*150)+"px");
         // $rootScope.tumorTypes.current
-        $scope.plot.d3graph = uc6(plot_data, width, height);
+        if($scope.barPlot){
+            $scope.plot.d3graph = uc6(plot_data, width, height);
+        } else {
+            //$scope.outliers.show,
+            $scope.plot.d3graph = uc6_box(plot_data, $scope.outliers.show, $scope.signatures, width, height);
+
+        }
 
     }
 
     // Update the plot
     $scope.updatePlot = function(file) {
-
-        $scope.load(file.name);
-
-        // update function is defined in uc6.js.
-        /*uc6_update($scope.getData(file),
-                   $scope.plot.d3graph,
-                   $scope.plot.binSize,
-                   $scope.getSelectedTypes());*/
+        $scope.loadFile($scope.file_selector.name);
     } 
 
 
-    // Update the plot according to the new bin size
-    $scope.changeMutationType  =  function() {
-
-        $scope.updatePlot($scope.files_fake_selector.file);
-    };
-
-
-    // Add a new empty condition for mutation types
-    $scope.addCondition = function(t) {
-        console.log(t);
-        $scope.selectedTypes.push(t);
-        $scope.updatePlot($scope.files_fake_selector.file);
+    $scope.showBarPlot = function() {
+        $scope.barPlot=true;
+        $scope.updatePlot();
     }
 
-    // Remove a condition on the mutation types
-    $scope.removeCondition = function(condition) {
-        $scope.selectedTypes = $scope.selectedTypes.filter(function(o){
-            return o!=condition;
-        });
-        $scope.changeMutationType();
-    }
+    $scope.showBoxPlot = function(){ 
+        $scope.barPlot=false;
+        $scope.updatePlot();
 
-    // Load Melanoma and select mutations C>T and G>A
-    $scope.runExample = function(){               
-        $scope.mutationTypes.selectedTypes = [ {from: "C", to: "T"}, {from: "G", to: "A"} ];
-        $scope.load($scope.files_fake_selector.name)
     }
-
-    //todo:remove
 
 
 });

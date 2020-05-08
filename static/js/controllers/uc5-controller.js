@@ -118,7 +118,6 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
                         $scope.pollUC5(file.name)
 
-
                     }
 
                     // Persist
