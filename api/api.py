@@ -63,7 +63,7 @@ def activate_job_cleaner():
 
 with app.app_context():
     DEBUG_MODE = True
-    #DEBUG_MODE = False
+    DEBUG_MODE = False
     logger = flask.current_app.logger
 
 chromosome_dict = dict([(str(x), x) for x in range(1, 23)] + [('x', 23), ('y', 24), ('mt', 25), ('m', 25), ])
