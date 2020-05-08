@@ -47,7 +47,29 @@ def signature_estimation_qp(M, P):
 
     return exposures
 
+
+def getPrevalence(exp_df):
+    items = []
+    sig_names = [s.split(' ')[-1] if type(s) == type('') else s for s in exp_df.columns]
+    for patient, r in exp_df.iterrows():
+        n_mutations = sum(r[sig] for sig in exp_df.columns)
+        for i, sig in enumerate(exp_df.columns):
+            items.append({
+                "Patient": patient,
+                "Signature": sig_names[i],
+                "Exposure": r[sig],
+                "Prevalence": r[sig] / n_mutations
+            })
+
+
+    prev = pd.DataFrame(items).pivot("Patient", "Signature", "Prevalence")
+
+    return prev
+
+
 def get_refitting( mut_df ):
+
+    print(mut_df)
 
     dirname = os.path.dirname(__file__)
 
@@ -75,5 +97,7 @@ def get_refitting( mut_df ):
     exp_df = pd.DataFrame(index=mut_df.index, columns=active_signatures,
                           data=exposures*n_muts[:, None])
 
-    return exp_df
+    prevalence =  getPrevalence(exp_df)
+    print(prevalence)
+    return prevalence
     #exp_df.to_csv('exposures_signatures_brca_all.txt', sep='\t')
