@@ -179,6 +179,8 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         wiidth_left = width*(3/4);
         wifth_tt = width*(1/4);
 
+         // Save last result
+        $rootScope.lastResult = JSON.stringify(plot_data);
 
         $("#uc5 svg").css("height", (data.length*150)+"px");
         uc5(plot_data, $scope.outliers.show, $scope.selectedTypes.map(function(x){return x.from+">"+x.to}),wiidth_left, height);

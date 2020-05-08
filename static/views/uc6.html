@@ -49,17 +49,23 @@
 
                     </div>
 
-
-
                 </div>
 
 
+                <div class="col-md-6 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
 
-                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
+                    <button class="btn" 
+                            ng-click="downloadPlotData()"
+                            type="submit"><i class="fa fa-download"></i> Result (JSON)</button>
+                    <a id="dwn_data" target="_blank" style="display: none"></a>
+
+                </div>
+
+                <div class="col-md-6 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
 
                     <button class="btn" 
                             ng-click="downloadPlot()"
-                            type="submit"><i class="fa fa-download"></i> Download plot as SVG</button>
+                            type="submit"><i class="fa fa-download"></i> Image (SVG)</button>
                     <a id="dwn" target="_blank" style="display: none"></a>
 
                 </div>

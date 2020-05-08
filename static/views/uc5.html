@@ -35,15 +35,6 @@
                     </select>
                 </div>
 
-                <!--div class="col-md-12" style="margin-top:10px;">
-<div class="form-group">
-<label for="minY">Min Y:</label>
-<input type="number" class="form-control" id="minY" 
-ng-model="plot.minY" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
-
-<br>
-</div>
-</div-->
                 <div class="col-md-12" style="margin-top:30px;">
                     <div class="row">
 
@@ -71,7 +62,7 @@ ng-model="plot.minY" ng-change="updatePlot(file_selector.file, tumorTypes.curren
                             <b>Mutation types</b>
                         </div>
                         <div class="col-md-5 right">
-                        
+
 
                         </div>
 
@@ -112,44 +103,54 @@ ng-model="plot.minY" ng-change="updatePlot(file_selector.file, tumorTypes.curren
 
 
                     </div>
-
-
-
-                    <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
-
-                        <button class="btn" 
-                                ng-click="downloadPlot()"
-                                type="submit"><i class="fa fa-download"></i> Download plot as SVG</button>
-                        <a id="dwn" target="_blank" style="display: none"></a>
-
-                    </div>
-
-
-
-
-                </div>
-            </div>
-            </nav>
-
-        <div id="content">
-            <div class="row">
-
-                <div class="col-md-12 text-center my-auto" ng-if="!loaded">
-                    Select a file.
                 </div>
 
-                <div class="col-md-12" style="padding-left: 50px; padding-right: 50px;">
-                    <div id="slider"></div>
+
+
+                <div class="col-md-6 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
+
+                    <button class="btn" 
+                            ng-click="downloadPlotData()"
+                            type="submit"><i class="fa fa-download"></i> Result (JSON)</button>
+                    <a id="dwn_data" target="_blank" style="display: none"></a>
+
                 </div>
 
-                <div class="col-md-12" window-resize="load(file_selector.name, tumorTypes.current)">
-                    <div id="uc5" class="plot-container">
-                        <svg></svg>
-                    </div>
+                <div class="col-md-6 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
+
+                    <button class="btn" 
+                            ng-click="downloadPlot()"
+                            type="submit"><i class="fa fa-download"></i> Image (SVG)</button>
+                    <a id="dwn" target="_blank" style="display: none"></a>
+
                 </div>
+
 
 
 
             </div>
         </div>
-        </main>
+    </nav>
+
+    <div id="content">
+        <div class="row">
+
+            <div class="col-md-12 text-center my-auto" ng-if="!loaded">
+                Select a file.
+            </div>
+
+            <div class="col-md-12" style="padding-left: 50px; padding-right: 50px;">
+                <div id="slider"></div>
+            </div>
+
+            <div class="col-md-12" window-resize="load(file_selector.name, tumorTypes.current)">
+                <div id="uc5" class="plot-container">
+                    <svg></svg>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+</main>

@@ -191,6 +191,10 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         if(window.innerHeight-250>height)
             height=window.innerHeight-260;
         $("svg").css("height", window.innerHeight);
+        
+        
+        // Save last result
+        $rootScope.lastResult = JSON.stringify(plot_data);
 
         $("#uc6 svg").css("height", (data.length*150)+"px");
         // $rootScope.tumorTypes.current

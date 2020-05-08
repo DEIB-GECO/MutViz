@@ -36,14 +36,14 @@
                 </div>
 
                 <!--div class="col-md-12" style="margin-top:10px;">
-                    <div class="form-group">
-                        <label for="minY">Min Y:</label>
-                        <input type="number" class="form-control" id="minY" 
-                               ng-model="plot.minY" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
+<div class="form-group">
+<label for="minY">Min Y:</label>
+<input type="number" class="form-control" id="minY" 
+ng-model="plot.minY" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
 
-                        <br>
-                    </div>
-                </div-->
+<br>
+</div>
+</div-->
 
                 <div class="col-md-12" style="margin-top:30px;">
 
@@ -53,18 +53,18 @@
                             <b>Mutation types</b>
                         </div>
                         <!--div class="col-md-5">
-                            <label class="checkbox-inline float-right">
-                                <input type="checkbox"  data-toggle="toggle" 
-                                       ng-change="updatePlot(file_selector.file, tumorTypes.current)"
-                                       ng-model="mutationTypes.stacked"> Stacked
-                            </label>
+<label class="checkbox-inline float-right">
+<input type="checkbox"  data-toggle="toggle" 
+ng-change="updatePlot(file_selector.file, tumorTypes.current)"
+ng-model="mutationTypes.stacked"> Stacked
+</label>
 
-                            <label class="checkbox-inline float-right">
-                                <input type="checkbox"  data-toggle="toggle" 
-                                       ng-change="updatePlot(file_selector.file, tumorTypes.current)"
-                                       ng-model="plot.showTotal"> Total
-                            </label>
-                        </div-->
+<label class="checkbox-inline float-right">
+<input type="checkbox"  data-toggle="toggle" 
+ng-change="updatePlot(file_selector.file, tumorTypes.current)"
+ng-model="plot.showTotal"> Total
+</label>
+</div-->
 
                     </div>
 
@@ -85,13 +85,13 @@
                         </div>
 
                     </div>
-                    
+
                     <div class="row" ng-if="selectedTypes.length<defaultMutationTypes.length" style="margin-top: 25px;">
                         <div class="col-md-6">
                             <select class="form-control" id="ttSelect" ng-model="addingType">
                                 <option ng-repeat="addType in defaultMutationTypes" ng-value="addType" ng-if="!selectedTypes.includes(addType)">{{addType.from}}>{{addType.to}}</option>
                             </select>
-                    
+
                         </div>
 
                         <div class="col-md-6">
@@ -101,17 +101,25 @@
                         </div>
                     </div>
 
-                
+
 
                 </div>
 
 
+                <div class="col-md-6 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
 
-                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
+                    <button class="btn" 
+                            ng-click="downloadPlotData()"
+                            type="submit"><i class="fa fa-download"></i> Result (JSON)</button>
+                    <a id="dwn_data" target="_blank" style="display: none"></a>
+
+                </div>
+
+                <div class="col-md-6 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
 
                     <button class="btn" 
                             ng-click="downloadPlot()"
-                            type="submit"><i class="fa fa-download"></i> Download plot as SVG</button>
+                            type="submit"><i class="fa fa-download"></i> Image (SVG)</button>
                     <a id="dwn" target="_blank" style="display: none"></a>
 
                 </div>

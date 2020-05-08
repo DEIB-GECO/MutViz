@@ -173,6 +173,9 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             height=window.innerHeight-260;
         $("svg").css("height", window.innerHeight);
         console.log(data);
+        
+         // Save last result
+        $rootScope.lastResult = JSON.stringify(plot_data);
 
         //$("#uc4 svg").css("height", (data.length*150)+"px");
         $scope.plot.d3graph = uc4(plot_data, $scope.selectedTypes, width, height, animate);

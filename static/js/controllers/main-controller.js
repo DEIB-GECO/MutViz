@@ -142,6 +142,15 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         document.getElementById("dwn").click();
     }
 
+    // Download last json
+    $scope.downloadPlotData = function() {
+
+        $('#dwn_data').attr('href', 'data:application/octet-stream;base64,' + btoa($rootScope.lastResult)); 
+        $('#dwn_data').attr('download', 'result.json');
+        $('#dwn_data').click();
+
+        document.getElementById("dwn_data").click();
+    }
     // Compute Distances
     $rootScope.computeDistances = function(file) {
 
