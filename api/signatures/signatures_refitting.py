@@ -69,8 +69,6 @@ def getPrevalence(exp_df):
 
 def get_refitting( mut_df ):
 
-    print(mut_df)
-
     dirname = os.path.dirname(__file__)
 
     #load the mutations
@@ -98,6 +96,6 @@ def get_refitting( mut_df ):
                           data=exposures*n_muts[:, None])
 
     prevalence =  getPrevalence(exp_df)
-    print(prevalence)
+
     return prevalence
     #exp_df.to_csv('exposures_signatures_brca_all.txt', sep='\t')
