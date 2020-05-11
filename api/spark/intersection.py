@@ -17,14 +17,23 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
     print("USING "+str(numBins)+" BINS.")
     start_time = time.time()
 
-    os.environ["SPARK_HOME"] = "/var/lib/spark-2.4.5-bin-hadoop2.7"
+    os.environ["SPARK_HOME"] = os.getenv('MUTVIZ_SPARK_HOME', "/var/lib/spark-2.4.5-bin-hadoop2.7")
     os.environ["PYSPARK_PYTHON"] = sys.executable
     os.environ["PYSPARK_DRIVER_PYTHON"] = sys.executable
 
     driver_class = "org.postgresql.Driver"
 
+    cores = os.getenv('MUTVIZ_CORES', "*")
+
+    print("#### SPARK CONFIGURATION ####")
+    print("SPARK HOME: " + os.getenv('SPARK_HOME'))
+    print("Using cores: "+cores)
+    print("Using memory: "+memory)
+    print("Using bins: "+str(numBins))
+    print("#############################")
+
     spark = SparkSession.builder \
-            .master("local[*]")      \
+            .master("local["+cores+"]")      \
             .appName("Word Count") \
             .config("spark.jars", jdbc_jar) \
             .config("spark.driver.memory", memory) \
