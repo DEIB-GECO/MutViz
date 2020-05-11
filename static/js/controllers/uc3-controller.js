@@ -10,23 +10,12 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.plot = {binSize: 10, d3graph: null}
     $scope.loaded = false;
 
-    $scope.selectedTumorTypes = [];
+
 
     $scope.test = {area:{from:0, to:0, fromPosition:-$scope.plot.binSize/2, toPosition:$scope.plot.binSize/2, visible: true, L:null, H:null}};
 
     // Selected File
     $scope.files_selector = {name : null, file: null};
-
-    // Initialize with the first tumor type
-    if($rootScope.tumorTypes.available.length>0) {
-        if($routeParams.showExample=="1"){
-            $scope.runExample();
-        } else {
-            $scope.selectedTumorTypes = [$rootScope.tumorTypes.available[0]];
-
-            //$scope.loadTumorType($scope.selectedTumorTypes[0], $scope.motifsType.current);
-        }
-    }
 
 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
@@ -174,19 +163,19 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             $scope.mutationTypes.invalidSelection = true;
         } else {
             $scope.mutationTypes.invalidSelection = false;
-            $scope.updatePlot($scope.files_selector.file, $scope.selectedTumorTypes);
+            $scope.updatePlot($scope.files_selector.file, $rootScope.selectedTumorTypes);
         }
     };
 
     $scope.doTest = function() {
 
-        if($scope.selectedTumorTypes.length != 2)
+        if($rootScope.selectedTumorTypes.length != 2)
             return;
 
         file = $scope.files_selector.file;
 
-        type1 = $scope.selectedTumorTypes[0]
-        type2 = $scope.selectedTumorTypes[1]
+        type1 = $rootScope.selectedTumorTypes[0]
+        type2 = $rootScope.selectedTumorTypes[1]
 
         dist1 = $rootScope.getDistances(file,type1)
         dist2 = $rootScope.getDistances(file,type2)
@@ -257,16 +246,16 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     $scope.addTumorType = function(type) {
         if(type!=undefined) { 
-            $scope.selectedTumorTypes.push(type);
-            $scope.load($scope.files_selector.name, $scope.selectedTumorTypes); 
+            $rootScope.selectedTumorTypes.push(type);
+            $scope.load($scope.files_selector.name, $rootScope.selectedTumorTypes); 
 
         }
     }
 
     $scope.removeTumorType = function(type) {
-        $scope.selectedTumorTypes = $scope.selectedTumorTypes.filter(function(t){return t!=type});
-        if($scope.selectedTumorTypes.length>0)
-            $scope.load($scope.files_selector.name, $scope.selectedTumorTypes)
+        $rootScope.selectedTumorTypes = $rootScope.selectedTumorTypes.filter(function(t){return t!=type});
+        if($rootScope.selectedTumorTypes.length>0)
+            $scope.load($scope.files_selector.name, $rootScope.selectedTumorTypes)
     }
 
 
@@ -286,9 +275,9 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     // Load Melanoma and select mutations C>T and G>A
     $scope.runExample = function(){               
         $scope.mutationTypes.selectedTypes = [ {from: "C", to: "T"}, {from: "G", to: "A"} ];
-        $scope.selectedTumorTypes = $rootScope.tumorTypes.available.slice(0,4);
+        $rootScope.selectedTumorTypes = $rootScope.tumorTypes.available.slice(0,4);
 
-        $scope.load($scope.files_selector.name, $scope.selectedTumorTypes)
+        $scope.load($scope.files_selector.name, $rootScope.selectedTumorTypes)
     }
 
 });

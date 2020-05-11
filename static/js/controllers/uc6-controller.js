@@ -15,16 +15,17 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.plot = { d3graph: null}
     $scope.loaded = false;
 
-    // Selected File
-    $scope.files_fake_selector = {name : null, file: null};
-
-    $scope.files_fake = [];
     $scope.getSelectedFile = function(fileName) {
         return $scope.files_fake.filter(function(f){return f.name == fileName})[0];
     }
 
+
     // cache
     $scope.uc6_files = {}
+
+    // status
+    $scope.execution = {running:false};
+    $scope.file_selector = {name:""}
 
     // outliers
     $scope.outliers = {show:true}
@@ -57,6 +58,7 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                     //$rootScope.persistData();
 
                     $scope.load($scope.uc6_files[filename].result);
+                    $scope.execution.running = false;
                 } else {
 
                     // schedule another call
@@ -78,21 +80,19 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     }
 
     $scope.loadFile = function(filename) {
-        console.log($rootScope.repository)
+        
+        $("#uc6").html("<svg></svg>")
 
+        $scope.execution.running = true;
+        $scope.loaded = false;
+        
         console.log("loading file "+filename);
 
-        if(false){
-            data = {"ready": true, "result": {"BLCA": [{"count": 229470, "donor_id": 229470, "mutation": "C>T"}, {"count": 229459, "donor_id": 229459, "mutation": "C>T"}]}}
-            $scope.load(data.result);
-            return
-        }
 
-
-
-        if( filename in $scope.uc6_files && "result" in $scope.uc6_files[filename] ) 
-            $scope.load( $scope.uc6_files[filename].result)
-        else {
+        if( filename in $scope.uc6_files && "result" in $scope.uc6_files[filename] ) { 
+            $scope.load( $scope.uc6_files[filename].result);
+            $scope.execution.running = false;
+        } else {
 
             request_body = {
                 repoId: filename,
@@ -129,8 +129,7 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
                         $scope.uc6_files[file.name] = file;
 
-                        $scope.pollUC6(file.name)
-
+                        $scope.pollUC6(file.name);
 
                     }
 
@@ -191,8 +190,8 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         if(window.innerHeight-250>height)
             height=window.innerHeight-260;
         $("svg").css("height", window.innerHeight);
-        
-        
+
+
         // Save last result
         $rootScope.lastResult = JSON.stringify(plot_data);
 

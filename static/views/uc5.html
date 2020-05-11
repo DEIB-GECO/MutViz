@@ -12,37 +12,46 @@
                 </div>
 
 
-
-                <div class="col-md-12" style="margin-top:10px;">
+                <div class="col-md-12" style="margin-top:10px; background-color: #fafafa;">
 
                     <div ng-show="repository.length>0"
                          style="height: 90px;">
                         <label for="jtSelect">File:</label>
-                        <select class="form-control" id="ttSelect" 
-                                ng-model="file_selector.name"
-                                ng-change="loadFile(file_selector.name)" >
+                        <select ng-disabled="execution.running"
+                                class="form-control" id="ttSelect" 
+                                ng-model="file_selector.name">
                             <option ng-repeat="file in repository track by $index" ng-value="file.identifier">{{file.name}}</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="col-md-12" style="margin-top:10px;">
+                <div class="col-md-12" style=" background-color: #fafafa;padding-bottom:10px;">
                     <label for="ttSelect">Tumor type:</label>
-                    <select class="form-control" id="ttSelect"
-                            ng-model="tumorTypes.current"
-                            ng-change="loadFile(file_selector.name)">
+                    <select ng-disabled="execution.running"
+                            class="form-control" id="ttSelect"
+                            ng-model="tumorTypes.current">
                         <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
                 </div>
 
-                <div class="col-md-12" style="margin-top:30px;">
+                <div class="col-md-12 text-center" style="margin-top:10px;">
+                    <button class="btn"  style="width: 100%;"
+                            ng-click="loadFile(file_selector.name)"
+                            ng-disabled="execution.running || file_selector.name=='' || tumorTypes.current==null"
+                            type="submit">
+                        <i class="fa fa-play" style="font-size: 0.9em;
+                                                     margin-right: 6px;"></i> Plot</button>
+                    <a id="dwn_data" target="_blank" style="display: none"></a>
+                </div>
+
+                <div class="col-md-12" style="margin-top:30px; height: 40px;" >
                     <div class="row">
 
-                        <div class="col-md-8">
-                            Show outliers:
+                        <div class="col-md-8" ng-show="loaded">
+                            Show outliers
                         </div>
 
-                        <div class="col-md-4">
+                        <div class="col-md-4" ng-show="loaded && !barPlot">
                             <switch size="small" id="enabled" name="enabled"
                                     ng-model="outliers.show" ng-change="loadFile(file_selector.name)">
                                 ></switch>
@@ -50,13 +59,11 @@
 
                     </div>
 
-
-
                 </div>
 
-                <div class="col-md-12" style="margin-top:30px;">
+                <div class="col-md-12" >
 
-                    <div class="row">
+                    <div class="row" ng-show="loaded">
 
                         <div class="col-md-7">
                             <b>Mutation types</b>
@@ -67,36 +74,39 @@
                         </div>
 
 
+                        <div class="col-md-12">
+                            <div class="row" style="margin-top: 5px; margin-bottom: 10px;">
+                                <div class="col-md-6"  ng-repeat="st in selectedTypes track by $index" >
+                                    <div class="row" style="margin-top:5px">
+                                        <div class="col-md-6" style="line-height: 39px;">
+                                            <span style="margin-left: 10px; padding: 6px; border: 1px solid black;">{{st.from}}>{{st.to}}</span>
+                                        </div>
 
-                        <div class="row" style="margin-top: 5px; margin-bottom: 10px;">
-                            <div class="col-md-6"  ng-repeat="st in selectedTypes track by $index" >
-                                <div class="row" style="margin-top:5px">
-                                    <div class="col-md-6" style="line-height: 39px;">
-                                        <span style="margin-left: 10px; padding: 6px; border: 1px solid black;">{{st.from}}>{{st.to}}</span>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <a class="form-control btn btn-default"  ng-click="removeCondition(st)">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
+                                        <div class="col-md-6">
+                                            <a class="form-control btn btn-default"  ng-click="removeCondition(st)">
+                                                <i class="fas fa-trash"></i>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
+                            </div>
                         </div>
 
-                        <div class="row" ng-if="selectedTypes.length<defaultMutationTypes.length" style="margin-top: 25px;">
-                            <div class="col-md-6">
-                                <select class="form-control" id="ttSelect" ng-model="addingType">
-                                    <option ng-repeat="addType in defaultMutationTypes" ng-value="addType" ng-if="!selectedTypes.includes(addType)">{{addType.from}}>{{addType.to}}</option>
-                                </select>
+                        <div class="col-md-12" ng-if="selectedTypes.length<defaultMutationTypes.length" style="margin-top: 25px;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <select class="form-control" id="ttSelect" ng-model="addingType">
+                                        <option ng-repeat="addType in defaultMutationTypes" ng-value="addType" ng-if="!selectedTypes.includes(addType)">{{addType.from}}>{{addType.to}}</option>
+                                    </select>
 
-                            </div>
+                                </div>
 
-                            <div class="col-md-6">
-                                <a class="form-control btn btn-default"  ng-click="addCondition(addingType)">
-                                    <i class="fas fa-plus"></i>
-                                </a>
+                                <div class="col-md-6">
+                                    <a class="form-control btn btn-default"  ng-click="addCondition(addingType)">
+                                        <i class="fas fa-plus"></i>
+                                    </a>
+                                </div>
                             </div>
                         </div>
 
@@ -107,23 +117,25 @@
 
 
 
-                <div class="col-md-6 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
+                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
 
-                    <button class="btn" 
+                    <button class="btn"  style="width:100%"
                             ng-click="downloadPlotData()"
-                            type="submit"><i class="fa fa-download"></i> Result (JSON)</button>
+                            type="submit"><i class="fa fa-download"></i> Download Result (JSON)</button>
                     <a id="dwn_data" target="_blank" style="display: none"></a>
 
                 </div>
 
-                <div class="col-md-6 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
+                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-bottom: 20px!important;">
 
                     <button class="btn" 
+                            style="width:100%"
                             ng-click="downloadPlot()"
-                            type="submit"><i class="fa fa-download"></i> Image (SVG)</button>
+                            type="submit"><i class="fa fa-download"></i> Download Image (SVG)</button>
                     <a id="dwn" target="_blank" style="display: none"></a>
 
                 </div>
+
 
 
 
@@ -132,12 +144,19 @@
         </div>
     </nav>
 
-    <div id="content">
+    <div id="content" style="padding-top: 0px; padding-left: 15px; background-color: {{execution.running?'#5d5d5d':''}}">
         <div class="row">
 
-            <div class="col-md-12 text-center my-auto" ng-if="!loaded">
+            <div class="col-md-12 text-center" ng-if="execution.running" style="line-height: 40px; margin-top: 20px; color:white;">
+                PROCESSING
+                <br>
+                <img src="img/running.gif" width="80px">
+            </div>
+
+            <div class="col-md-12 text-center" ng-if="!loaded && !execution.running" style="line-height: 40px;">
                 Select a file.
             </div>
+
 
             <div class="col-md-12" style="padding-left: 50px; padding-right: 50px;">
                 <div id="slider"></div>

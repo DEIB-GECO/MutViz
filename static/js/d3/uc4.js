@@ -4,17 +4,6 @@ var RECT_HEIGHT = 50;
 var uc4_colors = ["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#808000", "#ffd8b1", "#000075", "#a9a9a9", "#ffffff", "#000000"];
 
 
-// Get y value
-function yVal(bin) {
-    y_val = bin.map( function(x) {
-        if(x.length>=4)
-            return x[3];
-        else
-            return 1;
-    }).reduce(function(x,y){return x+y},0);
-
-    return y_val;
-}
 
 
 // Add a track to the heatmap
@@ -58,16 +47,8 @@ function uc4_getFilteredData(data, mutationTypes) {
 /* Build the graph with an initial number of bins */
 function uc4(data, mutationTypes, width, height, animate) {
     
-
-
-    console.log("width: "+width);
-
-    console.log("called uc4 with data: ");
-    console.log(data);
-    console.log(mutationTypes);
-
     var g = {} // here we put all useful objects describing our plot
-    console.log(mutationTypes.length);
+
 
     g.titleBoxHeight = 25;
 
@@ -77,7 +58,6 @@ function uc4(data, mutationTypes, width, height, animate) {
     g.width  = (width-1.5*g.margin.left-g.distance*(mutationTypes.length-1))/mutationTypes.length;
     g.height = height - 2*g.margin.top;
 
-    console.log("width: "+g.width)
 
     // Remove any pre-existing plot
     d3.select("#uc4 svg").html("");
@@ -97,13 +77,6 @@ function uc4(data, mutationTypes, width, height, animate) {
 
     // leave same space above the maximum
     g.yMax =  g.yMax + 0.1* g.yMax;
-    
-    console.log(data);
-    console.log(g.yMax);
-    
-
-
-    console.log("yMax: "+g.yMax);
 
     mutationTypes.forEach(function(mutationType,index) {
 
@@ -173,7 +146,7 @@ function uc4(data, mutationTypes, width, height, animate) {
             .duration(1000)
             .attr("y", function(d) { return g.yAxis[index](d["count"])+g.titleBoxHeight; })
             .attr("height", function(d) { return g.height - g.yAxis[index](d["count"]); })
-            .delay(function(d,i){console.log(i) ; return(i*100)})
+            .delay(function(d,i){console.log("") ; return(i*100)})
 
         // add the x Axis
         g.svg[index].append("g")

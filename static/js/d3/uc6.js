@@ -43,7 +43,7 @@ function uc6_box(data, showOutliers, signatures, width, height) {
         return({q1: q1, median: median, q3: q3, interQuantileRange: interQuantileRange, min: min, max: max})
     })
     .entries(data)
-    
+
     console.log(sumstat);
 
     //Outliers computation
@@ -54,9 +54,11 @@ function uc6_box(data, showOutliers, signatures, width, height) {
         sumstat.forEach(function(s){
 
             otl = data.filter(function(d){return d.signature==s.key && (d.value<s.value.min || d.value>s.value.max)});
-            outliers = outliers.union(otl);
+            console.log("doing union")
+            outliers = outliers.concat(otl);
 
         })
+        console.log("outliers total: "+outliers.length)
     }
 
 
@@ -70,7 +72,9 @@ function uc6_box(data, showOutliers, signatures, width, height) {
     }
 
     // leave same space above the maximum
-    g.yMax =  g.yMax + 0.1*g.yMax;
+    g.yMax =  g.yMax + 0.2*g.yMax;
+
+    if(g.yMax>1) g.yMax = 1;
 
     // Show the X scale
     var x = d3.scaleBand()
@@ -91,7 +95,13 @@ function uc6_box(data, showOutliers, signatures, width, height) {
     var y = d3.scaleLinear()
     .domain([0,g.yMax])
     .range([g.height, 0])
-    g.svg.append("g").style("font-size", "1em").call(d3.axisLeft(y))
+
+    if(g.yMax<0.01) {
+        g.svg.append("g").style("font-size", "0.7em").call(d3.axisLeft(y).tickFormat(d3.format(".1e")));
+    } else {
+        g.svg.append("g").style("font-size", "0.9em").call(d3.axisLeft(y));
+    }
+
 
     // tooltip
     var tip = d3.tip()
@@ -115,7 +125,7 @@ function uc6_box(data, showOutliers, signatures, width, height) {
         .attr("x1", function(d){return(x(d.key))})
         .attr("x2", function(d){return(x(d.key))})
         .attr("y1", function(d){return(y(Math.max(0,d.value.min)))})
-        .attr("y2", function(d){return(y(d.value.max))})
+        .attr("y2", function(d){return y(Math.min(1,d.value.max))   })
         .attr("stroke", "black")
         .style("width", 40)
 
@@ -158,7 +168,8 @@ function uc6_box(data, showOutliers, signatures, width, height) {
         .attr('class', 'd3-tip')
         .offset([-10, 0])
         .html(function(d) {
-            return "<strong style='color:yellow'>"+d.signature+"</strong> <br> donor_id: "+d.donor_id+"<br>count: "+d.value;;
+            //donor_id: "+d.donor_id+"
+            return "<strong style='color:yellow'>"+d.signature+"</strong> <br>count: "+d.value;;
         });
 
         g.svg.call(tip_outliers);
@@ -214,8 +225,6 @@ function uc6(data, width, height) {
 
     // leave same space above the maximum
     g.yMax =  g.yMax + 0.1* g.yMax;
-
-    console.log("yMax: "+g.yMax);
 
     index = 0;
 
@@ -280,12 +289,19 @@ function uc6(data, width, height) {
 
     g.svg[index].selectAll(".xaxis text").attr("transform", "translate(-13,+30) rotate(-90)");
 
+
+    if(g.yMax<0.001) {
+        to_call = d3.axisLeft(g.yAxis[index]).tickFormat(d3.format(".1e"));
+    } else {
+        to_call = d3.axisLeft(g.yAxis[index]);
+    }
+
     // add the y Axis
     if(index==0){
         g.svg[index].append("g")
             .attr("transform", "translate(-5,"+g.titleBoxHeight+")")
             .style("font-size", "0.8em")
-            .call(d3.axisLeft(g.yAxis[index]));
+            .call(to_call);
     }
 
     g.svg[index].append("rect")

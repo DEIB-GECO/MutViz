@@ -4,7 +4,7 @@ var uc2_getColor = d3.scaleLinear()
 .domain([0,1]);
 
 // Get y value
-function yVal(bin) {
+function uc2_yVal(bin) {
     y_val = bin.map( function(x) {
         if(x.length>=4)
             return x[3];
@@ -87,19 +87,19 @@ function uc2_update(data, g, binSize, mutationTypes) {
     var binsf1    = histogram(filtered_f1);
     var binsf2  = histogram(filtered_f2);
 
-    var maxInf1 = d3.max(binsf1, function(d) { return +yVal(d) });
-    var maxf2 = d3.max(binsf2, function(d) { return +yVal(d) });
+    var maxInf1 = d3.max(binsf1, function(d) { return +uc2_yVal(d) });
+    var maxf2 = d3.max(binsf2, function(d) { return +uc2_yVal(d) });
 
 
     var binsf1Norm = binsf1.map( function(b){
-        b.value = yVal(b) / maxInf1;
+        b.value = uc2_yVal(b) / maxInf1;
         b.variable = data.f1.name;
         b.group = b.x0;
         return b;
     });
 
     var binsf2Norm = binsf2.map(function(b){
-        b.value = yVal(b) / maxf2; 
+        b.value = uc2_yVal(b) / maxf2; 
         b.variable = data.f2.name;
         b.group = b.x0;
         return b;

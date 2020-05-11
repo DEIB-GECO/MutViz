@@ -2,8 +2,8 @@
    UC4 Controller
    #################### */
 app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, $http) {
-    
-    
+
+
 
     /* # Initialization # */
     window.scroll(0, 0);
@@ -20,13 +20,9 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     // cache
     $scope.uc4_files = {}
 
-    // Selected File
-    $scope.files_fake_selector = {name : null, file: null};
-
-    $scope.files_fake = [];
-    $scope.getSelectedFile = function(fileName) {
-        return $scope.files_fake.filter(function(f){return f.name == fileName})[0];
-    }
+    // status
+    $scope.execution = {running:false};
+    $scope.file_selector = {name : "", file: null};
 
 
     $scope.pollUC4 = function(filename) {
@@ -47,6 +43,7 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                     //$rootScope.persistData();
 
                     $scope.load($scope.uc4_files[filename].result, true);
+                    $scope.execution.running = false;
                 } else {
 
                     // schedule another call
@@ -68,9 +65,12 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     }
 
     $scope.loadFile = function(filename) {
-        console.log($rootScope.repository)
 
-        console.log("loading file "+filename);
+
+        $("#uc4").html("<svg></svg>")
+
+        $scope.execution.running = true;
+        $scope.loaded = false;
 
         /*data = {"COCA": {"C[C>T]C": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}, "LUSC": {"C[C>T]A": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]A"}}, "MELA": {"C[C>T]C": {"count": 2, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}, "OV": {"C[C>T]T": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]T"}}, "PACA": {"G[C>T]G": {"count": 1, "mutation": "C>T", "trinucleotide": "G[C>T]G"}}, "SKCA": {"C[C>T]C": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}}
 
@@ -79,9 +79,10 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
 
 
-        if( filename in $scope.uc4_files && "result" in $scope.uc4_files[filename] ) 
-            $scope.load( $scope.uc4_files[filename].result, true)
-        else {
+        if( filename in $scope.uc4_files && "result" in $scope.uc4_files[filename] ){ 
+            $scope.load( $scope.uc4_files[filename].result, true);
+            $scope.execution.running = false;
+        } else {
 
             request_body = {
                 repoId: filename,
@@ -172,9 +173,9 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         if(window.innerHeight-250>height)
             height=window.innerHeight-260;
         $("svg").css("height", window.innerHeight);
-        console.log(data);
-        
-         // Save last result
+
+
+        // Save last result
         $rootScope.lastResult = JSON.stringify(plot_data);
 
         //$("#uc4 svg").css("height", (data.length*150)+"px");

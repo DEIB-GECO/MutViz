@@ -6,7 +6,7 @@ var uc3_getColor = d3.scaleLinear()
 .domain([0,1]);
 
 // Get y value
-function yVal(bin) {
+function uc3_yVal(bin) {
     y_val = bin.map( function(x) {
         if(x.length>=4)
             return x[3];
@@ -88,13 +88,13 @@ function uc3_update(data, g, binSize, mutationTypes) {
     binned = data.map(function(tumorType){return histogram(uc3_getFilteredData(tumorType.data, mutationTypes));});
 
     // Max elements contained in a bin (array, one for each binned data in binned)
-    maxx = binned.map(function(bins){ return d3.max(bins, function(d) { return +yVal(d) }); });
+    maxx = binned.map(function(bins){ return d3.max(bins, function(d) { return +uc3_yVal(d) }); });
 
     // Add to each bin the normalized value
     var normalized = binned.map(function(bins,i){  
 
         return bins.map( function(b){
-            b.value = yVal(b) / maxx[i];
+            b.value = uc3_yVal(b) / maxx[i];
             b.variable = data[i].type;
             b.group = b.x0;
             return b;
@@ -147,8 +147,8 @@ function uc3(data, binSize, range, mutationTypes) {
     var g = {} // here we put all useful objects describing our plot
 
     // Set the dimensions and margins of the plot
-    g.margin = {top: 10, right: 30, bottom: 30, left: 40};
-    g.width  = 700 - g.margin.left - g.margin.right;
+    g.margin = {top: 10, right: 30, bottom: 30, left: 50};
+    g.width  = 700 - 2*g.margin.left;
     g.height = 150*data.length - g.margin.top - g.margin.bottom;
 
     // Remove any pre-existing plot

@@ -39,7 +39,7 @@ function uc1_get_bins(data, mutationTypes, binSize, minX, maxX) {
 var uc1_colors = ["#e6194B", "#3cb44b", "#ffe119", "#4363d8", "#f58231", "#911eb4", "#42d4f4", "#f032e6", "#bfef45", "#fabebe", "#469990", "#e6beff", "#9A6324", "#fffac8", "#800000", "#aaffc3", "#808000", "#ffd8b1", "#000075", "#a9a9a9", "#ffffff", "#000000"];
 
 // Get y value
-function yVal(bin) {
+function uc1_yVal(bin) {
     y_val = bin.map( function(x) {
         if(x.length>=4)
             return x[3];
@@ -86,9 +86,9 @@ function uc1_addBars(g, groupId, bins, alreadyAddedMutations, color) {
     // Get the vertical position of each bar, depending on the already stacked bars for a given bin (alreadyAddedMutations)
     yPos = function(bin, i) { 
         if(alreadyAddedMutations!=null) {
-            return g.yAxisScale(yVal(bin)+alreadyAddedMutations[i]);
+            return g.yAxisScale(uc1_yVal(bin)+alreadyAddedMutations[i]);
         } else
-            return g.yAxisScale(yVal(bin));
+            return g.yAxisScale(uc1_yVal(bin));
     }
 
     selection
@@ -100,13 +100,15 @@ function uc1_addBars(g, groupId, bins, alreadyAddedMutations, color) {
         .attr("x", 1) // starting distance of each element from y-axis (then will be translated...)
         .attr("transform", function(d,i) { return "translate(" + g.xAxisScale(d.x0) + "," + yPos(d,i) + ")"; }) // we move each rectangle depending on where the associated bin starts, and 
         .attr("width",  function(d) { return g.xAxisScale(d.x1) - g.xAxisScale(d.x0) -1 ; }) // width of the rect
-        .attr("height", function(d) { return g.height - g.yAxisScale(yVal(d)) })       // height of the rect
+        .attr("height", function(d) { return g.height - g.yAxisScale(uc1_yVal(d)) })       // height of the rect
 
         .style("fill", color)
 
     if(alreadyAddedMutations!=null)
         for(i in alreadyAddedMutations) {
-            alreadyAddedMutations[i] += yVal(bins[i]);
+            console.log(i);
+            console.log(bins[i])
+            alreadyAddedMutations[i] += uc1_yVal(bins[i]);
         }
 
     return alreadyAddedMutations;
@@ -175,7 +177,7 @@ function uc1_update(data, g, binSize, minY, mutationTypes, stacked, showTotal) {
      * we can complete the definition of yAxisScale and then build the yAxis.
      * The max function iterates over the bins, and for each bin (another array) takes the number of contained items (length * of the array containing the items) */
 
-    dataMin = d3.max(bins, function(d) { return yVal(d)})
+    dataMin = d3.max(bins, function(d) { return uc1_yVal(d)})
     yMin = dataMin + 20
     if(minY > dataMin)
         yMin = minY + 20
@@ -234,7 +236,7 @@ function uc1_update(data, g, binSize, minY, mutationTypes, stacked, showTotal) {
         filteredData = uc1_getFilteredData(data, [type]);
         filteredArray[i] = histogram(filteredData);
 
-        curMax = d3.max( filteredArray[i], function(d) { return yVal(d) })
+        curMax = d3.max( filteredArray[i], function(d) { return uc1_yVal(d) })
         maxInFiltered = curMax>maxInFiltered?curMax:maxInFiltered;
 
     }
@@ -346,5 +348,7 @@ function uc1(data, binSize, range, mutationTypes, stacked, showTotal, width, hei
     uc1_update(data, g, binSize, range.minY, mutationTypes, stacked, showTotal);
 
     // return a reference to the graph
+    console.log("returning g:")
+    console.log(g)
     return g;
 }

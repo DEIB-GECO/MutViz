@@ -20,6 +20,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         current: null,
         available: []
     }
+    $rootScope.selectedTumorTypes = [];
 
     // Repository
     $rootScope.repository = [];
@@ -210,6 +211,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         function success (response) {
             $rootScope.tumorTypes.available = response.data;
             $rootScope.tumorTypes.current = response.data[0];
+            $rootScope.selectedTumorTypes.push(response.data[0]);
             console.log("loaded tumor types");
 
         }).catch(
@@ -225,7 +227,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         .then(
         function success (response) {
             $rootScope.repository = response.data;
-            console.log( $rootScope.repository);
+   
             if($rootScope.repository.length>0)
                 $rootScope.repoEl = $rootScope.repository[0];
             console.log("loaded repository");

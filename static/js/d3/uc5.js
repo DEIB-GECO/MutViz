@@ -1,25 +1,10 @@
 var RECT_HEIGHT = 50;
 
-Array.prototype.union = function(a) 
-{
-    var r = this.slice(0);
-    a.forEach(function(i) { if (r.indexOf(i) < 0) r.push(i); });
-    return r;
-};
-
 
 // List of available colors
 var uc5_colors = ["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#808000", "#ffd8b1", "#000075", "#a9a9a9", "#ffffff", "#000000"];
 
 function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
-
-
-    console.log("width: "+width);
-
-    console.log("called uc5 with data: ");
-    console.log(data);
-    console.log(mutationTypes);
-
 
     var g = {} // here we put all useful objects describing our plot
     console.log(mutationTypes.length);
@@ -53,9 +38,7 @@ function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
         max = q3 + 1.5 * interQuantileRange
         return({q1: q1, median: median, q3: q3, interQuantileRange: interQuantileRange, min: min, max: max})
     })
-    .entries(data)
-
-    console.log(sumstat);
+    .entries(data);
 
     //Outliers computation
 
@@ -65,13 +48,9 @@ function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
 
         sumstat.forEach(function(s){
 
-            console.log("key: "+s.key+ "min:"+ s.value.min+" max: "+s.value.max);
-
             otl = data.filter(function(d){return d.mutation==s.key && (d.count<s.value.min || d.count>s.value.max)});
-            console.log(data);
-            console.log(otl);
 
-            outliers = outliers.union(otl);
+            outliers = outliers.concat(otl);
 
         })
     }
@@ -223,6 +202,7 @@ function uc5(data, showOutliers, mutationTypes, width, height) {
         .attr("transform",
               "translate(" + g.margin.left + "," + g.margin.top + ")");
 
+
     // Compute quartiles, median, inter quantile range min and max --> these info are then used to draw the box.
     var sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
     .key(function(d) { return d.mutation;})
@@ -244,10 +224,11 @@ function uc5(data, showOutliers, mutationTypes, width, height) {
 
         sumstat.forEach(function(s){
 
-            console.log("key: "+s.key+ "min:"+ s.value.min+" max: "+s.value.max);
-
-            otl = data.filter(function(d){return d.mutation==s.key && (d.count<s.value.min || d.count>s.value.max)});
-            outliers = outliers.union(otl);
+            otl = data.filter(function(d){
+                return d.mutation==s.key && (d.count<s.value.min || d.count>s.value.max)
+            
+            });
+            outliers = outliers.concat(otl);
 
         })
     }

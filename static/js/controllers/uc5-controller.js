@@ -19,12 +19,15 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // cache
     $scope.uc5_files = {}
-    
+
+    // status
+    $scope.execution = {running:false};
+    $scope.file_selector = {name : "", file: null};
+
+
     // outliers
     $scope.outliers = {show:true}
 
-    // Selected File
-    $scope.files_selector = {name : null, file: null};
 
     $scope.pollUC5 = function(filename) {
         // Start polling
@@ -44,6 +47,7 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                     //$rootScope.persistData();
 
                     $scope.load($scope.uc5_files[filename].result);
+                    $scope.execution.running = false;
                 } else {
 
                     // schedule another call
@@ -65,7 +69,11 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     }
 
     $scope.loadFile = function(filename) {
-        console.log($rootScope.repository)
+
+        $("#uc5").html("<svg></svg>")
+
+        $scope.execution.running = true;
+        $scope.loaded = false;
 
         console.log("loading file "+filename);
 
@@ -77,9 +85,10 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
 
 
-        if( filename in $scope.uc5_files && "result" in $scope.uc5_files[filename] ) 
-            $scope.load( $scope.uc5_files[filename].result)
-        else {
+        if( filename in $scope.uc5_files && "result" in $scope.uc5_files[filename] ) {
+            $scope.load( $scope.uc5_files[filename].result);
+            $scope.execution.running = false;
+        } else {
 
             request_body = {
                 repoId: filename,
@@ -140,20 +149,17 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         $("svg").css("height", 100+145);
 
-        console.log("data");
-        console.log(data);
-
         plot_data = []
 
         if($rootScope.tumorTypes.current.identifier in data) 
             plot_data = data[$rootScope.tumorTypes.current.identifier];
 
-
-        console.log("plot_data")
-        console.log(plot_data)
-
-
         $scope.loaded = true;
+
+
+        // Take only selected tumor types
+        mutationTypes = $scope.selectedTypes.map(function(x){return x.from+">"+x.to});
+        plot_data = plot_data.filter(function(d){ return mutationTypes.includes(d.mutation) });
 
 
         data_tt = {}
@@ -164,7 +170,7 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                 return {"mutation" : "Ti", donor_id:e["donor_id"], count:e["count"]};
             else
                 return {"mutation" : "Tv", donor_id:e["donor_id"], count:e["count"]};
-                
+
         });
 
         // Plot area size
@@ -179,36 +185,27 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         wiidth_left = width*(3/4);
         wifth_tt = width*(1/4);
 
-         // Save last result
+
+
+
+        // Save last result
         $rootScope.lastResult = JSON.stringify(plot_data);
 
         $("#uc5 svg").css("height", (data.length*150)+"px");
-        uc5(plot_data, $scope.outliers.show, $scope.selectedTypes.map(function(x){return x.from+">"+x.to}),wiidth_left, height);
+        uc5(plot_data, $scope.outliers.show, mutationTypes, wiidth_left, height);
         uc5_tt(data_tt, $scope.outliers.show, ["Ti", "Tv"],  wifth_tt, height, wiidth_left);
 
     }
 
     // Update the plot
-    $scope.updatePlot = function(file) {
-
-        console.log("CALLBACK");
-
-        file=$scope.files_selector.file;
-
-
-        $scope.load(file.name);
-
-        // update function is defined in uc5.js.
-        /*uc5_update($scope.getData(file),
-                   $scope.plot.d3graph,
-                   $scope.plot.binSize,
-                   $scope.getSelectedTypes());*/
+    $scope.updatePlot = function(filename) {
+        $scope.loadFile(filename);
     } 
 
 
     // Update the plot according to the new bin size
     $scope.changeMutationType  =  function() {
-        $scope.updatePlot($scope.files_selector.file);
+        $scope.updatePlot($scope.file_selector.name);
     };
 
     $scope.getTemplate = function(){
@@ -231,7 +228,7 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     // Add a new empty condition for mutation types
     $scope.addCondition = function(t) {
         $scope.selectedTypes.push(t);
-        $scope.updatePlot($scope.files_selector.file);
+        $scope.changeMutationType();
     }
 
     // Remove a condition on the mutation types
