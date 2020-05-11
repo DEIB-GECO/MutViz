@@ -85,7 +85,8 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
 
 
-        if( filename in $scope.uc5_files && "result" in $scope.uc5_files[filename] ) {
+        if( filename in $scope.uc5_files && "result" in $scope.uc5_files[filename] 
+           && $rootScope.tumorTypes.current.identifier in $scope.uc5_files[filename].result) {
             $scope.load( $scope.uc5_files[filename].result);
             $scope.execution.running = false;
         } else {

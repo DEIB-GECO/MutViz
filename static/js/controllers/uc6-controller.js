@@ -30,7 +30,7 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.outliers = {show:true}
 
     $scope.MIN_PATIENTS = 5;
-    $scope.threshold = {active:false, minMutations: 1000}
+    $scope.threshold = {active:false, minMutations: 100}
 
 
     $scope.barPlot = true;
@@ -89,16 +89,14 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.execution.running = true;
         $scope.loaded = false;
 
-
         if( filename in $scope.uc6_files && "result" in $scope.uc6_files[filename] 
-           && $scope.tumorTypes.current in $scope.uc6_files[filename].result) { 
+           && $rootScope.tumorTypes.current.identifier in $scope.uc6_files[filename].result) { 
 
             same_threshold = Object.keys($scope.uc6_files[filename].result).every(function(k){
                 current = $scope.uc6_files[filename].result[k];
                 return current.threshold_min == $scope.threshold.minMutations && current.threshold_active == $scope.threshold.active;
             })
 
-            console.log("same threshold: "+same_threshold);
             if(same_threshold) {
                 $scope.load( $scope.uc6_files[filename].result);
                 $scope.execution.running = false;

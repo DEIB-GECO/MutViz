@@ -79,7 +79,8 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
 
 
-        if( filename in $scope.uc4_files && "result" in $scope.uc4_files[filename] ){ 
+        if( filename in $scope.uc4_files && "result" in $scope.uc4_files[filename] 
+           && $rootScope.tumorTypes.current.identifier in $scope.uc4_files[filename].result){ 
             $scope.load( $scope.uc4_files[filename].result, true);
             $scope.execution.running = false;
         } else {
