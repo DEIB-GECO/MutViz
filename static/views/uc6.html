@@ -35,6 +35,27 @@
                     </select>
                 </div>
 
+                <div class="col-md-12" style=" background-color: #fafafa;padding-bottom:10px;">
+                    <label for="ttSelect">Threshold {{threshold.active?'':'[disabled]'}}:</label>
+                        <div class="row">
+
+                        <div class="col-md-8">
+                            <input ng-disabled="!threshold.active" type="number" class="form-control" ng-model="threshold.minMutations" style="font-size: 0.8em;">
+                        </div>
+
+                        <div class="col-md-4">
+                            <switch size="small" id="enabled" name="enabled"
+                                    ng-model="threshold.active">
+                                ></switch>
+                        </div>
+
+                    </div>
+                    
+                   
+                   
+                </div>
+
+
                 <div class="col-md-12 text-center" style="margin-top:10px;">
                     <button class="btn btn-white"  style="width: 100%;"
                             ng-click="loadFile(file_selector.name)"
@@ -138,12 +159,12 @@
             </div>
             <div class="modal-body">
                 <p id="modal_description">
-                For higher accuracy in signature refitting, only tumors with more than 100 mutations are considered, in case less than 5 tumors have more than 100 mutations, the mutations are merged and an estimation of the average signatures' weights is provided.
+                    For higher accuracy in signature refitting, only tumors with more than 100 mutations are considered, in case less than 5 tumors have more than 100 mutations, the mutations are merged and an estimation of the average signatures' weights is provided.
                 </p>
 
             </div>
             <div class="modal-footer">
-                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

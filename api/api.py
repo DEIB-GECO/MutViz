@@ -432,6 +432,12 @@ def get_uc6():
     repoId = request.form.get('repoId')
     logger.debug(f"repoId: {repoId}")
 
+    threshold_active = request.form.get('threshold_active')=="true"
+    threshold_min = int(request.form.get('threshold_min'))
+
+    print("Threshold active: "+str(threshold_active))
+    print("Threshold min: "+str(threshold_min))
+
     regions = request.form.get('regions')
     if not regions:
         logger.debug(f"regions: {regions}")
@@ -475,14 +481,19 @@ def get_uc6():
             else:
 
                 if DEBUG_MODE:
-                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"], minCount=100)
+                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"])
                 else:
-                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"], minCount=100)
+                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"])
 
                     values = list(map(lambda m:  SignaturesCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], donor_id=m[1], trinucleotide_id_r=m[2], count=m[3]), mutations))
                     session.add_all(values)
                     session.commit()
                     session.close()
+
+
+            # FILTER IF THRESHOLD IS ACTIVE
+            if threshold_active:
+                mutations = filter(lambda m: m[3] >= threshold_min, mutations)
 
 
             result  = defaultdict(list)
@@ -528,6 +539,8 @@ def get_uc6():
                 final_results[tumor] = {}
                 final_results[tumor]["data"] = with_donors.to_dict(orient='list')
                 final_results[tumor]["num_patients"] = num_patients
+                final_results[tumor]["threshold_min"] = threshold_min
+                final_results[tumor]["threshold_active"] = threshold_active
 
             update_job(jobID, final_results)
             logger.info('JOB DONE: ' + jobID)

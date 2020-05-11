@@ -28,9 +28,10 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // outliers
     $scope.outliers = {show:true}
-    
-    $scope.numPatients = 0;
+
     $scope.MIN_PATIENTS = 5;
+    $scope.threshold = {active:false, minMutations: 1000}
+
 
     $scope.barPlot = true;
 
@@ -82,24 +83,34 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     }
 
     $scope.loadFile = function(filename) {
-        
+
         $("#uc6").html("<svg></svg>")
 
         $scope.execution.running = true;
         $scope.loaded = false;
-        
-        console.log("loading file "+filename);
 
 
-        if( filename in $scope.uc6_files && "result" in $scope.uc6_files[filename] ) { 
-            $scope.load( $scope.uc6_files[filename].result);
-            $scope.execution.running = false;
+        if( filename in $scope.uc6_files && "result" in $scope.uc6_files[filename] 
+           && $scope.tumorTypes.current in $scope.uc6_files[filename].result) { 
+
+            same_threshold = Object.keys($scope.uc6_files[filename].result).every(function(k){
+                current = $scope.uc6_files[filename].result[k];
+                return current.threshold_min == $scope.threshold.minMutations && current.threshold_active == $scope.threshold.active;
+            })
+
+            console.log("same threshold: "+same_threshold);
+            if(same_threshold) {
+                $scope.load( $scope.uc6_files[filename].result);
+                $scope.execution.running = false;
+            }
         } else {
 
             request_body = {
                 repoId: filename,
                 regions: "",
-                regionsFormat: ""
+                regionsFormat: "",
+                threshold_active: $scope.threshold.active,
+                threshold_min: $scope.threshold.minMutations
             }
 
             // Call the API
@@ -156,7 +167,7 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         $scope.numPatients = 0;
         plot_data = $scope.signatures.map(function(s){return {signature:s, value:0}});
-        
+
 
         if($rootScope.tumorTypes.current.identifier in data) {
             selected_data = data[$rootScope.tumorTypes.current.identifier].data;
