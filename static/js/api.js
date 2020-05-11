@@ -13,4 +13,4 @@ var API_R04 = API_ROOT+"api/signatures/";
 var API_T02 = API_ROOT+"api/t02/";
 var API_T03 = API_ROOT+"api/t03/";
 
-var POLLING_TIMEOUT = 5000;
+var POLLING_TIMEOUT = 2000;
