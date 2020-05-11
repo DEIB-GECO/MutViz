@@ -476,9 +476,9 @@ def get_uc6():
             else:
 
                 if DEBUG_MODE:
-                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"])
+                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"], minCount=100)
                 else:
-                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"])
+                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"], minCount=100)
 
                     values = list(map(lambda m:  SignaturesCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], donor_id=m[1], trinucleotide_id_r=m[2], count=m[3]), mutations))
                     session.add_all(values)
@@ -487,10 +487,13 @@ def get_uc6():
 
 
             result  = defaultdict(list)
+
             mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  x[1], trinucleotides_dict[x[2]][0], x[3]], mutations))
 
             for m in mutations:
                 result[m[0]].append([ m[1], m[2],  m[3]])
+
+            # result ( tumorTypeString -> [donor, trinucleotide, count] )
 
             def toDataframe(data):
 
@@ -513,12 +516,22 @@ def get_uc6():
             final_results = {}
 
             for tumor in result.keys():
+                # columns: trin, index: patients
                 table_donors = toDataframe(result[tumor])
+                num_patients = table_donors.shape[0]
+
+                # if less than 5 patients
+                if num_patients<5:
+                    table_donors = table_donors.sum()
+
                 with_donors =  get_refitting(table_donors)
-                #num_donors = with_donors.shape[0]
-                final_results[tumor] = with_donors.to_dict(orient='list')
+
+                final_results[tumor] = {}
+                final_results[tumor]["data"] = with_donors.to_dict(orient='list')
+                final_results[tumor]["num_patients"] = num_patients
 
             update_job(jobID, final_results)
+            print(final_results)
             logger.info('JOB DONE: ' + jobID)
         except Exception as e:
             unregister_job(jobID)
