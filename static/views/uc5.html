@@ -9,6 +9,7 @@
 
                 <div class="col-md-12 text-center">
                     <h4 style="margin-top: 15px">Box-plot</h4>
+                    <a class="btn info-btn" data-toggle="modal" data-target="#infoModal"><i class="fa fa-info-circle"></i></a>
                 </div>
 
 
@@ -35,7 +36,7 @@
                 </div>
 
                 <div class="col-md-12 text-center" style="margin-top:10px;">
-                    <button class="btn"  style="width: 100%;"
+                    <button class="btn btn-white"  style="width: 100%;"
                             ng-click="loadFile(file_selector.name)"
                             ng-disabled="execution.running || file_selector.name=='' || tumorTypes.current==null"
                             type="submit">
@@ -119,7 +120,7 @@
 
                 <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
 
-                    <button class="btn"  style="width:100%"
+                    <button class="btn btn-white"  style="width:100%"
                             ng-click="downloadPlotData()"
                             type="submit"><i class="fa fa-download"></i> Download Result (JSON)</button>
                     <a id="dwn_data" target="_blank" style="display: none"></a>
@@ -128,7 +129,7 @@
 
                 <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-bottom: 20px!important;">
 
-                    <button class="btn" 
+                    <button class="btn btn-white" 
                             style="width:100%"
                             ng-click="downloadPlot()"
                             type="submit"><i class="fa fa-download"></i> Download Image (SVG)</button>
@@ -173,3 +174,23 @@
         </div>
     </div>
 </main>
+
+
+<div class="modal" tabindex="-1" role="dialog" id="infoModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                Description
+            </div>
+            <div class="modal-body">
+                <p id="modal_description">
+                ...
+                </p>
+
+            </div>
+            <div class="modal-footer">
+                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

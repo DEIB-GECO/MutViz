@@ -15,7 +15,7 @@ def get_job_result(job_id):
         update_ttl(job_id)
         job_value = jobs[job_id][1]
 
-        if job_value:
+        if job_value!=None:
             return json.dumps({"ready": True, "result": job_value})
         else:
             return json.dumps({"ready": False})

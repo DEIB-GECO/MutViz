@@ -9,6 +9,7 @@
 
                 <div class="col-md-12 text-center">
                     <h4 style="margin-top: 15px">Signatures</h4>
+                    <a class="btn info-btn" data-toggle="modal" data-target="#infoModal"><i class="fa fa-info-circle"></i></a>
                 </div>
 
 
@@ -35,16 +36,21 @@
                 </div>
 
                 <div class="col-md-12 text-center" style="margin-top:10px;">
-                    <button class="btn"  style="width: 100%;"
+                    <button class="btn btn-white"  style="width: 100%;"
                             ng-click="loadFile(file_selector.name)"
                             ng-disabled="execution.running || file_selector.name=='' || tumorTypes.current==null"
                             type="submit">
                         <i class="fa fa-play" style="font-size: 0.9em;
-                        margin-right: 6px;"></i> Plot</button>
+                                                     margin-right: 6px;"></i> Plot</button>
                     <a id="dwn_data" target="_blank" style="display: none"></a>
                 </div>
 
-                <div class="col-md-12" style="margin-top:30px; height: 80px;" >
+                <div class="col-md-12 text-center" style="margin-top:30px;" ng-show="loaded">
+                    <b style="color:blue">{{numPatients}}</b> patients found. 
+                </div>
+
+
+                <div class="col-md-12" style="margin-top:30px;" >
                     <div class="row">
 
                         <div class="col-md-8" ng-show="loaded && !barPlot">
@@ -62,9 +68,9 @@
                 </div>
 
 
-                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
+                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:10px!important;margin-bottom: 20px!important;">
 
-                    <button class="btn"  style="width:100%"
+                    <button class="btn btn-white"  style="width:100%"
                             ng-click="downloadPlotData()"
                             type="submit"><i class="fa fa-download"></i> Download Result (JSON)</button>
                     <a id="dwn_data" target="_blank" style="display: none"></a>
@@ -73,7 +79,7 @@
 
                 <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-bottom: 20px!important;">
 
-                    <button class="btn" 
+                    <button class="btn btn-white" 
                             style="width:100%"
                             ng-click="downloadPlot()"
                             type="submit"><i class="fa fa-download"></i> Download Image (SVG)</button>
@@ -89,11 +95,11 @@
         <div class="row">
 
             <div class="col-md-12 text-center" ng-if="execution.running" style="line-height: 40px; margin-top: 20px; color:white;">
-               PROCESSING
+                PROCESSING
                 <br>
                 <img src="img/running.gif" width="80px">
             </div>
-            
+
             <div class="col-md-12 text-center" ng-if="!loaded && !execution.running" style="line-height: 40px;">
                 Select a file.
             </div>
@@ -103,8 +109,13 @@
                     <div class="col-md-6 sub-menu-item {{barPlot?'active':''}}" ng-click="showBarPlot()">
                         Bar Plot
                     </div>
-                    <div class="col-md-6 sub-menu-item {{barPlot?'':'active'}}" ng-click="showBoxPlot()">
+                    <div class="col-md-6 sub-menu-item {{barPlot?'':'active'}}" ng-click="showBoxPlot()" 
+                         ng-if="numPatients>=MIN_PATIENTS">
                         Box Plot
+                    </div>
+                    <div class="col-md-6 sub-menu-item {{barPlot?'':'active'}}" style="cursor: pointer"
+                         ng-if="numPatients<MIN_PATIENTS">
+                        <strike>Box Plot</strike>
                     </div>
                 </div>
             </div>
@@ -115,8 +126,25 @@
                 </div>
             </div>
 
-
-
         </div>
     </div>
 </main>
+
+<div class="modal" tabindex="-1" role="dialog" id="infoModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                Description
+            </div>
+            <div class="modal-body">
+                <p id="modal_description">
+                For higher accuracy in signature refitting, only tumors with more than 100 mutations are considered, in case less than 5 tumors have more than 100 mutations, the mutations are merged and an estimation of the average signatures' weights is provided.
+                </p>
+
+            </div>
+            <div class="modal-footer">
+                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

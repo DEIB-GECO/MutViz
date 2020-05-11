@@ -19,7 +19,6 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         return $scope.files_fake.filter(function(f){return f.name == fileName})[0];
     }
 
-
     // cache
     $scope.uc6_files = {}
 
@@ -29,6 +28,9 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // outliers
     $scope.outliers = {show:true}
+    
+    $scope.numPatients = 0;
+    $scope.MIN_PATIENTS = 5;
 
     $scope.barPlot = true;
 
@@ -152,10 +154,13 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         $("svg").css("height", 100+145);
 
-        plot_data = $scope.signatures.map(function(s){return {signature:s, value:1}});
+        $scope.numPatients = 0;
+        plot_data = $scope.signatures.map(function(s){return {signature:s, value:0}});
+        
 
         if($rootScope.tumorTypes.current.identifier in data) {
-            selected_data = data[$rootScope.tumorTypes.current.identifier];
+            selected_data = data[$rootScope.tumorTypes.current.identifier].data;
+            $scope.numPatients = data[$rootScope.tumorTypes.current.identifier].num_patients;
             plot_data = $scope.signatures.flatMap(function(s){
 
                 values = selected_data[s]
