@@ -25,4 +25,6 @@ def toDataframe(data):
     return result
 
 
-toDataframe(data)
+df = toDataframe(data)
+print(df)
+print(df.sum().to_frame().transpose())

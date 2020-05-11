@@ -521,7 +521,7 @@ def get_uc6():
 
                 # if less than 5 patients
                 if num_patients<5:
-                    table_donors = table_donors.sum()
+                    table_donors = table_donors.sum().to_frame().transpose()
 
                 with_donors =  get_refitting(table_donors)
 
