@@ -1,6 +1,6 @@
 //var API_ROOT = "/mutviz/";
 var API_ROOT = "http://127.0.0.1:5000/mutviz/";
-API_ROOT =  "http://genomic.elet.polimi.it/mutviz/";
+API_ROOT =  "http://geco.deib.polimi.it/mutviz/";
 
 var API_L01 = API_ROOT+"api/tumor_types/";
 var API_L02 = API_ROOT+"api/repository/";
