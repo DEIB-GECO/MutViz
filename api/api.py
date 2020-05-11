@@ -88,7 +88,6 @@ with app.app_context():
     repositories_dict = dict()
     for r in res:
         repositories_dict[str(r.id)] = (r.id, r.name, r.description, r.count)
-    print(repositories_dict)
     del res
 
 
@@ -531,7 +530,6 @@ def get_uc6():
                 final_results[tumor]["num_patients"] = num_patients
 
             update_job(jobID, final_results)
-            print(final_results)
             logger.info('JOB DONE: ' + jobID)
         except Exception as e:
             unregister_job(jobID)
