@@ -5,6 +5,8 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="MutViz - Analysis and Visualization of Mutation Enrichments for Selected Genomic Regions and Cancer Types.">
         <meta name="author" content="Andrea Gulino, Arif Canakoglu, Erini Stamoulakatou, Pietro Pinoli">
+        <meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
+        <meta http-equiv="CACHE-CONTROL" content="NO-STORE"> 
         <link rel="icon" 
               type="image/png" 
               href="img/logo-black.png">
@@ -19,7 +21,7 @@
               rel="stylesheet" type="text/css"/>
 
         <!-- Custom CSS -->
-        <link href="css/style.css?v=1.0.0" type="text/css" rel="stylesheet">
+        <link href="css/style.css?v=1.1.0" type="text/css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 
         <link href="https://fonts.googleapis.com/css?family=Titillium+Web&display=swap" rel="stylesheet">
@@ -58,10 +60,10 @@
                         <li class="nav-item {{active_menu=='uc4'?'active':''}}">
                             <a class="nav-link" href="#!/uc4" tabindex="-1" aria-disabled="true">Trinucleotide</a>
                         </li>
-                         <li class="nav-item {{active_menu=='uc5'?'active':''}}">
+                        <li class="nav-item {{active_menu=='uc5'?'active':''}}">
                             <a class="nav-link" href="#!/uc5" tabindex="-1" aria-disabled="true">Box-plot</a>
                         </li>
-                         <li class="nav-item {{active_menu=='uc6'?'active':''}}">
+                        <li class="nav-item {{active_menu=='uc6'?'active':''}}">
                             <a class="nav-link" href="#!/uc6" tabindex="-1" aria-disabled="true">Signatures</a>
                         </li>
                     </ul>
@@ -96,28 +98,28 @@
         <script src="libs/d3/d3-tip.js"></script>
         <script src="libs/simple-statistics.min.js"></script>
 
-        <script src="js/support.js?v=1.0.0"></script>
-        <script src="js/stat.js?v=1.0.0"></script>
-        <script src="data/mutation_types.js?v=1.0.0"></script>
-        <script src="js/d3/uc1.js?v=1.0.0?v=1.0.0"></script>
-        <script src="js/d3/uc2.js?v=1.0.0?v=1.0.0"></script>
-        <script src="js/d3/uc3.js?v=1.0.0?v=1.0.0"></script>
-        <script src="js/d3/uc4.js?v=1.0.0?v=1.0.0"></script>
-        <script src="js/d3/uc5.js?v=1.0.0?v=1.0.0"></script>
-        <script src="js/d3/uc6.js?v=1.0.0?v=1.0.0"></script>
+        <script src="js/support.js?v=1.1.0"></script>
+        <script src="js/stat.js?v=1.1.0"></script>
+        <script src="data/mutation_types.js?v=1.1.0"></script>
+        <script src="js/d3/uc1.js?v=1.1.0?v=1.1.0"></script>
+        <script src="js/d3/uc2.js?v=1.1.0?v=1.1.0"></script>
+        <script src="js/d3/uc3.js?v=1.1.0?v=1.1.0"></script>
+        <script src="js/d3/uc4.js?v=1.1.0?v=1.1.0"></script>
+        <script src="js/d3/uc5.js?v=1.1.0?v=1.1.0"></script>
+        <script src="js/d3/uc6.js?v=1.1.0?v=1.1.0"></script>
 
-        <script src="js/app.js?v=1.0.0"></script>
+        <script src="js/app.js?v=1.1.0"></script>
 
-        <script src="js/controllers/main-controller.js?v=1.0.0"></script>
-        <script src="js/controllers/data-controller.js?v=1.0.0"></script>
-        <script src="js/controllers/uc1-controller.js?v=1.0.0"></script>
-        <script src="js/controllers/uc2-controller.js?v=1.0.0"></script>
-        <script src="js/controllers/uc3-controller.js?v=1.0.0"></script>
-        <script src="js/controllers/uc4-controller.js?v=1.0.0"></script>
-        <script src="js/controllers/uc5-controller.js?v=1.0.0"></script>
-        <script src="js/controllers/uc6-controller.js?v=1.0.0"></script>
-        
-          <!-- SWITCH BTN -->
+        <script src="js/controllers/main-controller.js?v=1.1.0"></script>
+        <script src="js/controllers/data-controller.js?v=1.1.0"></script>
+        <script src="js/controllers/uc1-controller.js?v=1.1.0"></script>
+        <script src="js/controllers/uc2-controller.js?v=1.1.0"></script>
+        <script src="js/controllers/uc3-controller.js?v=1.1.0"></script>
+        <script src="js/controllers/uc4-controller.js?v=1.1.0"></script>
+        <script src="js/controllers/uc5-controller.js?v=1.1.0"></script>
+        <script src="js/controllers/uc6-controller.js?v=1.1.0"></script>
+
+        <!-- SWITCH BTN -->
         <script src="libs/angular-ui-switch-master/angular-ui-switch.js"
                 type="text/javascript"></script>
         <!-- END SWITCH BTN -->
@@ -125,13 +127,13 @@
 
 
         <div style="text-align: right">
-        <!-- Begin ShinyStat Code -->
-        <script type="text/javascript" src="//codice.shinystat.com/cgi-bin/getcod.cgi?USER=andreagulino"></script>
-        <noscript >
-            <h6><a  href="http://www.shinystat.com">
-                <img src="//www.shinystat.com/cgi-bin/shinystat.cgi?USER=andreagulino" alt="Free hit counters" style="border:0px" /></a></h6>
-        </noscript>
-            </div>
+            <!-- Begin ShinyStat Code -->
+            <script type="text/javascript" src="//codice.shinystat.com/cgi-bin/getcod.cgi?USER=andreagulino"></script>
+            <noscript >
+                <h6><a  href="http://www.shinystat.com">
+                    <img src="//www.shinystat.com/cgi-bin/shinystat.cgi?USER=andreagulino" alt="Free hit counters" style="border:0px" /></a></h6>
+            </noscript>
+        </div>
         <!-- End ShinyStat Code -->
     </body>
 </html>
