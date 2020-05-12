@@ -89,18 +89,15 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.execution.running = true;
         $scope.loaded = false;
 
-        if( filename in $scope.uc6_files && "result" in $scope.uc6_files[filename] 
-           && $rootScope.tumorTypes.current.identifier in $scope.uc6_files[filename].result) { 
-
-            same_threshold = Object.keys($scope.uc6_files[filename].result).every(function(k){
+        condition = filename in $scope.uc6_files && "result" in $scope.uc6_files[filename] 
+           && $rootScope.tumorTypes.current.identifier in $scope.uc6_files[filename].result;
+        condition =  condition && Object.keys($scope.uc6_files[filename].result).every(function(k){
                 current = $scope.uc6_files[filename].result[k];
-                return current.threshold_min == $scope.threshold.minMutations && current.threshold_active == $scope.threshold.active;
-            })
-
-            if(same_threshold) {
+                return current.threshold_min == $scope.threshold.minMutations && current.threshold_active == $scope.threshold.active;});
+        
+        if(condition) {
                 $scope.load( $scope.uc6_files[filename].result);
                 $scope.execution.running = false;
-            }
         } else {
 
             request_body = {
