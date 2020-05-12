@@ -30,7 +30,7 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.outliers = {show:true}
 
     $scope.MIN_PATIENTS = 5;
-    $scope.threshold = {active:false, minMutations: 100}
+    $scope.threshold = {active:false, minMutations: 0}
 
 
     $scope.barPlot = true;
@@ -216,6 +216,14 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         }
 
+    }
+    
+    $scope.thresholdChanged = function() {
+        if(!$scope.threshold.active) {
+            $scope.threshold.minMutations = 0;
+        } else {
+             $scope.threshold.minMutations = 100;
+        }
     }
 
     // Update the plot
