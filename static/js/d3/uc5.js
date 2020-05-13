@@ -34,8 +34,8 @@ function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
         median = d3.quantile(d.map(function(d) { return d.count;}).sort(d3.ascending),.5)
         q3 = d3.quantile(d.map(function(d) { return d.count;}).sort(d3.ascending),.75)
         interQuantileRange = q3 - q1
-        min = q1 - 1.5 * interQuantileRange
-        max = q3 + 1.5 * interQuantileRange
+        min = Math.max(0, q1 - 1.5 * interQuantileRange)
+        max = Math.round(q3 + 1.5 * interQuantileRange)
         return({q1: q1, median: median, q3: q3, interQuantileRange: interQuantileRange, min: min, max: max})
     })
     .entries(data);
@@ -211,8 +211,8 @@ function uc5(data, showOutliers, mutationTypes, width, height) {
         median = d3.quantile(d.map(function(d) { return d.count;}).sort(d3.ascending),.5)
         q3 = d3.quantile(d.map(function(d) { return d.count;}).sort(d3.ascending),.75)
         interQuantileRange = q3 - q1
-        min = q1 - 1.5 * interQuantileRange
-        max = q3 + 1.5 * interQuantileRange
+        min = Math.max(0, q1 - 1.5 * interQuantileRange)
+        max = Math.round(q3 + 1.5 * interQuantileRange)
         return({q1: q1, median: median, q3: q3, interQuantileRange: interQuantileRange, min: min, max: max})
     })
     .entries(data)

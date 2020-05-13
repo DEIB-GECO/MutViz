@@ -38,8 +38,8 @@ function uc6_box(data, showOutliers, signatures, width, height) {
         median = d3.quantile(d.map(function(d) { return d.value;}).sort(d3.ascending),.5)
         q3 = d3.quantile(d.map(function(d) { return d.value;}).sort(d3.ascending),.75)
         interQuantileRange = q3 - q1
-        min = q1 - 1.5 * interQuantileRange
-        max = q3 + 1.5 * interQuantileRange
+        min = Math.max(0, q1 - 1.5 * interQuantileRange)
+        max = Math.min(q3 + 1.5 * interQuantileRange, 1)
         return({q1: q1, median: median, q3: q3, interQuantileRange: interQuantileRange, min: min, max: max})
     })
     .entries(data)
