@@ -36,8 +36,10 @@
                 </div>
 
                 <div class="col-md-12" style=" background-color: #fafafa;padding-bottom:10px;">
-                    <label for="ttSelect">Threshold {{threshold.active?'':'[disabled]'}}:</label>
-                        <div class="row">
+                    <label for="ttSelect" style="margin-bottom: 0px;">Threshold {{threshold.active?'':'[disabled]'}}:</label><br>
+                    <span style="font-size: 0.9em; color:#5b5555;">(Minimum number of mutations per donor)</span>
+                    
+                        <div class="row" style="margin-top: 6px;">
 
                         <div class="col-md-8">
                             <input ng-disabled="!threshold.active" type="number" class="form-control" ng-model="threshold.minMutations" style="font-size: 0.8em;">
