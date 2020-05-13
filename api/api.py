@@ -412,7 +412,7 @@ def get_uc5():
                                                                r["count"]],
                                                     groupby=["tumor_type_id", "trinucleotide_id_r", "donor_id"])
 
-                        values = list(map(lambda m: DonorsCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], trinucleotide_id=m[1], donor_id=m[2], count=m[3]), mutations))
+                        values = list(map(lambda m: DonorsTriCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], trinucleotide_id=m[1], donor_id=m[2], count=m[3]), mutations))
                     else:
                         mutations = spark_intersect(t_mutation_trinucleotide.name,
                                                     "full_" + repositories_dict[repoId][1], DB_CONF,
