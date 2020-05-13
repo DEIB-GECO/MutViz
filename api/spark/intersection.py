@@ -12,7 +12,7 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
     #3h13 geco 4h37 genomic
 
 
-    numBins = int(os.getenv('MUTVIZ_NUM_BINS', 5))
+    numBins = int(os.getenv('MUTVIZ_NUM_BINS', 1))
     memory = os.getenv('MUTVIZ_DRIVER_MEMORY', "50g")
     print("USING "+str(numBins)+" BINS.")
     start_time = time.time()
@@ -73,7 +73,12 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
      regions = regions_df.collect()
      regions_broadcast = sc.broadcast( sorted(regions, key=itemgetter('pos_start', 'pos_stop')))
 
-     partitioned = mutations.withColumn("bin", mutations["position"]%numBins).repartition("chrom", "bin").sortWithinPartitions("position")
+     if numBins>1:
+        print("REAL BINNING.")
+        partitioned = mutations.withColumn("bin", (mutations["position"]%numBins).cast("string")+"-"+mutations["chrom"].cast("string")).repartition("bin").sortWithinPartitions("position")
+     else:
+        print("No Binning, just using chromosome parallelism.")
+        partitioned = mutations.repartition("chrom").sortWithinPartitions("position")
 
      def partitionWork( p):
 
