@@ -49,7 +49,6 @@ function uc4(data, mutationTypes, width, height, animate) {
     
     var g = {} // here we put all useful objects describing our plot
 
-
     g.titleBoxHeight = 25;
 
     g.distance = 10; // between successive plots

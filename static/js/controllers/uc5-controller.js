@@ -17,6 +17,8 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     $scope.show_percentage = false;
 
+    $scope.trinucleotides = {show:false};
+
     // cache
     $scope.uc5_files = {}
 
@@ -78,15 +80,33 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         console.log("loading file "+filename);
 
         if(false){
-            data = {"ready": true, "result": {"BLCA": [{"count": 229470, "donor_id": 229470, "mutation": "C>T"}, {"count": 229459, "donor_id": 229459, "mutation": "C>T"}]}}
+            data = {"ready": true, "result":
+                    {"BLCA": [
+                        {"count": 1, "donor_id": 229470, "mutation": "A[C>A]A"}, 
+                        {"count": 10, "donor_id": 229459, "mutation": "A[C>A]A"},
+                        {"count": 20, "donor_id": 229459, "mutation": "A[C>A]A"},
+                        {"count": 30, "donor_id": 229459, "mutation": "A[C>A]A"},
+                        {"count": 100, "donor_id": 229459, "mutation": "A[C>A]A"},
+                        {"count": 1, "donor_id": 229459, "mutation": "A[C>A]A"},
+                        {"count": 10, "donor_id": 229459, "mutation": "A[C>A]G"},
+                        {"count": 1, "donor_id": 229470, "mutation": "A[C>A]G"}, 
+                        {"count": 10, "donor_id": 229459, "mutation": "A[C>A]G"},
+                        {"count": 20, "donor_id": 229459, "mutation": "A[C>A]G"},
+                        {"count": 30, "donor_id": 229459, "mutation": "A[C>A]G"},
+                        {"count": 100, "donor_id": 229459, "mutation": "A[C>A]G"},
+                        {"count": 1, "donor_id": 229459, "mutation": "A[C>A]G"},
+                        {"count": 10, "donor_id": 229459, "mutation": "A[C>A]G"},
+                    ]}}
             $scope.load(data.result);
+            $scope.execution.running = false;
             return
         }
 
 
-
         if( filename in $scope.uc5_files && "result" in $scope.uc5_files[filename] 
-           && $rootScope.tumorTypes.current.identifier in $scope.uc5_files[filename].result) {
+           && $rootScope.tumorTypes.current.identifier in $scope.uc5_files[filename].result && 
+           $scope.uc5_files[filename].result[$rootScope.tumorTypes.current.identifier].trinucleotide == $scope.trinucleotides.show) {
+            console.log("LOADING CACHED RESULT");
             $scope.load( $scope.uc5_files[filename].result);
             $scope.execution.running = false;
         } else {
@@ -94,7 +114,8 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             request_body = {
                 repoId: filename,
                 regions: "",
-                regionsFormat: ""
+                regionsFormat: "",
+                trinucleotide: $scope.trinucleotides.show
             }
 
             // Call the API
@@ -148,26 +169,35 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
     $scope.load = function(data) {
 
+        show_trinucleotide = false
+
+
         $("svg").css("height", 100+145);
 
         plot_data = []
 
-        if($rootScope.tumorTypes.current.identifier in data) 
-            plot_data = data[$rootScope.tumorTypes.current.identifier];
+        if($rootScope.tumorTypes.current.identifier in data) {
+            show_trinucleotide = data[$rootScope.tumorTypes.current.identifier].trinucleotide;
+            plot_data = data[$rootScope.tumorTypes.current.identifier].data;
+        }
+
 
         $scope.loaded = true;
 
+        trinucleotideTypes = $scope.getTemplateTri().map(function(t){return t.trinucleotide})
 
         // Take only selected tumor types
         mutationTypes = $scope.selectedTypes.map(function(x){return x.from+">"+x.to});
-        plot_data = plot_data.filter(function(d){ return mutationTypes.includes(d.mutation) });
+        if(!show_trinucleotide)
+            plot_data = plot_data.filter(function(d){ return mutationTypes.includes(d.mutation) });
 
 
         data_tt = {}
 
         data_tt = plot_data.map(function(e){
+            mut =e["mutation"]
 
-            if( e["mutation"]=="T<C" || e["mutation"]=="C>T" )
+            if( mut=="T<C" || mut=="C>T" )
                 return {"mutation" : "Ti", donor_id:e["donor_id"], count:e["count"]};
             else
                 return {"mutation" : "Tv", donor_id:e["donor_id"], count:e["count"]};
@@ -183,9 +213,9 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             height=window.innerHeight-230;
         $("svg").css("height", window.innerHeight);
 
+
         wiidth_left = width*(3/4);
         wifth_tt = width*(1/4);
-
 
 
 
@@ -193,8 +223,15 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $rootScope.lastResult = JSON.stringify(plot_data);
 
         $("#uc5 svg").css("height", (data.length*150)+"px");
-        uc5(plot_data, $scope.outliers.show, mutationTypes, wiidth_left, height);
-        uc5_tt(data_tt, $scope.outliers.show, ["Ti", "Tv"],  wifth_tt, height, wiidth_left);
+
+        if(show_trinucleotide){
+            uc5_tri(plot_data, $scope.outliers.show, mutationTypes, $scope.getBefAft(), width, height);
+        } else{
+            uc5(plot_data, $scope.outliers.show, mutationTypes, wiidth_left, height, false);
+            uc5_tt(data_tt, $scope.outliers.show, ["Ti", "Tv"],  wifth_tt, height, wiidth_left);
+        }
+
+
 
     }
 
@@ -219,6 +256,45 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     }
 
+    $scope.getBefAft = function() {
+        alleles = ["A", "C", "G", "T"];
+        data = [];
+
+        alleles.forEach(function(before){
+            alleles.forEach(function(after){
+                data.push(before+"-"+after)
+            });
+        });
+
+        return data;
+
+    }
+
+
+    $scope.getTemplateTri = function(){
+
+        alleles = ["A", "C", "G", "T"];
+        data = [];
+
+        // Generate template:
+        alleles.forEach(function(from){
+            alleles.forEach(function(to){
+                alleles.forEach(function(before){
+                    alleles.forEach(function(after){
+                        if(from!=to && from!="A" && from!="G") {
+                            entry = {"trinucleotide": before+"["+from+">"+to+"]"+after, "mutation":from+">"+to, "count":0};
+                            data.push(entry)
+                        }
+                    });
+                });
+            });
+        });
+
+        return data;
+
+
+    }
+
 
     //todo: remove
     /*$rootScope.files=
@@ -228,6 +304,7 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // Add a new empty condition for mutation types
     $scope.addCondition = function(t) {
+        if(t.from==null) return;
         $scope.selectedTypes.push(t);
         $scope.changeMutationType();
     }

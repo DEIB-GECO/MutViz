@@ -347,6 +347,11 @@ def get_uc5():
     logger.debug(f"repoId: {repoId}")
 
     regions = request.form.get('regions')
+    trinucleotide = request.form.get('trinucleotide')
+    trinucleotide = trinucleotide == "true"
+
+    print("Trinucleotide ==>"+str(trinucleotide))
+
     if not regions:
         logger.debug(f"regions: {regions}")
 
@@ -381,29 +386,67 @@ def get_uc5():
             session.execute("set enable_seqscan=false")
 
             exists=False
-            exists = db.session.query(db.session.query(DonorsCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
+
+            if trinucleotide:
+                exists = db.session.query(db.session.query(DonorsTriCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
+            else:
+                exists = db.session.query(db.session.query(DonorsCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
+
             print("exists: "+str(exists))
 
             if exists:
-                mutations = db.session.query( DonorsCache.tumor_type_id, DonorsCache.mutation_id,  DonorsCache.donor_id, DonorsCache.count).filter_by(file_id=repositories_dict[repoId][0])
+                if trinucleotide:
+                    mutations = db.session.query(DonorsTriCache.tumor_type_id, DonorsCache.mutation_id, DonorsTriCache.trinucleotide_id, DonorsTriCache.count).filter_by(file_id=repositories_dict[repoId][0])
+                else:
+                    mutations = db.session.query( DonorsCache.tumor_type_id, DonorsCache.mutation_id,  DonorsCache.donor_id, DonorsCache.count).filter_by(file_id=repositories_dict[repoId][0])
             else:
 
                 if DEBUG_MODE:
                     mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"],r["mutation_code_id"], r["donor_id"], r["count"]], groupby=["tumor_type_id", "mutation_code_id", "donor_id"])
                 else:
-                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["mutation_code_id"], r["donor_id"], r["count"]], groupby=["tumor_type_id", "mutation_code_id", "donor_id"])
 
-                    values = list(map(lambda m:  DonorsCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], mutation_id=m[1], donor_id=m[2], count=m[3]), mutations))
+                    if trinucleotide:
+                        mutations = spark_intersect(t_mutation_trinucleotide.name,
+                                                    "full_" + repositories_dict[repoId][1], DB_CONF,
+                                                    lambda r: [r["tumor_type_id"], r["trinucleotide_id_r"], r["donor_id"],
+                                                               r["count"]],
+                                                    groupby=["tumor_type_id", "trinucleotide_id_r", "donor_id"])
+
+                        values = list(map(lambda m: DonorsCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], trinucleotide_id=m[1], donor_id=m[2], count=m[3]), mutations))
+                    else:
+                        mutations = spark_intersect(t_mutation_trinucleotide.name,
+                                                    "full_" + repositories_dict[repoId][1], DB_CONF,
+                                                    lambda r: [r["tumor_type_id"], r["mutation_code_id"], r["donor_id"],
+                                                               r["count"]],
+                                                    groupby=["tumor_type_id", "mutation_code_id", "donor_id"])
+
+                        values = list(map(lambda m:  DonorsCache(file_id=repositories_dict[repoId][0], tumor_type_id=m[0], mutation_id=m[1], donor_id=m[2], count=m[3]), mutations))
                     session.add_all(values)
                     session.commit()
                     session.close()
 
 
-            result  = defaultdict(list)
-            mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  mutation_code_r_dict[x[1]], x[2], x[3]], mutations))
+            result  = {}
+            if trinucleotide:
+                mutations = list(
+                    map(lambda x: [tumor_type_dict[x[0]][0], trinucleotides_dict[x[1]][0], x[2], x[3]], mutations))
 
-            for m in mutations:
-                result[m[0]].append({"mutation":m[1], "donor_id":m[2], "count" : m[3]})
+
+                for m in mutations:
+                    if m[0] not in result:
+                        result[m[0]] = {"data": [], "trinucleotide": trinucleotide}
+
+                    result[m[0]]["data"].append({"mutation": m[1], "donor_id": m[2], "count": m[3]})
+
+
+            else:
+                mutations = list(
+                    map(lambda x: [tumor_type_dict[x[0]][0], mutation_code_r_dict[x[1]], x[2], x[3]], mutations))
+
+                for m in mutations:
+                    if m[0] not in result:
+                        result[m[0]] = {"data": [], "trinucleotide": trinucleotide}
+                    result[m[0]]["data"].append({"mutation": m[1], "donor_id": m[2], "count": m[3]})
 
             update_job(jobID, result)
             logger.info('JOB DONE: ' + jobID)
@@ -494,6 +537,7 @@ def get_uc6():
             # FILTER IF THRESHOLD IS ACTIVE
             if threshold_active:
                 mutations = filter(lambda m: m[3] >= threshold_min, mutations)
+                print("TOTAL MUTATIONS: "+str(sum(list(map(lambda m: m[3], mutations)))))
 
 
             result  = defaultdict(list)

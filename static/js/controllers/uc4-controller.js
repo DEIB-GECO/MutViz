@@ -211,7 +211,7 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // Add a new empty condition for mutation types
     $scope.addCondition = function(t) {
-        console.log(t);
+        if(t.from==null) return;
         $scope.selectedTypes.push(t);
         $scope.loadFile($scope.file_selector.name);
     }

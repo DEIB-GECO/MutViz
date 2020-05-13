@@ -35,6 +35,21 @@
                     </select>
                 </div>
 
+                <div class="col-md-12" style="padding-top:10px; background-color: #fafafa;padding-bottom:10px;">
+                    <div class="row">
+
+                        <div class="col-md-8">
+                            Show Trinucleotides:
+                        </div>
+
+                        <div class="col-md-4">
+                            <switch size="small" id="enabled" name="enabled"
+                                    ng-model="trinucleotides.show">
+                                ></switch>
+                        </div>
+
+                    </div>
+                </div>
                 <div class="col-md-12 text-center" style="margin-top:10px;">
                     <button class="btn btn-white"  style="width: 100%;"
                             ng-click="loadFile(file_selector.name)"
@@ -184,12 +199,12 @@
             </div>
             <div class="modal-body">
                 <p id="modal_description">
-                ...
+                    ...
                 </p>
 
             </div>
             <div class="modal-footer">
-                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
