@@ -76,6 +76,8 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
                 // Attempt another computation
                 console.log("error  poll uc6.");
+                $scope.execution.running = false;
+                window.alert("An error occurred.");
 
 
             }
@@ -90,14 +92,14 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.loaded = false;
 
         condition = filename in $scope.uc6_files && "result" in $scope.uc6_files[filename] 
-           && $rootScope.tumorTypes.current.identifier in $scope.uc6_files[filename].result;
+        && $rootScope.tumorTypes.current.identifier in $scope.uc6_files[filename].result;
         condition =  condition && Object.keys($scope.uc6_files[filename].result).every(function(k){
-                current = $scope.uc6_files[filename].result[k];
-                return current.threshold_min == $scope.threshold.minMutations && current.threshold_active == $scope.threshold.active;});
-        
+            current = $scope.uc6_files[filename].result[k];
+            return current.threshold_min == $scope.threshold.minMutations && current.threshold_active == $scope.threshold.active;});
+
         if(condition) {
-                $scope.load( $scope.uc6_files[filename].result);
-                $scope.execution.running = false;
+            $scope.load( $scope.uc6_files[filename].result);
+            $scope.execution.running = false;
         } else {
 
             request_body = {
@@ -147,6 +149,8 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                 }, 
                 function error(response) {
                     console.error("error");
+                    $scope.execution.running = false;
+                    window.alert("An error occurred.");
                 }
             );
 
@@ -217,12 +221,12 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         }
 
     }
-    
+
     $scope.thresholdChanged = function() {
         if(!$scope.threshold.active) {
             $scope.threshold.minMutations = 0;
         } else {
-             $scope.threshold.minMutations = 100;
+            $scope.threshold.minMutations = 100;
         }
     }
 

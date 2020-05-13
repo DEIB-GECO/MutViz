@@ -64,6 +64,8 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
                 // Attempt another computation
                 console.log("error  poll uc5.");
+                $scope.execution.running = false;
+                window.alert("An error occurred.")
 
 
             }
@@ -157,6 +159,8 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                 }, 
                 function error(response) {
                     console.error("error");
+                    $scope.execution.running = false;
+                    window.alert("An error occurred.");
                 }
             );
 
