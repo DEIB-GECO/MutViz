@@ -396,7 +396,7 @@ def get_uc5():
 
             if exists:
                 if trinucleotide:
-                    mutations = db.session.query(DonorsTriCache.tumor_type_id, DonorsCache.mutation_id, DonorsTriCache.trinucleotide_id, DonorsTriCache.count).filter_by(file_id=repositories_dict[repoId][0])
+                    mutations = db.session.query(DonorsTriCache.tumor_type_id, DonorsTriCache.trinucleotide_id, DonorsTriCache.donor_id, DonorsTriCache.count).filter_by(file_id=repositories_dict[repoId][0])
                 else:
                     mutations = db.session.query( DonorsCache.tumor_type_id, DonorsCache.mutation_id,  DonorsCache.donor_id, DonorsCache.count).filter_by(file_id=repositories_dict[repoId][0])
             else:
