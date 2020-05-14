@@ -83,7 +83,8 @@ def spark_intersect(regions, mutations):
         if localMutations:
             #print("chrom "+str(chrom))
 
-            localRegions = regions_broadcast.value
+            import copy
+            localRegions = copy.deepcopy(regions_broadcast.value)
 
             if localRegions:
                 sorted_mutations = sorted(localMutations, key=itemgetter('position'))

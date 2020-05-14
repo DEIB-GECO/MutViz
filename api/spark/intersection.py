@@ -101,7 +101,8 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
 
             if localMutations:
 
-                localRegions = regions_broadcast.value
+                import copy
+                localRegions = copy.deepcopy(regions_broadcast.value)
 
                 if localRegions:
                     sorted_mutations = sorted(localMutations, key=itemgetter('position'))
@@ -141,6 +142,9 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
         #    res = mutations.rdd.groupBy(lambda e: e["chrom"],numPartitions=numPartitions).flatMap(partitionWork)
         #else:
         #    res = mutations.rdd.groupBy(lambda e: e["chrom"]).flatMap(partitionWork)
+
+        if sparkDebug:
+            print("#### NUM PARTITIONS: ", mutations.rdd.getNumPartitions)
 
         res = mutations.rdd.mapPartitions(partitionWork)
 
