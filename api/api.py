@@ -524,6 +524,7 @@ def get_uc6():
             else:
 
                 if DEBUG_MODE:
+                    print("t_mutation_trinucleotide_test.name ==> ",t_mutation_trinucleotide_test.name)
                     mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"])
                 else:
                     mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repositories_dict[repoId][1] , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"])
@@ -532,12 +533,6 @@ def get_uc6():
                     session.add_all(values)
                     session.commit()
                     session.close()
-
-
-            # FILTER IF THRESHOLD IS ACTIVE
-            if threshold_active:
-                mutations = filter(lambda m: m[3] >= threshold_min, mutations)
-                print("TOTAL MUTATIONS: "+str(sum(list(map(lambda m: m[3], mutations)))))
 
 
             result  = defaultdict(list)
@@ -572,7 +567,16 @@ def get_uc6():
             for tumor in result.keys():
                 # columns: trin, index: patients
                 table_donors = toDataframe(result[tumor])
+
+                # FILTER IF THRESHOLD IS ACTIVE
+                if threshold_active:
+                    table_donors['counts'] = table_donors.sum(axis=1)
+                    table_donors = table_donors[table_donors['counts']>=threshold_min].drop("counts", axis=1)
+
                 num_patients = table_donors.shape[0]
+
+                if num_patients == 0:
+                    continue
 
                 # if less than 5 patients
                 if num_patients<5:
