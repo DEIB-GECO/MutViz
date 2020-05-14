@@ -55,7 +55,6 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
     )
 
 
-
     regions_df = DataFrameReader(sql_ctx).jdbc(
         url='jdbc:%s' % url, table=regions_table_name, properties=properties
     )
@@ -77,31 +76,32 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
 
     else:
 
-        regions = regions_df.collect()
-        print("====> REGIONS COLLECTED AFTER (S) %s" % (time.time() - start_time))
-        rb = defaultdict(list)
-        for v in regions: rb[v["chrom"]].append(v)
+        # regions = regions_df.collect()
+        # print("====> REGIONS COLLECTED AFTER (S) %s" % (time.time() - start_time))
+        # rb = defaultdict(list)
+        # for v in regions: rb[v["chrom"]].append(v)
+        #
+        # for c in rb:
+        #     rb[c] = sorted(rb[c], key=itemgetter('pos_start', 'pos_stop'))
 
-        for c in rb:
-            rb[c] = sorted(rb[c], key=itemgetter('pos_start', 'pos_stop'))
+        regions = regions_df.collect()
+        regions = sorted(regions, key=itemgetter('pos_start', 'pos_stop'))
 
         print("====> REGIONS SORTED AFTER (S) %s" % (time.time() - start_time))
-        regions_broadcast = sc.broadcast(rb)
+        regions_broadcast = sc.broadcast(regions)
         print("====> REGIONS BROADCAST AFTER (S) %s" % (time.time() - start_time))
 
 
         def partitionWork(p):
 
+            localMutations = list(p)
             matched = []
-
-            chrom = p[0]
-            localMutations = list(p[1])
 
             print("====> PROCESSING PARTITION AFTER (S)  %s" % (time.time() - start_time))
 
             if localMutations:
 
-                localRegions = regions_broadcast.value[chrom]
+                localRegions = regions_broadcast.value
 
                 if localRegions:
                     sorted_mutations = sorted(localMutations, key=itemgetter('position'))
@@ -118,7 +118,18 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
                         if cur_mut["position"] < cur_reg["pos_start"]:
                             cur_mut_idx += 1
                         elif cur_mut["position"] <= cur_reg["pos_stop"]:
-                            matched.append(cur_mut)
+                            if cur_reg["chrom"] == cur_mut["chrom"]:
+                                matched.append(cur_mut)
+                            else:
+                                # look ahead
+                                next_region_index = cur_reg_idx + 1
+                                while next_region_index < len(sorted_regions) and sorted_regions[next_region_index][
+                                    "pos_start"] <= cur_mut["position"]:
+                                    if sorted_regions[next_region_index]["chrom"] == cur_mut["chrom"] and \
+                                            sorted_regions[next_region_index]["pos_stop"] >= cur_mut["position"]:
+                                        matched.append(cur_mut)
+                                    next_region_index = next_region_index + 1
+
                             cur_mut_idx += 1
                         else:
                             cur_reg_idx += 1
@@ -126,10 +137,13 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
             return matched
 
 
-        if numPartitions > 0:
-            res = mutations.rdd.groupBy(lambda e: e["chrom"],numPartitions=numPartitions).flatMap(partitionWork)
-        else:
-            res = mutations.rdd.groupBy(lambda e: e["chrom"]).flatMap(partitionWork)
+        #if numPartitions > 0:
+        #    res = mutations.rdd.groupBy(lambda e: e["chrom"],numPartitions=numPartitions).flatMap(partitionWork)
+        #else:
+        #    res = mutations.rdd.groupBy(lambda e: e["chrom"]).flatMap(partitionWork)
+
+        res = mutations.rdd.mapPartitions(partitionWork)
+
 
         if sparkDebug:
             print("############ results ==> ", res.count())
