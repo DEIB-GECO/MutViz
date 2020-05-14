@@ -6,6 +6,8 @@ import sys
 import time
 from collections import defaultdict
 
+from pyspark.sql.types import StructType, StructField, IntegerType
+
 from api import spark
 
 
@@ -59,7 +61,16 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
             url='jdbc:%s' % url, table=mutation_table_name, properties=properties
         )
     else:
-        mutations = spark.read.format("csv").option("header", "true").load(fs_db_dir + "/"+mutation_table_name)
+        customSchema = StructType([
+            StructField("donor_id", IntegerType, False),
+            StructField("tumor_type_id", IntegerType, False),
+            StructField("chrom", IntegerType, False),
+            StructField("position", IntegerType, False),
+            StructField("mutation_code_id", IntegerType, False),
+            StructField("trinucleotide_id_r", IntegerType, False)]
+        )
+
+        mutations = spark.read.format("csv").option("header", "true").schema(customSchema).load(fs_db_dir + "/"+mutation_table_name)
 
 
     regions_df = DataFrameReader(sql_ctx).jdbc(
