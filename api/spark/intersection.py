@@ -6,12 +6,16 @@ import sys
 import time
 from collections import defaultdict
 
+from api import spark
+
+
 def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_format, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=False, minCount=-1):
 
     # SQL VS MINE8: 388[1h] , 1507 (25min), 1018[bin=20], (1h,  no bins), 1101 (5 bins), 994 [100] - 952 [200] 916(ctcf) 941[41]
     # 590 ETS1
     #3h13 geco 4h37 genomic
 
+    fs_db_dir  =os.getenv('MUTVIZ_FS_DB_FOLDER', "disabled")
 
     numPartitions = int(os.getenv('MUTVIZ_NUM_PARTITIONS', -1))
     memory = os.getenv('MUTVIZ_DRIVER_MEMORY', "50g")
@@ -50,9 +54,12 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
     url = 'postgresql://'+DB_CONF["postgres_url"]+'/'+DB_CONF["postgres_db"]
 
 
-    mutations = DataFrameReader(sql_ctx).jdbc(
-        url='jdbc:%s' % url, table=mutation_table_name, properties=properties
-    )
+    if fs_db_dir == 'disabled':
+        mutations = DataFrameReader(sql_ctx).jdbc(
+            url='jdbc:%s' % url, table=mutation_table_name, properties=properties
+        )
+    else:
+        mutations = spark.read.format("csv").option("header", "true").load(fs_db_dir + "/"+mutation_table_name)
 
 
     regions_df = DataFrameReader(sql_ctx).jdbc(
