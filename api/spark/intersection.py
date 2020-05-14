@@ -4,6 +4,7 @@ from pyspark.sql import SparkSession, DataFrameReader
 import os
 import sys
 import time
+from collections import defaultdict
 
 def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_format, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=False, minCount=-1):
 
@@ -12,10 +13,10 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
     #3h13 geco 4h37 genomic
 
 
-    numBins = int(os.getenv('MUTVIZ_NUM_BINS', 1))
+    numPartitions = int(os.getenv('MUTVIZ_NUM_PARTITIONS', -1))
     memory = os.getenv('MUTVIZ_DRIVER_MEMORY', "50g")
-    sparkDebug = os.getenv('MUTVIZ_SPARK_DEBUG', "true") == "true"
-    print("USING "+str(numBins)+" BINS.")
+    sparkDebug = os.getenv('MUTVIZ_SPARK_DEBUG', "false") == "true"
+    print("USING "+str(numPartitions)+" PARTITIONS (-1:AUTO).")
     start_time = time.time()
 
     os.environ["SPARK_HOME"] = os.getenv('MUTVIZ_SPARK_HOME', "/var/lib/spark-2.4.5-bin-hadoop2.7")
@@ -30,16 +31,17 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
     print("SPARK HOME: " + os.getenv('SPARK_HOME'))
     print("Using cores: "+cores)
     print("Using memory: "+memory)
-    print("Using bins: "+str(numBins))
+    print("Using partitions: "+str(numPartitions))
+    print("Debug enabled: " + str(sparkDebug))
     print("#############################")
 
     spark = SparkSession.builder \
-            .master("local["+cores+"]")      \
-            .appName("Word Count") \
-            .config("spark.jars", jdbc_jar) \
-            .config("spark.driver.memory", memory) \
-            .config("spark.driver.cores", cores)\
-            .getOrCreate()
+        .master("local["+cores+"]") \
+        .appName("Word Count") \
+        .config("spark.jars", jdbc_jar) \
+        .config("spark.driver.memory", memory) \
+        .config("spark.driver.cores", cores) \
+        .getOrCreate()
 
     sql_ctx = SQLContext(spark.sparkContext)
     sc = spark.sparkContext
@@ -75,70 +77,74 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
 
     else:
 
-     regions = regions_df.collect()
-     regions_broadcast = sc.broadcast( sorted(regions, key=itemgetter('pos_start', 'pos_stop')))
+        regions = regions_df.collect()
+        rb = defaultdict(list)
+        for v in regions: rb[v["chrom"]].append(v)
 
-     if numBins>1:
-        print("REAL BINNING.")
-        partitioned = mutations.withColumn("bin", (mutations["position"]%numBins).cast("string")+"-"+mutations["chrom"].cast("string")).repartition("bin").sortWithinPartitions("position")
-     else:
-        print("No Binning, just using chromosome parallelism.")
-        partitioned = mutations.repartition("chrom").sortWithinPartitions("position")
+        for c in rb:
+            rb[c] = sorted(rb[c], key=itemgetter('pos_start', 'pos_stop'))
 
-     def partitionWork( p):
+        regions_broadcast = sc.broadcast(rb)
 
-         matched = []
-         localMutations = list(p)
+        def partitionWork(p):
 
-         if localMutations:
-             chrom=localMutations[0]["chrom"]
-             #print("chrom "+str(chrom))
+            matched = []
 
-             localRegions = filter(lambda r : r['chrom']==chrom, regions_broadcast.value)
+            chrom = p[0]
+            localMutations = list(p[1])
 
-             if localRegions:
-                 sorted_mutations = localMutations #sorted(localMutations, key=itemgetter('position'))
-                 sorted_regions = sorted(localRegions, key=itemgetter('pos_start', 'pos_stop'))
+            if localMutations:
 
-                 cur_reg_idx = 0
-                 cur_mut_idx = 0
+                localRegions = regions_broadcast.value[chrom]
 
-                 while( cur_mut_idx < len(sorted_mutations)  and cur_reg_idx < len(sorted_regions) ):
+                if localRegions:
+                    sorted_mutations = sorted(localMutations, key=itemgetter('position'))
+                    sorted_regions = localRegions
 
-                     cur_reg = sorted_regions[cur_reg_idx]
-                     cur_mut = sorted_mutations[cur_mut_idx]
+                    cur_reg_idx = 0
+                    cur_mut_idx = 0
 
-                     if cur_mut["position"] < cur_reg["pos_start"]:
-                         cur_mut_idx += 1
-                     elif cur_mut["position"] <= cur_reg["pos_stop"]:
-                         matched.append(cur_mut)
-                         cur_mut_idx += 1
-                     else:
-                         cur_reg_idx += 1
+                    while( cur_mut_idx < len(sorted_mutations)  and cur_reg_idx < len(sorted_regions) ):
 
-         return matched
+                        cur_reg = sorted_regions[cur_reg_idx]
+                        cur_mut = sorted_mutations[cur_mut_idx]
 
-     res = partitioned.rdd.mapPartitions(partitionWork)
+                        if chrom != cur_mut["chrom"] or chrom != cur_reg["chrom"] or cur_reg["chrom"] != cur_mut["chrom"]:
+                            print(chrom, cur_reg["chrom"], cur_mut["chrom"])
 
-     if sparkDebug:
-         print("############ results ==> ", res.count())
+                        if cur_mut["position"] < cur_reg["pos_start"]:
+                            cur_mut_idx += 1
+                        elif cur_mut["position"] <= cur_reg["pos_stop"]:
+                            matched.append(cur_mut)
+                            cur_mut_idx += 1
+                        else:
+                            cur_reg_idx += 1
 
-    # Grouping
-     #todo: if empty
-     if groupby:
-         if minCount==-1:
-            res = res.toDF().groupBy(groupby).count().rdd.map(output_format)
-         else:
-            res_df = res.toDF().groupBy(groupby).count()
-            res = res_df.filter(res_df["count"]>minCount).rdd.map(output_format)
+            return matched
 
-         if sparkDebug:
-             print("############ results after grouping ==> ", res.count())
 
-     res = res.collect()
+        if numPartitions > 0:
+            res = mutations.rdd.groupBy(lambda e: e["chrom"],numPartitions=numPartitions).flatMap(partitionWork)
+        else:
+            res = mutations.rdd.groupBy(lambda e: e["chrom"]).flatMap(partitionWork)
 
-    # print(partitioned)
-    #
-     print("Spark execution took %s seconds ---" % (time.time() - start_time))
+        if sparkDebug:
+            print("############ results ==> ", res.count())
+
+        # Grouping
+        #todo: if empty
+        if groupby:
+            if minCount==-1:
+                res = res.toDF().groupBy(groupby).count().rdd.map(output_format)
+            else:
+                res_df = res.toDF().groupBy(groupby).count()
+                res = res_df.filter(res_df["count"]>minCount).rdd.map(output_format)
+
+            if sparkDebug:
+                print("############ results after grouping ==> ", res.count())
+
+    res = res.collect()
+
+    print("Spark execution took %s seconds ---" % (time.time() - start_time))
 
     return res

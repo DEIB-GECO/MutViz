@@ -5,6 +5,7 @@ import os
 import sys
 import time
 import pandas as pd
+from collections import defaultdict
 
 def spark_intersect(regions, mutations):
 
@@ -52,7 +53,13 @@ def spark_intersect(regions, mutations):
 
 
     regions = regions_df.collect()
-    regions_broadcast = sc.broadcast( sorted(regions, key=itemgetter('pos_start', 'pos_stop')))
+    rb = defaultdict(list)
+    for v in regions: rb[v["chrom"]].append(v)
+
+    for c in rb:
+        rb[c] = sorted(rb[c], key=itemgetter('pos_start', 'pos_stop'))
+
+    regions_broadcast = sc.broadcast(rb)
 
     if numBins > 1:
         print("Real Binning")
@@ -66,20 +73,22 @@ def spark_intersect(regions, mutations):
 
     def partitionWork(p):
 
+        chrom = p[0]
+        localMutations = list(p[1])
+
         matched = []
-        localMutations = list(p)
 
         #print(list(filter(lambda x: x["position"] == 56785094, localMutations)))
 
         if localMutations:
-            chrom=localMutations[0]["chrom"]
             #print("chrom "+str(chrom))
 
-            localRegions = filter(lambda r : r['chrom']==chrom, regions_broadcast.value)
+            localRegions = regions_broadcast.value[chrom]
 
             if localRegions:
-                sorted_mutations = localMutations #sorted(localMutations, key=itemgetter('position'))
-                sorted_regions = sorted(localRegions, key=itemgetter('pos_start', 'pos_stop'))
+                sorted_mutations = sorted(localMutations, key=itemgetter('position'))
+                sorted_regions = localRegions
+                #sorted_regions = sorted(localRegions, key=itemgetter('pos_start', 'pos_stop'))
 
                 cur_reg_idx = 0
                 cur_mut_idx = 0
@@ -99,7 +108,9 @@ def spark_intersect(regions, mutations):
 
         return matched
 
-    res = partitioned.rdd.mapPartitions(partitionWork)
+    #res = partitioned.rdd.mapPartitions(partitionWork)
+
+    res = mutations.rdd.groupBy(lambda e: e["chrom"]).flatMap(partitionWork)
 
     if sparkDebug:
         print("############ results ==> ", res.count())
