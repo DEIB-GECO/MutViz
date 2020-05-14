@@ -81,13 +81,14 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
         print("====> REGIONS COLLECTED AFTER (S) %s" % (time.time() - start_time))
         rb = defaultdict(list)
         for v in regions: rb[v["chrom"]].append(v)
-        print("====> REGIONS SORTED AFTER (S) %s" % (time.time() - start_time))
-
 
         for c in rb:
             rb[c] = sorted(rb[c], key=itemgetter('pos_start', 'pos_stop'))
 
+        print("====> REGIONS SORTED AFTER (S) %s" % (time.time() - start_time))
         regions_broadcast = sc.broadcast(rb)
+        print("====> REGIONS BROADCAST AFTER (S) %s" % (time.time() - start_time))
+
 
         def partitionWork(p):
 
