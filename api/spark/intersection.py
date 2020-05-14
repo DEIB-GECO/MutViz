@@ -62,12 +62,12 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
         )
     else:
         customSchema = StructType([
-            StructField("donor_id", IntegerType, False),
-            StructField("tumor_type_id", IntegerType, False),
-            StructField("chrom", IntegerType, False),
-            StructField("position", IntegerType, False),
-            StructField("mutation_code_id", IntegerType, False),
-            StructField("trinucleotide_id_r", IntegerType, False)]
+            StructField("donor_id", IntegerType(), False),
+            StructField("tumor_type_id", IntegerType(), False),
+            StructField("chrom", IntegerType(), False),
+            StructField("position", IntegerType(), False),
+            StructField("mutation_code_id", IntegerType(), False),
+            StructField("trinucleotide_id_r", IntegerType(), False)]
         )
 
         mutations = spark.read.format("csv").option("header", "true").schema(customSchema).load(fs_db_dir + "/"+mutation_table_name)
