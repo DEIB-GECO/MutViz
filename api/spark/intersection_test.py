@@ -14,6 +14,7 @@ def spark_intersect(regions, mutations):
 
 
     numBins = int(os.getenv('MUTVIZ_NUM_BINS', 1))
+    sparkDebug = os.getenv('MUTVIZ_NUM_BINS', "true") == "true"
     memory = os.getenv('MUTVIZ_DRIVER_MEMORY', "50g")
     print("USING "+str(numBins)+" BINS.")
     start_time = time.time()
@@ -44,6 +45,10 @@ def spark_intersect(regions, mutations):
 
     mutations = sql_ctx.createDataFrame(mutations)
     regions_df = sql_ctx.createDataFrame(regions)
+
+    if sparkDebug:
+        print("############ mutations ==> ", mutations.count())
+        print("############ regions   ==>", regions_df.count())
 
 
     regions = regions_df.collect()
@@ -96,6 +101,9 @@ def spark_intersect(regions, mutations):
 
     res = partitioned.rdd.mapPartitions(partitionWork)
 
+    if sparkDebug:
+        print("############ results ==> ", res.count())
+
     # Grouping
     #todo: if empty
     #if groupby:
@@ -126,6 +134,7 @@ res = spark_intersect(regions, mutations)
 print(mutations.shape)
 res_df = pd.DataFrame(map(lambda x: [x.chrom, x.position], res), columns=["chrom", "position"])
 print(res_df)
+print("RESULT SHAPE=>",res_df.shape)
 
 missing = pd.concat([mutations,res_df]).drop_duplicates(keep=False)
 print(missing)

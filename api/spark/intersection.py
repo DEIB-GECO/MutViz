@@ -14,6 +14,7 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
 
     numBins = int(os.getenv('MUTVIZ_NUM_BINS', 1))
     memory = os.getenv('MUTVIZ_DRIVER_MEMORY', "50g")
+    sparkDebug = os.getenv('MUTVIZ_NUM_BINS', "true") == "true"
     print("USING "+str(numBins)+" BINS.")
     start_time = time.time()
 
@@ -37,6 +38,7 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
             .appName("Word Count") \
             .config("spark.jars", jdbc_jar) \
             .config("spark.driver.memory", memory) \
+            .config("spark.driver.cores", cores)\
             .getOrCreate()
 
     sql_ctx = SQLContext(spark.sparkContext)
@@ -56,6 +58,9 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
         url='jdbc:%s' % url, table=regions_table_name, properties=properties
     )
 
+    if sparkDebug:
+        print("############ mutations ==> ", mutations.count())
+        print("############ regions   ==>", regions_df.count())
 
     # new
     if useSQL :
@@ -115,6 +120,9 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
 
      res = partitioned.rdd.mapPartitions(partitionWork)
 
+     if sparkDebug:
+         print("############ results ==> ", res.count())
+
     # Grouping
      #todo: if empty
      if groupby:
@@ -123,6 +131,9 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
          else:
             res_df = res.toDF().groupBy(groupby).count()
             res = res_df.filter(res_df["count"]>minCount).rdd.map(output_format)
+
+         if sparkDebug:
+             print("############ results after grouping ==> ", res.count())
 
      res = res.collect()
 
