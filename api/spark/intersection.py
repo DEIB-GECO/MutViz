@@ -78,6 +78,7 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
     else:
 
         regions = regions_df.collect()
+        print("====> REGIONS COLLECTED")
         rb = defaultdict(list)
         for v in regions: rb[v["chrom"]].append(v)
 
@@ -92,6 +93,8 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
 
             chrom = p[0]
             localMutations = list(p[1])
+
+            print("====> PROCESSING PARTITION WITH CHROM",chrom)
 
             if localMutations:
 
