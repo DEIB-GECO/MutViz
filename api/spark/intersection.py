@@ -112,9 +112,6 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
                         cur_reg = sorted_regions[cur_reg_idx]
                         cur_mut = sorted_mutations[cur_mut_idx]
 
-                        if chrom != cur_mut["chrom"] or chrom != cur_reg["chrom"] or cur_reg["chrom"] != cur_mut["chrom"]:
-                            print(chrom, cur_reg["chrom"], cur_mut["chrom"])
-
                         if cur_mut["position"] < cur_reg["pos_start"]:
                             cur_mut_idx += 1
                         elif cur_mut["position"] <= cur_reg["pos_stop"]:
