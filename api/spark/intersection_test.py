@@ -14,7 +14,7 @@ def spark_intersect(regions, mutations):
 
 
     numBins = int(os.getenv('MUTVIZ_NUM_BINS', 1))
-    sparkDebug = os.getenv('MUTVIZ_NUM_BINS', "true") == "true"
+    sparkDebug = os.getenv('MUTVIZ_SPARK_DEBUG', "true") == "true"
     memory = os.getenv('MUTVIZ_DRIVER_MEMORY', "50g")
     print("USING "+str(numBins)+" BINS.")
     start_time = time.time()
