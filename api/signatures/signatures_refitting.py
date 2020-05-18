@@ -160,7 +160,7 @@ def get_refitting( mut_df, user_file_df ):
 
     dirname = os.path.dirname(__file__)
 
-    print("mut_df has shape ==>", mut_df.shape[0])
+    print("mut_df has shape ==>", mut_df.shape[0], ",",mut_df.shape[1])
 
     #load the mutations
     categories = list(mut_df.columns)
