@@ -519,6 +519,8 @@ def get_uc6():
             exists = db.session.query(db.session.query(SignaturesCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
             print("exists: "+str(exists))
 
+            exists = False
+
             if exists:
                 mutations = db.session.query( SignaturesCache.tumor_type_id, SignaturesCache.donor_id, SignaturesCache.trinucleotide_id_r, SignaturesCache.count).filter_by(file_id=repositories_dict[repoId][0])
             else:
@@ -582,7 +584,13 @@ def get_uc6():
                 if num_patients<5:
                     table_donors = table_donors.sum().to_frame().transpose()
 
-                with_donors =  get_refitting(table_donors)
+                region_file_table_name = "full_"+repositories_dict[repoId][1]
+                #user_file =  create_upload_table_full(session, region_file_table_name, create=False, upload=False)
+
+                user_file_df = pd.read_sql("SELECT * FROM "+region_file_table_name+";", session.bind)
+
+
+                with_donors =  get_refitting(table_donors. user_file_df)
 
                 final_results[tumor] = {}
                 final_results[tumor]["data"] = with_donors.to_dict(orient='list')
