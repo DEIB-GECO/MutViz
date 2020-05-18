@@ -519,7 +519,6 @@ def get_uc6():
             exists = db.session.query(db.session.query(SignaturesCache).filter_by(file_id=repositories_dict[repoId][0]).exists()).scalar()
             print("exists: "+str(exists))
 
-            exists = False
 
             if exists:
                 mutations = db.session.query( SignaturesCache.tumor_type_id, SignaturesCache.donor_id, SignaturesCache.trinucleotide_id_r, SignaturesCache.count).filter_by(file_id=repositories_dict[repoId][0])
