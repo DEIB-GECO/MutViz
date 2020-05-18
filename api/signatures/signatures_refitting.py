@@ -73,7 +73,7 @@ def reverse_comp(sample):
 #find the seuqunces of the regions
 
 def seq(sample, genome):
-    sample['sequence']= sample.apply(lambda row: genome.fetch(row['chrom'], int(row['start'])-1, int(row['stop'])).upper(), axis=1)
+    sample['sequence']= sample.apply(lambda row: genome.fetch(row['chrom'], row['start']-1, row['stop']).upper(), axis=1)
     sample['sequence'] = sample['sequence'].str.replace(r'[R,N,H,M,U,W,B,D,V,S,Y,K,-,>,1]','A')
     return sample
 
