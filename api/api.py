@@ -588,9 +588,10 @@ def get_uc6():
                 #user_file =  create_upload_table_full(session, region_file_table_name, create=False, upload=False)
 
                 user_file_df = pd.read_sql("SELECT * FROM "+region_file_table_name+";", session.bind)
+                user_file_df.columns = ["chrom", "start", "stop"]
 
 
-                with_donors =  get_refitting(table_donors. user_file_df)
+                with_donors =  get_refitting(table_donors, user_file_df)
 
                 final_results[tumor] = {}
                 final_results[tumor]["data"] = with_donors.to_dict(orient='list')
