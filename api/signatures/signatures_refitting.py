@@ -200,7 +200,6 @@ def get_refitting( mut_df, user_file_df ):
 
     active_signatures = sigs_df_norm.T.index
 
-    active_signatures = sigs_df.index
 
     # Compute the exposures and output to file
     # SignatureEstimation gives the proportion of mutations per signature,
