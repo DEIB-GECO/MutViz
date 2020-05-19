@@ -164,8 +164,7 @@ def get_refitting( mut_df, user_file_df,  sigs_df_norm = None):
     categories = list(mut_df.columns)
     M = mut_df.values
 
-
-    if  sigs_df_norm == None:
+    if  sigs_df_norm is None:
 
         filename = os.path.join(dirname, "signatures.csv")
         frequencies_wg_file = os.path.join(dirname, "frequencies_whole_genome.tsv")
