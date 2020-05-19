@@ -3,7 +3,7 @@ import uuid
 from flask import json, request, abort
 
 from api import MUTVIZ_CONF, app, logger, parse_input_regions, db, DEBUG_MODE, repositories_dict, \
-    trinucleotides_dict, tumor_type_dict, executor, mutation_code_r_dict
+    trinucleotides_dict, tumor_type_dict, executor, mutation_code_r_dict, RESULTS_CACHE
 from api.db import *
 from api.jobs import register_job, update_job, unregister_job
 from api.model.models import *
@@ -22,10 +22,15 @@ def get_uc5(logger):
     if not repoId:
         abort(400)
 
+    CACHE_ID = "DONORS#" + repoId + "#" + str(tumorType) + "#" +trinucleotide
+
     jobID = register_job()
 
     def async_function():
         try:
+            if CACHE_ID in RESULTS_CACHE:
+                update_job(jobID, RESULTS_CACHE[CACHE_ID])
+
             session = db.session
             session.execute("set enable_seqscan=false")
 
@@ -92,6 +97,8 @@ def get_uc5(logger):
                     if m[0] not in result:
                         result[m[0]] = {"data": [], "trinucleotide": trinucleotide}
                     result[m[0]]["data"].append({"mutation": m[1], "donor_id": m[2], "count": m[3]})
+
+            RESULTS_CACHE[CACHE_ID] = result
 
             update_job(jobID, result)
 

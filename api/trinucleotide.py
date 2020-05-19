@@ -2,8 +2,8 @@ from collections import defaultdict
 
 from flask import json, request, abort
 
-from api import  DEBUG_MODE, repositories_dict, \
-    trinucleotides_dict, tumor_type_dict, executor
+from api import DEBUG_MODE, repositories_dict, \
+    trinucleotides_dict, tumor_type_dict, executor, RESULTS_CACHE
 from api.db import *
 from api.jobs import register_job, update_job, unregister_job
 from api.model.models import *
@@ -20,10 +20,15 @@ def get_trinucleotide(logger):
     if not repoId:
         abort(400)
 
+    CACHE_ID = "TRINUCLEOTIDE#" + repoId + "#" + str(tumorType)
+
     jobID = register_job()
 
     def async_function():
         try:
+            if CACHE_ID in RESULTS_CACHE:
+                update_job(jobID, RESULTS_CACHE[CACHE_ID])
+
             session = db.session
             session.execute("set enable_seqscan=false")
 
@@ -54,8 +59,9 @@ def get_trinucleotide(logger):
                 result[m[0]][m[1]] = {"trinucleotide":m[1], "mutation":m[1][2:-2], "count" : m[2]}
 
 
-            if not result:
-                result = {"empty":[]}
+
+            RESULTS_CACHE[CACHE_ID] = result
+
             update_job(jobID, result)
 
         except Exception as e:

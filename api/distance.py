@@ -5,7 +5,7 @@ from sqlalchemy import func, between
 import psycopg2
 
 from api import MUTVIZ_CONF, app, logger, parse_input_regions, repositories_dict, mutation_code_dict, \
-    tumor_type_reverse_dict, executor, DB_CONF
+    tumor_type_reverse_dict, executor, DB_CONF, RESULTS_CACHE
 from api.jobs import register_job, update_job, unregister_job
 from api.model.models import *
 from api.jobs import update_job
@@ -23,6 +23,8 @@ def get_distances(logger):
     tumorType = request.form.get('tumorType')
     logger.debug(f"tumorType: {tumorType}")
 
+    CACHE_ID = "DISTANCE#" + repoId + "#" + str(maxDistance) + "#" + str(tumorType)
+
     if not repoId or not maxDistance:
         abort(400)
 
@@ -36,6 +38,10 @@ def get_distances(logger):
 
     def async_function():
         try:
+
+            if CACHE_ID in RESULTS_CACHE:
+                update_job(jobID, RESULTS_CACHE[CACHE_ID])
+
             session = db.session
             session.execute("set enable_seqscan=false")
 
@@ -108,6 +114,7 @@ def get_distances(logger):
             session.commit()
             session.close()
 
+            RESULTS_CACHE[CACHE_ID] = result
 
             update_job(jobID, result)
 

@@ -23,7 +23,6 @@ def get_uc6(logger):
 
     CACHE_ID = "SIGNATURES#"+repoId+"#"+str(threshold_active)
 
-
     logger.debug("Threshold active: "+str(threshold_active))
     logger.debug("Threshold min: "+str(threshold_min))
 
