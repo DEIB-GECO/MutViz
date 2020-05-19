@@ -45,6 +45,8 @@ with app.app_context():
     DEBUG_MODE = True
     DEBUG_MODE = False
 
+    RESULTS_CACHE = {}
+
     jobs = dict()
     job_counter = 0
 

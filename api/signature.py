@@ -4,7 +4,7 @@ from collections import defaultdict
 from flask import json, request, abort
 
 from api import MUTVIZ_CONF, app, logger, parse_input_regions, DEBUG_MODE, repositories_dict, \
-    trinucleotides_dict, tumor_type_dict, executor
+    trinucleotides_dict, tumor_type_dict, executor, RESULTS_CACHE
 from api.db import *
 from api.jobs import register_job, update_job, unregister_job
 from api.model.models import *
@@ -21,6 +21,9 @@ def get_uc6(logger):
     threshold_active = request.form.get('threshold_active')=="true"
     threshold_min = int(request.form.get('threshold_min'))
 
+    CACHE_ID = "SIGNATURES#"+repoId+"#"+str(threshold_active)
+
+
     logger.debug("Threshold active: "+str(threshold_active))
     logger.debug("Threshold min: "+str(threshold_min))
 
@@ -34,6 +37,10 @@ def get_uc6(logger):
 
     def async_function():
         try:
+
+            if CACHE_ID in RESULTS_CACHE:
+                update_job(jobID, RESULTS_CACHE[CACHE_ID])
+
             session = db.session
 
             file_id = db.session.query(UserFile).filter_by(name=repoId).one().id
@@ -120,6 +127,8 @@ def get_uc6(logger):
                 final_results[tumor]["num_patients"] = num_patients
                 final_results[tumor]["threshold_min"] = threshold_min
                 final_results[tumor]["threshold_active"] = threshold_active
+
+            RESULTS_CACHE[CACHE_ID] = final_results
 
             update_job(jobID, final_results)
 
