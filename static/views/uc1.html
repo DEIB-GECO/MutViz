@@ -2,7 +2,7 @@
 <main role="main" class="wrapper">
 
     <!-- Sidebar  -->
-    <nav id="sidebar">
+    <nav id="sidebar-small">
         <div class="col-md-12" style="background-color: #f5f5f5">
 
             <div class="row">
@@ -13,46 +13,50 @@
                 </div>
 
 
+                <div class="col-md-12" style="margin-top:10px; background-color: #fafafa;">
 
-                <div class="col-md-12" style="margin-top:10px; {{files.length>0 && someAreValid?'background-color:#e6e6e6;':''}} ">
-
-                    <div ng-if="files.length==0 && !someAreRead || !someAreValid"
-                         class="col-md-12 text-center"
-                         style="padding-top: 20px;padding-bottom: 20px; background-color: #ffe28d">
-                        No valid file in your <a href="#!/data">workspace</a>. Please, upload a region file or add a file from the repository.
-                    </div>
-
-                    <div ng-if="files.length>0 && !someAreReady && someAreValid"
-                         class="col-md-12 text-center"
-                         style="padding-top: 20px;padding-bottom: 20px;">
-                        Loading your workspace
-                        <div class="col-md-12 text-center" style="padding-top: 10px;">
-                            <img src="img/loading.gif" style="height: 45px; margin-left: 5px; margin-bottom: 4px;">
-                        </div>
-                    </div>
-
-                    <div ng-show="files.length>0 && someAreReady"
+                    <div ng-show="files.length>0 && someAreValid"
                          style="height: 90px;">
                         <label for="jtSelect">File:</label>
-                        <select class="form-control" id="ttSelect" 
-                                ng-model="file_selector.name"
-                                ng-change="load(file_selector.name, tumorTypes.current)" >
-                            <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
+                        <select ng-disabled="execution.running"
+                                class="form-control" id="ttSelect" 
+                                ng-model="file_selector.file">
+                            <option ng-repeat="file in files | filter:valid track by $index"  ng-value="file">{{file.name}}</option>
                         </select>
                     </div>
+
+
+                    <div ng-show="files.length==0 || !someAreValid"
+                         style="height: 90px;">
+                        <label for="jtSelect">File:</label>
+                        <p class="text-center" style="background-color: #ffdddd; line-height: 30px; height: 30px;">
+                            <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i>
+                            Your <a href="#!/data">workspace</a> is empty.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-12 text-center" style="margin-top:10px;">
+                    <button class="btn btn-white"  style="width: 100%;"
+                            ng-click="loadFile(file_selector.file)"
+                            ng-disabled="execution.running || file_selector.file==null"
+                            type="submit">
+                        <i class="fa fa-play" style="font-size: 0.9em;
+                                                     margin-right: 6px;"></i> Plot</button>
+                    <a id="dwn_data" target="_blank" style="display: none"></a>
                 </div>
 
                 <div class="col-md-12" style="margin-top:10px;">
                     <label for="ttSelect">Tumor type:</label>
                     <select class="form-control" id="ttSelect"
-                            ng-model="tumorTypes.current"
-                            ng-change="load(file_selector.name, tumorTypes.current)">
+                            ng-model="tumorTypes.current" 
+                            ng-change="loadFile(file_selector.file)" ng-disabled="execution.running">
                         <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
                 </div>
 
 
-                <div class="col-md-6" style="margin-top:10px;">
+                <div class="col-md-6" style="margin-top:10px;" ng-if="loaded">
                     <div class="form-group">
                         <label for="inputBins">Bin size (bp):</label>
                         <input type="number" class="form-control" id="inputBins" 
@@ -62,7 +66,7 @@
                     </div>
                 </div>
 
-                 <div class="col-md-6" style="margin-top:10px;">
+                <div class="col-md-6" style="margin-top:10px;" ng-if="loaded">
                     <div class="form-group">
                         <label for="minY">Min Y:</label>
                         <input type="number" class="form-control" id="minY" 
@@ -72,31 +76,41 @@
                     </div>
                 </div>
 
-                <div class="col-md-12" style="margin-top:10px;">
+
+                <div class="col-md-6 text-center" style="margin-top:10px;" ng-if="loaded">
+                    <div class="form-group">
+                        <label for="stacked">Stacked</label><br>
+                        <switch size="small" id="enabled" name="enabled"
+                                ng-model="mutationTypes.stacked" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
+                        </switch>
+                        <br>
+                    </div>
+                </div>
+
+                <div class="col-md-6 text-center" style="margin-top:10px;" ng-if="loaded">
+                    <div class="form-group">
+                        <label for="total">Show Total</label><br>
+                        <switch size="small" id="enabled" name="enabled"
+                                ng-model="plot.showTotal" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
+                        </switch>
+                        <br>
+                    </div>
+                </div>
+
+
+                <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">
 
                     <div class="row">
 
-                        <div class="col-md-7">
-                            <b>Mutation types</b>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="checkbox-inline float-right">
-                                <input type="checkbox"  data-toggle="toggle" 
-                                       ng-change="updatePlot(file_selector.file, tumorTypes.current)"
-                                       ng-model="mutationTypes.stacked"> Stacked
-                            </label>
-
-                            <label class="checkbox-inline float-right">
-                                <input type="checkbox"  data-toggle="toggle" 
-                                       ng-change="updatePlot(file_selector.file, tumorTypes.current)"
-                                       ng-model="plot.showTotal"> Total
-                            </label>
+                        <div class="col-md-12 text-left" style="padding-bottom:10px">
+                            Mutation types:
                         </div>
 
                     </div>
 
 
-                    <div class="row" ng-repeat="st in mutationTypes.selectedTypes track by $index" style="margin-top: 5px; margin-bottom: 10px;">
+                    <div class="row" ng-repeat="st in mutationTypes.selectedTypes track by $index"
+                         style="padding-top: 10px; padding-bottom: 10px; background-color: #fafafa;">
 
                         <div class="col-md-1 text-center" style="line-height: 32px;">
                             <span  ng-if="mutationTypes.selectedTypes.length>1 && $first!=true && !mutationTypes.stacked">or</span>
@@ -146,7 +160,7 @@
 
                 </div>
 
-                <div class="col-md-12" style="margin-top:10px;" ng-show="file_selector.name!=null">
+                <div class="col-md-12" style="margin-top:10px;" ng-show="loaded" >
                     <div class="row">
 
                         <div class="col-md-12">
@@ -215,11 +229,21 @@
                     </div>
                 </div>
 
+                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
+
+                    <button class="btn btn-white"  style="width:100%"
+                            ng-click="downloadPlotData()"
+                            type="submit"><i class="fa fa-download"></i> Download Result (JSON)</button>
+                    <a id="dwn_data" target="_blank" style="display: none"></a>
+
+                </div>
+
                 <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-bottom: 20px!important;">
 
-                    <button class="btn" 
+                    <button class="btn btn-white" 
+                            style="width:100%"
                             ng-click="downloadPlot()"
-                            type="submit"><i class="fa fa-download"></i> Download plot as SVG</button>
+                            type="submit"><i class="fa fa-download"></i> Download Image (SVG)</button>
                     <a id="dwn" target="_blank" style="display: none"></a>
 
                 </div>
@@ -228,27 +252,29 @@
         </div>
     </nav>
 
-    <div id="content">
+    <div id="content" style="padding-top: 30px; padding-left: 15px; background-color: {{execution.running?'#5d5d5d':''}}">
         <div class="row">
 
-            <div class="col-md-12 text-center my-auto" ng-if="!loaded">
-                Select a file.
+            <div class="col-md-12 text-center" ng-if="execution.running" style="line-height: 40px; margin-top: 20px; color:white;">
+                PROCESSING
+                <br>
+                <img src="img/running.gif" width="80px">
             </div>
 
+            <div class="col-md-12 text-center" ng-if="!loaded && !execution.running " style="line-height: 40px;">
+                Select a file.
+            </div>
 
 
             <div class="col-md-12" style="padding-left: 50px; padding-right: 50px;">
                 <div id="slider"></div>
             </div>
 
-
-            <div class="col-md-12" window-resize="load(file_selector.name, tumorTypes.current)">
+            <div class="col-md-12" window-resize="loadFile(file_selector.file, tumorTypes.current)">
                 <div id="uc1" class="plot-container">
                     <svg></svg>
                 </div>
             </div>
-
-
 
         </div>
     </div>
@@ -262,12 +288,12 @@
             </div>
             <div class="modal-body">
                 <p id="modal_description">
-                ...
+                    ...
                 </p>
 
             </div>
             <div class="modal-footer">
-                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

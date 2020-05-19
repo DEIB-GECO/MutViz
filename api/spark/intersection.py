@@ -53,7 +53,7 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
     sc = spark.sparkContext
 
     properties = {'user': DB_CONF["postgres_user"], 'password':DB_CONF["postgres_pw"], 'driver': driver_class}
-    url = 'postgresql://'+DB_CONF["postgres_url"]+'/'+DB_CONF["postgres_db"]
+    url = 'postgresql://'+DB_CONF["postgres_host"]+':'+DB_CONF["postgres_port"]+'/'+DB_CONF["postgres_db"]
 
 
     if fs_db_dir == 'disabled':
@@ -115,7 +115,8 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
             localMutations = list(p)
             matched = []
 
-            print("====> PROCESSING PARTITION AFTER (S)  %s" % (time.time() - start_time))
+            if sparkDebug:
+                print("====> PROCESSING PARTITION AFTER (S)  %s" % (time.time() - start_time))
 
             if localMutations:
 

@@ -15,25 +15,27 @@
 
                 <div class="col-md-12" style="margin-top:10px; background-color: #fafafa;">
 
-                    <div ng-show="repository.length>0"
+                    <div ng-show="files.length>0 && someAreValid"
                          style="height: 90px;">
                         <label for="jtSelect">File:</label>
                         <select ng-disabled="execution.running"
                                 class="form-control" id="ttSelect" 
                                 ng-model="file_selector.name">
-                            <option ng-repeat="file in repository track by $index" ng-value="file.identifier">{{file.name}}</option>
+                            <option ng-repeat="file in files | filter:valid track by $index" ng-value="file">{{file.name}}</option>
                         </select>
+                    </div>
+
+                    <div ng-show="files.length==0 || !someAreValid"
+                         style="height: 90px;">
+                        <label for="jtSelect">File:</label>
+                        <p class="text-center" style="background-color: #ffdddd; line-height: 30px; height: 30px;">
+                            <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i>
+                            Your <a href="#!/data">workspace</a> is empty.
+                        </p>
                     </div>
                 </div>
 
-                <div class="col-md-12" style=" background-color: #fafafa;padding-bottom:10px;">
-                    <label for="ttSelect">Tumor type:</label>
-                    <select ng-disabled="execution.running"
-                            class="form-control" id="ttSelect"
-                            ng-model="tumorTypes.current">
-                        <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
-                    </select>
-                </div>
+
 
                 <div class="col-md-12" style="padding-top:10px; background-color: #fafafa;padding-bottom:10px;">
                     <div class="row">
@@ -58,6 +60,15 @@
                         <i class="fa fa-play" style="font-size: 0.9em;
                                                      margin-right: 6px;"></i> Plot</button>
                     <a id="dwn_data" target="_blank" style="display: none"></a>
+                </div>
+
+                <div class="col-md-12"  style="margin-top:30px;">
+                    <label for="ttSelect">Tumor type:</label>
+                    <select ng-change="loadFile(file_selector.name)" ng-disabled="execution.running"
+                            class="form-control" id="ttSelect"
+                            ng-model="tumorTypes.current">
+                        <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
+                    </select>
                 </div>
 
                 <div class="col-md-12" style="margin-top:30px; height: 40px;" >
@@ -178,7 +189,7 @@
                 <div id="slider"></div>
             </div>
 
-            <div class="col-md-12" window-resize="load(file_selector.name, tumorTypes.current)">
+            <div class="col-md-12" window-resize="loadFile(file_selector.name, tumorTypes.current)">
                 <div id="uc5" class="plot-container">
                     <svg></svg>
                 </div>

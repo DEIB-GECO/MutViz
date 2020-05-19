@@ -2,7 +2,7 @@
 <main role="main" class="wrapper">
 
     <!-- Sidebar  -->
-    <nav id="sidebar">
+    <nav id="sidebar-small">
         <div class="col-md-12" style="background-color: #f5f5f5">
 
             <div class="row">
@@ -11,53 +11,59 @@
                     <a class="btn info-btn" data-toggle="modal" data-target="#infoModal"><i class="fa fa-info-circle"></i></a>
                 </div>
 
+                <div class="col-md-12" style="margin-top:10px; background-color: #fafafa;">
 
-                <div class="col-md-12 text-center"  ng-if="!someAreReady" style="margin-top:10px;">
-                    <div ng-if="(files.length==0 || !someAreValid) && !someAreReady"
-                         class="col-md-12 text-center"
-                         style="padding-top: 20px;padding-bottom: 20px; background-color: #ffe28d">
-                        No valid file in your <a href="#!/data">workspace</a>. Please, upload a region file or add a file from the repository.
+                    <div ng-show="files.length>1 && someAreValid"
+                         style="height: 90px;">
+                        <label for="jtSelect">File 1:</label>
+                        <select ng-disabled="execution.running"
+                                class="form-control" id="ttSelect" 
+                                ng-model="file_selector.file1">
+                            <option ng-repeat="file in files | filter:valid track by $index" ng-value="file">{{file.name}}</option>
+                        </select>
                     </div>
 
-                    <div ng-if="files.length>0 && !someAreReady && someAreValid"
-                         class="col-md-12 text-center"
-                         style="padding-top: 20px;padding-bottom: 20px;">
-                        Loading your workspace
-                        <div class="col-md-12 text-center" style="padding-top: 10px;">
-                            <img src="img/loading.gif" style="height: 45px; margin-left: 5px; margin-bottom: 4px;">
-                        </div>
+                    <div ng-show="files.length>1 && someAreValid"
+                         style="height: 90px;">
+                        <label for="jtSelect">File 2:</label>
+                        <select ng-disabled="execution.running"
+                                class="form-control" id="ttSelect" 
+                                ng-model="file_selector.file2">
+                            <option ng-repeat="file in files | filter:{valid} track by $index" ng-value="file">{{file.name}}</option>
+                        </select>
+                    </div>
+
+                    <div ng-show="files.length<2 || !someAreValid"
+                         style="height: 90px;">
+                        <label for="jtSelect">Files:</label>
+                        <p class="text-center" style="background-color: #ffdddd; line-height: 30px; height: 30px;">
+                            <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i>
+                            Not enough files in your <a href="#!/data">workspace</a>.
+                        </p>
                     </div>
                 </div>
 
-                <div class="col-md-12" ng-show="files.length>0 && someAreReady" style="margin-top:10px; background-color:#e6e6e6; height: 90px;">
-                    <label for="jtSelect">File 1:</label>
-                    <select class="form-control" id="ttSelect"
-                            ng-model="file_selector.name1"
-                            ng-change="load(file_selector.name1, file_selector.name2, tumorTypes.current)">
-                        <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
-                    </select>
+                <div class="col-md-12 text-center" style="margin-top:10px;">
+                    <button class="btn btn-white"  style="width: 100%;"
+                            ng-click="loadFiles(file_selector.file1, file_selector.file2)"
+                            ng-disabled="execution.running || file_selector.file1==null ||  file_selector.file2==null"
+                            type="submit">
+                        <i class="fa fa-play" style="font-size: 0.9em;
+                                                     margin-right: 6px;"></i> Plot</button>
+                    <a id="dwn_data" target="_blank" style="display: none"></a>
                 </div>
 
-                <div class="col-md-12"  ng-show="files.length>0 && someAreReady" style="margin-top:0px; background-color:#e6e6e6; height: 90px;">
-                    <label for="jtSelect">File 2:</label>
-                    <select class="form-control" id="ttSelect"
-                            ng-model="file_selector.name2"
-                            ng-change="load(file_selector.name1, file_selector.name2, tumorTypes.current)">
-                        <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
-                    </select>
-                </div>
 
                 <div class="col-md-12" style="margin-top:10px;">
                     <label for="ttSelect">Tumor type:</label>
                     <select class="form-control" id="ttSelect"
-                            ng-model="tumorTypes.current"
-                            ng-change="load(file_selector.name1, file_selector.name2, tumorTypes.current)">
-                        <option ng-repeat="type in tumorTypes.available" ng-value="type">{{type.name}}</option>
+                            ng-model="tumorTypes.current" 
+                            ng-change="loadFiles(file_selector.file1, file_selector.file2)" ng-disabled="execution.running">
+                        <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
-                    <hr>
                 </div>
 
-                <div class="col-md-12" style="margin-top:10px;">
+                <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">
 
                     <label for="inputBins">Mutation types:</label>
 
@@ -114,7 +120,7 @@
 
                 </div>
 
-                <div class="col-md-12" style="margin-top:10px;">
+                <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">
                     <div class="form-group">
                         <label for="inputBins">Bin size (bp):</label>
                         <input type="number" class="form-control" id="inputBins" 
@@ -124,7 +130,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-12" style="margin-top:10px;" ng-show="file_selector.name1!=null && file_selector.name2!=null">
+                <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">
                     <div class="row">
 
                         <div class="col-md-12">
@@ -156,11 +162,21 @@
                     </div>
                 </div>
 
+                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
+
+                    <button class="btn btn-white"  style="width:100%"
+                            ng-click="downloadPlotData()"
+                            type="submit"><i class="fa fa-download"></i> Download Result (JSON)</button>
+                    <a id="dwn_data" target="_blank" style="display: none"></a>
+
+                </div>
+
                 <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-bottom: 20px!important;">
 
-                    <button class="btn" 
+                    <button class="btn btn-white" 
+                            style="width:100%"
                             ng-click="downloadPlot()"
-                            type="submit"><i class="fa fa-download"></i> Download plot as SVG</button>
+                            type="submit"><i class="fa fa-download"></i> Download Image (SVG)</button>
                     <a id="dwn" target="_blank" style="display: none"></a>
 
                 </div>
@@ -170,27 +186,31 @@
     </nav>
 
 
-    <div id="content">
-
+    <div id="content" style="padding-top: 30px; padding-left: 15px; background-color: {{execution.running?'#5d5d5d':''}}">
         <div class="row">
 
-            <div class="col-md-12 text-center my-auto" ng-if="!loaded">
-                Select files.
+            <div class="col-md-12 text-center" ng-if="execution.running" style="line-height: 40px; margin-top: 20px; color:white;">
+                PROCESSING
+                <br>
+                <img src="img/running.gif" width="80px">
             </div>
+
+            <div class="col-md-12 text-center" ng-if="!loaded && !execution.running " style="line-height: 40px;">
+                Select two files.
+            </div>
+
 
             <div class="col-md-12" style="padding-left: 50px; padding-right: 50px;">
                 <div id="slider"></div>
             </div>
 
-            <div class="col-md-12">
+            <div class="col-md-12" window-resize="loadFiles(file_selector.file1, file_selector.file2)">
                 <div id="uc2" class="plot-container">
                     <svg></svg>
                 </div>
             </div>
 
-
         </div>
-
     </div>
 </main>
 
@@ -202,12 +222,12 @@
             </div>
             <div class="modal-body">
                 <p id="modal_description">
-                ...
+                    ...
                 </p>
 
             </div>
             <div class="modal-footer">
-                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

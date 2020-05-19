@@ -10,7 +10,8 @@ var API_R02 = API_ROOT+"api/trinucleotide/";
 var API_R03 = API_ROOT+"api/donors/";
 var API_R04 = API_ROOT+"api/signatures/";
 
-var API_T02 = API_ROOT+"api/t02/";
-var API_T03 = API_ROOT+"api/t03/";
+var API_JOBS = API_ROOT+"api/jobs/";
+var API_REGIONS = API_ROOT+"api/regions/";
+
 
 var POLLING_TIMEOUT = 2000;

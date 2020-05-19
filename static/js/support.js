@@ -21,7 +21,6 @@ function getFilteredData(data, mutationTypes) {
 
 function get_bins(data, mutationTypes, binSize, minX, maxX) {
     
-    console.log(data);
 
     filtered = getFilteredData(data, mutationTypes);
 
@@ -61,8 +60,8 @@ function compress_regions(csv_txt, peak) {
     output = ""
 
     lines = csv_txt.split(/\r\n|\n/);
-    console.log(lines);
-
+    
+    
     correctly_parsed = 0;
     empty_lines=0;
     parsing_log = "";
@@ -77,6 +76,7 @@ function compress_regions(csv_txt, peak) {
             continue;
         }
 
+        lines[i] = lines[i].replace(/\,/g,"\t");
         cols = lines[i].split(new RegExp("\\s"));
 
         if(peak && cols.length<10 || !peak &&  cols.length<3) {
@@ -97,14 +97,12 @@ function compress_regions(csv_txt, peak) {
         if(Number.isNaN(start) || Number.isNaN(stop) || Number.isNaN(offset)) {
             parsing_log+="line "+(i+1)+": '"+lines[i]+"' (start and stop must be integer numbers).\n";
             continue;
-        } else {
-            center= Math.floor((start+stop)/2+offset);
-        }
+        } else 
 
         if(output!="")
             output += "\n";
 
-        output += chromosome+"\t"+center;
+        output += chromosome+"\t"+start+"\t"+stop;
         correctly_parsed +=1;
 
     }

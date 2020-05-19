@@ -3,8 +3,6 @@
    #################### */
 app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, $http) {
 
-
-
     /* # Initialization # */
     window.scroll(0, 0);
     $rootScope.active_menu = "uc4";
@@ -22,64 +20,52 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // status
     $scope.execution = {running:false};
-    $scope.file_selector = {name : "", file: null};
 
 
-    $scope.pollUC4 = function(filename) {
-        // Start polling
-        // Call the API
-        $http({method: 'GET', url: API_R02+ $scope.uc4_files[filename].jobID
-              }).then(
+    $scope.pollUC4 = function(filename, jobID) {
+
+        console.log("Polling "+filename+ " "+jobID);
+
+
+        $http({method: 'GET', url: API_JOBS+ jobID}).then(
             function success(response) {
                 if( response.data.ready == true) {
-                    $scope.uc4_files[filename].ready = true;
-                    console.log("result for "+ $scope.uc4_files[filename].jobID+" is ready");
+
+                    console.log("result for "+ jobID+" is ready");
 
                     // Add the new file to the local list of files together with the answer
                     $scope.uc4_files[filename].result = response.data.result;
-                    //$rootScope.someAreReady=true;
-
-                    // Persist
-                    //$rootScope.persistData();
 
                     $scope.load($scope.uc4_files[filename].result, true);
                     $scope.execution.running = false;
+
                 } else {
 
                     // schedule another call
-                    $timeout($scope.pollUC4, POLLING_TIMEOUT, true, filename);
+                    $timeout($scope.pollUC4, POLLING_TIMEOUT, true, filename, jobID);
 
                 }
             }, 
             function error(response) {
-                //window.alert("Error. File "+file.name+" will be removed.");
-                //index =  $rootScope.files.indexOf(file);
-                //$rootScope.files.splice(index, 1);
 
                 // Attempt another computation
-                console.log("error  poll uc4.");
+                console.error("Error polling for uc4.");
                 $scope.execution.running = false;
                 window.alert("An error occurred.");
-
 
             }
         );
     }
 
-    $scope.loadFile = function(filename) {
-
+    $scope.loadFile = function(file) {
+        
+        filename = file.identifier;
+        console.log("Load "+filename);
 
         $("#uc4").html("<svg></svg>")
 
         $scope.execution.running = true;
         $scope.loaded = false;
-
-        /*data = {"COCA": {"C[C>T]C": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}, "LUSC": {"C[C>T]A": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]A"}}, "MELA": {"C[C>T]C": {"count": 2, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}, "OV": {"C[C>T]T": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]T"}}, "PACA": {"G[C>T]G": {"count": 1, "mutation": "C>T", "trinucleotide": "G[C>T]G"}}, "SKCA": {"C[C>T]C": {"count": 1, "mutation": "C>T", "trinucleotide": "C[C>T]C"}}}
-
-        $scope.load(data);
-        return*/
-
-
 
         if( filename in $scope.uc4_files && "result" in $scope.uc4_files[filename] 
            && $rootScope.tumorTypes.current.identifier in $scope.uc4_files[filename].result){ 
@@ -88,9 +74,7 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         } else {
 
             request_body = {
-                repoId: filename,
-                regions: "",
-                regionsFormat: ""
+                file_name: filename
             }
 
             // Call the API
@@ -101,36 +85,10 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                 url: API_R02
             }).then(
                 function success(response) {
-
-                    file = {}
-
-                    file.name = filename;
-
-                    file.jobID = response.data.jobID;
-                    file.parsed_lines =  response.data.correct_region_size;
-                    if(response.data.error && response.data.error.length>0)
-                        file.errors = response.data.error;
-                    else
-                        file.errors = [];
-
-                    if(file.parsed_lines==0){
-                        file.valid = false;
-                    } else {
-
-                        //$rootScope.someAreValid = true;
-                        file.valid = true;
-
-                        $scope.uc4_files[file.name] = file;
-
-                        $scope.pollUC4(file.name)
-
-
-                    }
-
-                    // Persist
-                    $rootScope.persistData();
-
-                }, 
+                    $scope.uc4_files[filename] = file;
+                    $scope.pollUC4(filename, response.data.jobID);
+                }
+                , 
                 function error(response) {
                     console.error("error");
                     $scope.execution.running = false;
@@ -227,14 +185,6 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         });
         $scope.loadFile($scope.file_selector.name);
     }
-
-    // Load Melanoma and select mutations C>T and G>A
-    $scope.runExample = function(){               
-        $scope.mutationTypes.selectedTypes = [ {from: "C", to: "T"}, {from: "G", to: "A"} ];
-        $scope.load($scope.files_fake_selector.name, false)
-    }
-
-    //todo:remove
 
 
 });

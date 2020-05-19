@@ -64,6 +64,7 @@ app.filter('reverse', function() {
      function link(scope, element, attrs){
 
        angular.element($window).bind('resize', function(scope){
+      
                scope.reload();
        },scope);    
      }    

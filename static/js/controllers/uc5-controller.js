@@ -24,99 +24,66 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // status
     $scope.execution = {running:false};
-    $scope.file_selector = {name : "", file: null};
-
 
     // outliers
     $scope.outliers = {show:true}
 
 
-    $scope.pollUC5 = function(filename) {
-        // Start polling
-        // Call the API
-        $http({method: 'GET', url: API_R03+ $scope.uc5_files[filename].jobID
-              }).then(
+    $scope.pollUC5 = function(filename, jobID) {
+
+        console.log("Polling "+filename+ " "+jobID);
+
+
+        $http({method: 'GET', url: API_JOBS+ jobID}).then(
             function success(response) {
                 if( response.data.ready == true) {
-                    $scope.uc5_files[filename].ready = true;
-                    console.log("result for "+ $scope.uc5_files[filename].jobID+" is ready");
+
+                    console.log("result for "+ jobID+" is ready");
 
                     // Add the new file to the local list of files together with the answer
                     $scope.uc5_files[filename].result = response.data.result;
-                    //$rootScope.someAreReady=true;
 
-                    // Persist
-                    //$rootScope.persistData();
-
-                    $scope.load($scope.uc5_files[filename].result);
+                    $scope.load($scope.uc5_files[filename].result, true);
                     $scope.execution.running = false;
+
                 } else {
 
                     // schedule another call
-                    $timeout($scope.pollUC5, POLLING_TIMEOUT, true, filename);
+                    $timeout($scope.pollUC5, POLLING_TIMEOUT, true, filename, jobID);
 
                 }
             }, 
             function error(response) {
-                //window.alert("Error. File "+file.name+" will be removed.");
-                //index =  $rootScope.files.indexOf(file);
-                //$rootScope.files.splice(index, 1);
 
                 // Attempt another computation
-                console.log("error  poll uc5.");
+                console.error("Error polling for uc5.");
                 $scope.execution.running = false;
-                window.alert("An error occurred.")
-
+                window.alert("An error occurred.");
 
             }
         );
     }
-
-    $scope.loadFile = function(filename) {
-
-        $("#uc5").html("<svg></svg>")
+    
+    $scope.loadFile = function(file) {
+        
+        filename = file.identifier;
+        console.log("Load "+filename);
+        
+        $("#uc5").html("<svg></svg>");
 
         $scope.execution.running = true;
         $scope.loaded = false;
 
-        console.log("loading file "+filename);
-
-        if(false){
-            data = {"ready": true, "result":
-                    {"BLCA": [
-                        {"count": 1, "donor_id": 229470, "mutation": "A[C>A]A"}, 
-                        {"count": 10, "donor_id": 229459, "mutation": "A[C>A]A"},
-                        {"count": 20, "donor_id": 229459, "mutation": "A[C>A]A"},
-                        {"count": 30, "donor_id": 229459, "mutation": "A[C>A]A"},
-                        {"count": 100, "donor_id": 229459, "mutation": "A[C>A]A"},
-                        {"count": 1, "donor_id": 229459, "mutation": "A[C>A]A"},
-                        {"count": 10, "donor_id": 229459, "mutation": "A[C>A]G"},
-                        {"count": 1, "donor_id": 229470, "mutation": "A[C>A]G"}, 
-                        {"count": 10, "donor_id": 229459, "mutation": "A[C>A]G"},
-                        {"count": 20, "donor_id": 229459, "mutation": "A[C>A]G"},
-                        {"count": 30, "donor_id": 229459, "mutation": "A[C>A]G"},
-                        {"count": 100, "donor_id": 229459, "mutation": "A[C>A]G"},
-                        {"count": 1, "donor_id": 229459, "mutation": "A[C>A]G"},
-                        {"count": 10, "donor_id": 229459, "mutation": "A[C>A]G"},
-                    ]}}
-            $scope.load(data.result);
-            $scope.execution.running = false;
-            return
-        }
-
-
         if( filename in $scope.uc5_files && "result" in $scope.uc5_files[filename] 
            && $rootScope.tumorTypes.current.identifier in $scope.uc5_files[filename].result && 
            $scope.uc5_files[filename].result[$rootScope.tumorTypes.current.identifier].trinucleotide == $scope.trinucleotides.show) {
-            console.log("LOADING CACHED RESULT");
+
             $scope.load( $scope.uc5_files[filename].result);
             $scope.execution.running = false;
         } else {
 
             request_body = {
-                repoId: filename,
-                regions: "",
-                regionsFormat: "",
+                file_name: filename,
                 trinucleotide: $scope.trinucleotides.show
             }
 
@@ -129,32 +96,8 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             }).then(
                 function success(response) {
 
-                    file = {}
-
-                    file.name = filename;
-
-                    file.jobID = response.data.jobID;
-                    file.parsed_lines =  response.data.correct_region_size;
-                    if(response.data.error && response.data.error.length>0)
-                        file.errors = response.data.error;
-                    else
-                        file.errors = [];
-
-                    if(file.parsed_lines==0){
-                        file.valid = false;
-                    } else {
-
-                        //$rootScope.someAreValid = true;
-                        file.valid = true;
-
-                        $scope.uc5_files[file.name] = file;
-
-                        $scope.pollUC5(file.name)
-
-                    }
-
-                    // Persist
-                    $rootScope.persistData();
+                    $scope.uc5_files[filename] = file;
+                    $scope.pollUC5(filename, response.data.jobID);
 
                 }, 
                 function error(response) {
@@ -324,7 +267,7 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     // Load Melanoma and select mutations C>T and G>A
     $scope.runExample = function(){               
         $scope.mutationTypes.selectedTypes = [ {from: "C", to: "T"}, {from: "G", to: "A"} ];
-        $scope.load($scope.files_selector.name)
+        $scope.load($scope.file_selector.name)
     }
 
     //todo:remove

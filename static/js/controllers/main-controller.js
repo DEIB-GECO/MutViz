@@ -14,6 +14,9 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
 
     // Maximum distance from center
     $rootScope.maxDistance = 1000;
+    
+    // Cache for distance API
+    $rootScope.dist_files = {}
 
     // Tumor Types
     $rootScope.tumorTypes = {
@@ -43,8 +46,8 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         console.log("persisting "+files.length+" files");
 
         for (i=0; i<files.length; i++) {
-            files[i].distances=[]; // don't save the computation result
-            files[i].ready=false;
+            if(files[i].source!="repo")
+                files[i].ready=false;
             localStorage['file-'+i] = JSON.stringify(files[i]); 
         }
 
@@ -54,16 +57,17 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         return $rootScope.files.filter(function(f){return f.name == fileName})[0];
     }
 
-    $rootScope.getDistances = function(file, tumorType) {
+    // returns res with .distances
+    $rootScope.filterDistances = function(data, tumorType) {
         // Extract distances for the proper tumorType
-        distances = file.distances.filter(
-            function(x){return x.tumorType==tumorType.identifier
-                       })[0].distances
+        res = data.filter(
+            function(x){return x.tumorType==tumorType
+                       })[0]
 
 
-        distances = distances.filter(function(x){return x[1].length==1 && x[2].length==1})
+        res.distances = res.distances.filter(function(x){return x[1].length==1 && x[2].length==1})
 
-        return distances;
+        return res;
     }
 
 
@@ -73,7 +77,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         console.log("Polling for file: "+file.name+" with jobId"+file.jobID);
 
         // Call the API
-        $http({method: 'GET', url: API_R01+file.jobID
+        $http({method: 'GET', url: API_JOBS+file.jobID
               }).then(
             function success(response) {
                 if( response.data.ready == true) {
@@ -81,7 +85,6 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
                     console.log("result for "+file.jobID+" is ready");
 
                     // Add the new file to the local list of files together with the answer
-                    file.distances = response.data.result;
                     $rootScope.someAreReady=true;
 
                     // Persist
@@ -97,15 +100,41 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
                 //window.alert("Error. File "+file.name+" will be removed.");
                 //index =  $rootScope.files.indexOf(file);
                 //$rootScope.files.splice(index, 1);
-
-                // Attempt another computation
-                console.log("Attempting another computation.");
-                $rootScope.computeDistances(file);
+                
+                file.ready = true;
+                file.valid = false;
+                window.alert("An error occurred.")
 
                 $rootScope.persistData();
             });
 
     }
+    
+     $rootScope.checkExists = function checkExists(file) {
+
+        console.log("Checking if file: "+file.name+" exists");
+
+        // Call the API
+        $http({method: 'GET', url: API_REGIONS+file.identifier
+              }).then(
+            function success(response) {
+                file.ready = true;
+                file.valid = true;
+            }, 
+            function error(response) {
+                //window.alert("Error. File "+file.name+" will be removed.");
+                //index =  $rootScope.files.indexOf(file);
+                //$rootScope.files.splice(index, 1);
+                
+                file.ready = true;
+                file.valid = false;
+
+                $rootScope.persistData();
+            });
+
+    }
+     
+    //http://bl.ocks.org/Rokotyan/0556f8facbaf344507cdc45dc3622177
 
     // Recover files from local storage
     $rootScope.recoverData = function() {
@@ -121,10 +150,12 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
 
             // Restart polling
             $rootScope.files.forEach(function(f){
-                if(f.valid) {
+                if(f.source!="repo") {
                     $rootScope.someAreValid = true;
                     f.ready = false;
-                    $rootScope.pollR01(f);
+                    $rootScope.checkExists(f);
+                } else {
+                    $rootScope.someAreValid = true;
                 }
             });
         }
@@ -142,7 +173,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
 
         document.getElementById("dwn").click();
     }
-
+    
     // Download last json
     $scope.downloadPlotData = function() {
 
@@ -152,55 +183,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
 
         document.getElementById("dwn_data").click();
     }
-    // Compute Distances
-    $rootScope.computeDistances = function(file) {
-
-        // Build the POST request body
-        request_body = {
-            repoId: file.repoId,
-            regions: file.file_txt,
-            regionsFormat: file.type,
-            maxDistance: file.maxDistance
-        }
-
-        // Call the API
-        $http({
-            method: 'POST',
-            data: $.param(request_body),
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            url: API_R01
-        }).then(
-            function success(response) {
-
-                file.jobID = response.data.jobID;
-                file.parsed_lines =  response.data.correct_region_size;
-                if(response.data.error && response.data.error.length>0)
-                    file.errors = response.data.error;
-                else
-                    file.errors = [];
-
-                if(file.parsed_lines==0){
-                    file.valid = false;
-                } else {
-
-                    $rootScope.someAreValid = true;
-                    file.valid = true;
-
-                    // Start polling
-                    $rootScope.pollR01(file);
-                }
-
-                // Persist
-                $rootScope.persistData();
-
-            }, 
-            function error(response) {
-                console.error("error");
-            });
-
-    }
-
-
+    
 
     // ########### //
 

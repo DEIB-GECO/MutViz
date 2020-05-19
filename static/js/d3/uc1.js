@@ -106,8 +106,6 @@ function uc1_addBars(g, groupId, bins, alreadyAddedMutations, color) {
 
     if(alreadyAddedMutations!=null)
         for(i in alreadyAddedMutations) {
-            console.log(i);
-            console.log(bins[i])
             alreadyAddedMutations[i] += uc1_yVal(bins[i]);
         }
 

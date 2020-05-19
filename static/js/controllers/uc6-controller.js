@@ -24,7 +24,6 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // status
     $scope.execution = {running:false};
-    $scope.file_selector = {name:""}
 
     // outliers
     $scope.outliers = {show:true}
@@ -43,48 +42,44 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                          'SBS39', 'SBS40', 'SBS41', 'SBS44', 'SBS84', 'SBS85'];
 
 
-    $scope.pollUC6 = function(filename) {
-        // Start polling
-        // Call the API
-        $http({method: 'GET', url: API_R04+ $scope.uc6_files[filename].jobID
-              }).then(
+    $scope.pollUC6 = function(filename, jobID) {
+
+        console.log("Polling "+filename+ " "+jobID);
+
+        $http({method: 'GET', url: API_JOBS+ jobID}).then(
             function success(response) {
                 if( response.data.ready == true) {
-                    $scope.uc6_files[filename].ready = true;
-                    //console.log("result for "+ $scope.uc6_files[filename].jobID+" is ready");
+
+                    console.log("result for "+ jobID+" is ready");
 
                     // Add the new file to the local list of files together with the answer
                     $scope.uc6_files[filename].result = response.data.result;
-                    //$rootScope.someAreReady=true;
 
-                    // Persist
-                    //$rootScope.persistData();
-
-                    $scope.load($scope.uc6_files[filename].result);
+                    $scope.load($scope.uc6_files[filename].result, true);
                     $scope.execution.running = false;
+
                 } else {
 
                     // schedule another call
-                    $timeout($scope.pollUC6, POLLING_TIMEOUT, true, filename);
+                    $timeout($scope.pollUC6, POLLING_TIMEOUT, true, filename, jobID);
 
                 }
             }, 
             function error(response) {
-                //window.alert("Error. File "+file.name+" will be removed.");
-                //index =  $rootScope.files.indexOf(file);
-                //$rootScope.files.splice(index, 1);
 
                 // Attempt another computation
-                console.log("error  poll uc6.");
+                console.error("Error polling for uc6.");
                 $scope.execution.running = false;
                 window.alert("An error occurred.");
-
 
             }
         );
     }
-
-    $scope.loadFile = function(filename) {
+    
+    $scope.loadFile = function(file) {
+        
+        filename = file.identifier;
+        console.log("Load "+filename);
 
         $("#uc6").html("<svg></svg>")
 
@@ -103,9 +98,7 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         } else {
 
             request_body = {
-                repoId: filename,
-                regions: "",
-                regionsFormat: "",
+                file_name: filename,
                 threshold_active: $scope.threshold.active,
                 threshold_min: $scope.threshold.minMutations
             }
@@ -118,34 +111,8 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                 url: API_R04
             }).then(
                 function success(response) {
-
-                    file = {}
-
-                    file.name = filename;
-
-                    file.jobID = response.data.jobID;
-                    file.parsed_lines =  response.data.correct_region_size;
-                    if(response.data.error && response.data.error.length>0)
-                        file.errors = response.data.error;
-                    else
-                        file.errors = [];
-
-                    if(file.parsed_lines==0){
-                        file.valid = false;
-                    } else {
-
-                        //$rootScope.someAreValid = true;
-                        file.valid = true;
-
-                        $scope.uc6_files[file.name] = file;
-
-                        $scope.pollUC6(file.name);
-
-                    }
-
-                    // Persist
-                    $rootScope.persistData();
-
+                    $scope.uc6_files[filename] = file;
+                    $scope.pollUC6(filename, response.data.jobID);
                 }, 
                 function error(response) {
                     console.error("error");

@@ -156,48 +156,46 @@ def getPrevalence(exp_df):
     return prev
 
 
-def get_refitting( mut_df, user_file_df ):
+def get_refitting( mut_df, user_file_df,  sigs_df_norm = None):
 
     dirname = os.path.dirname(__file__)
-
-    print("mut_df has shape ==>", mut_df.shape[0], ",",mut_df.shape[1])
 
     #load the mutations
     categories = list(mut_df.columns)
     M = mut_df.values
 
-    filename = os.path.join(dirname, "signatures.csv")
-    frequencies_wg_file = os.path.join(dirname, "frequencies_whole_genome.tsv")
-    fasta_file = os.path.join(dirname, "hg19_ref_genome.fa")
+    if not sigs_df_norm:
 
-    genome = pysam.Fastafile(fasta_file)
-    codon_whole_genome = pd.read_csv(frequencies_wg_file, sep='\t')
+        filename = os.path.join(dirname, "signatures.csv")
+        frequencies_wg_file = os.path.join(dirname, "frequencies_whole_genome.tsv")
+        fasta_file = os.path.join(dirname, "hg19_ref_genome.fa")
 
-    # Load the signatures
-    sigs_df = pd.read_csv(filename, sep='\t', index_col=2).drop(["Type","SubType","trinucleotide_id"], axis=1).transpose()[categories]
-    assert(list(sigs_df.columns) == categories)
-    sigs = sigs_df.values
+        genome = pysam.Fastafile(fasta_file)
+        codon_whole_genome = pd.read_csv(frequencies_wg_file, sep='\t')
 
-    # freq_whole_gen / trinucleotide_freq_in_region
-    ###### updated ########
+        # Load the signatures
+        sigs_df = pd.read_csv(filename, sep='\t', index_col=2).drop(["Type","SubType","trinucleotide_id"], axis=1).transpose()[categories]
+        assert(list(sigs_df.columns) == categories)
+        sigs = sigs_df.values
 
-
-    # user_file : chrom, start, stop
-    df = seq(user_file_df, genome)
-    df_freq = frequencies(df)
-    df_correction = correction_factor(df_freq, codon_whole_genome)
+        # freq_whole_gen / trinucleotide_freq_in_region
+        ###### updated ########
 
 
-    # Load the signatures
-    #sigs_df = pd.read_csv(signatures_file, sep='\t', index_col=0)[categories]
-    assert(list(sigs_df.columns) == categories)
-    sigs_df= sigs_df.T.merge(df_correction, left_index=True, right_index=True)
-    sigs_df_mult= sigs_df.loc[:,'SBS1':'SBS85'].multiply(sigs_df['correction'], axis="index")
-    sigs_df_norm=sigs_df_mult.div(sigs_df_mult.sum(axis=0), axis=1)
+        # user_file : chrom, start, stop
+        df = seq(user_file_df, genome)
+        df_freq = frequencies(df)
+        df_correction = correction_factor(df_freq, codon_whole_genome)
+
+
+        # Load the signatures
+        #sigs_df = pd.read_csv(signatures_file, sep='\t', index_col=0)[categories]
+        assert(list(sigs_df.columns) == categories)
+        sigs_df= sigs_df.T.merge(df_correction, left_index=True, right_index=True)
+        sigs_df_mult= sigs_df.loc[:,'SBS1':'SBS85'].multiply(sigs_df['correction'], axis="index")
+        sigs_df_norm=sigs_df_mult.div(sigs_df_mult.sum(axis=0), axis=1)
+
     sigs = sigs_df_norm.T.values
-
-
-
     active_signatures = sigs_df_norm.T.index
 
 
@@ -213,4 +211,4 @@ def get_refitting( mut_df, user_file_df ):
 
     prevalence =  getPrevalence(exp_df)
 
-    return prevalence
+    return (prevalence, sigs_df_norm)

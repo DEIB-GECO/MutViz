@@ -77,12 +77,8 @@ function uc2_update(data, g, binSize, mutationTypes) {
     .domain(g.xAxisScale.domain())       
     .thresholds(ticks); 
 
-
-    console.log(data);
     filtered_f1   = uc2_getFilteredData(data.f1.distances, mutationTypes);
     filtered_f2 = uc2_getFilteredData(data.f2.distances, mutationTypes);
-
-    console.log(filtered_f1)
 
     var binsf1    = histogram(filtered_f1);
     var binsf2  = histogram(filtered_f2);

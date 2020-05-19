@@ -127,10 +127,14 @@ class TumorType(db.Model):
 class UserFile(db.Model):
     __tablename__ = 'user_file'
 
-    id = db.Column(db.SmallInteger, primary_key=True, server_default=db.FetchedValue())
-    name = db.Column(db.String(100))
-    description = db.Column(db.String(100))
+    id = db.Column(db.SmallInteger, primary_key=True, server_default=db.FetchedValue(), autoincrement=True)
+    name = db.Column(db.String(100), unique=True)
+    description = db.Column(db.Text)
     count = db.Column(db.Integer)
+    preloaded = db.Column(db.Boolean, nullable=False, server_default=db.FetchedValue())
+    expiration = db.Column(db.Date)
+    expired = db.Column(db.Boolean, nullable=False, server_default=db.FetchedValue())
+
 
 class MutationGrouped(db.Model):
     __tablename__ = 'mutation_grouped'
@@ -177,4 +181,13 @@ class SignaturesCache(db.Model):
     tumor_type_id = db.Column(db.SmallInteger, primary_key=True, nullable=False)
     donor_id = db.Column(db.Integer, primary_key=True, nullable=False)
     trinucleotide_id_r = db.Column(db.SmallInteger, primary_key=True, nullable=False)
+    count = db.Column(db.Integer, nullable=False)
+
+class DistanceCache(db.Model):
+    __tablename__ = 'distance_cache'
+
+    file_id = db.Column(db.Integer, primary_key=True, nullable=False)
+    tumor_type_id = db.Column(db.Integer, primary_key=True, nullable=False)
+    distance = db.Column(db.Integer, primary_key=True, nullable=False)
+    mutation_code_id = db.Column(db.Integer, primary_key=True, nullable=False)
     count = db.Column(db.Integer, nullable=False)

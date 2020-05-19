@@ -1,7 +1,7 @@
 /* ####################
    UC2 Controller
    #################### */
-app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
+app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $timeout) {
 
     /* # Initialization # */
     window.scroll(0, 0);
@@ -9,6 +9,9 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     $scope.plot = {binSize: 10, d3graph: null}
     $scope.loaded = false;
+
+    // status
+    $scope.execution = {running:false};
 
     $scope.test = {pvalue:null}
 
@@ -25,30 +28,137 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
         //$scope.load($rootScope.tumorTypes.current);
     }
 
+    $scope.pollUC1 = function(filename, filename1, filename2, jobID) {
+
+        console.log("Polling "+filename+" "+filename1+" "+filename2+" "+jobID);
+
+
+        $http({method: 'GET', url: API_JOBS+ jobID}).then(
+            function success(response) {
+                if( response.data.ready == true) {
+
+                    console.log("result for "+ jobID+":"+filename+" is ready, f1: "+filename1+" f2: "+filename2);
+
+                    // Add the new file to the local list of files together with the answer
+                    $rootScope.dist_files[filename].result = response.data.result;
+
+                    if(filename1 in $rootScope.dist_files &&  "result" in $rootScope.dist_files[filename1] &&
+                       filename2 in $rootScope.dist_files &&  "result" in $rootScope.dist_files[filename2] ){
+
+                        f1 = $rootScope.dist_files[filename1];
+                        f2 = $rootScope.dist_files[filename2];
+                        
+                        descr = filename1+" "+filename2
+
+                        $scope.load(f1, f2, descr);
+                        $scope.execution.running = false;
+                    }
+
+
+                } else {
+
+                    $timeout($scope.pollUC1, POLLING_TIMEOUT, true, filename,  filename1, filename2, jobID);
+
+                }
+            }, 
+            function error(response) {
+
+                // Attempt another computation
+                console.error("Error polling for uc1.");
+                $scope.execution.running = false;
+                window.alert("An error occurred.");
+
+            }
+        );
+    }
+
+    $scope.loadFiles = function(file1, file2) {
+
+        $scope.loaded = false;
+
+        filename1 = file1.identifier;
+        filename2 = file2.identifier;
+        
+        console.log("Load "+filename1+" "+filename2);
+
+        $("#uc2").html("<svg></svg>")
+
+        $scope.execution.running = true;
+
+        if( filename1 in $rootScope.dist_files && "result" in $rootScope.dist_files[filename1] 
+           && filename2 in $rootScope.dist_files && "result" in $rootScope.dist_files[filename2] ){ 
+            
+            console.log("using cached")
+
+            f1 = $rootScope.dist_files[filename1];
+            f2 =  $rootScope.dist_files[filename2];
+
+            $scope.load(f1, f2);
+            $scope.execution.running = false;
+        } else {
+            console.log("asking to api")
+            function onlyUnique(value, index, self) { 
+                return self.indexOf(value) === index;
+            }
+            
+            [file1,file2].filter(onlyUnique).forEach(function(file){
+                
+                console.log("asking to api file: "+file.identifier)
+
+                if(!(file.identifier in $rootScope.dist_files)) {
+
+                    request_body = {
+                        file_name: file.identifier,
+                        maxDistance: $rootScope.maxDistance 
+                    }
+
+                    // Call the API
+                    $http({
+                        method: 'POST',
+                        data: $.param(request_body),
+                        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                        url: API_R01
+                    }).then(
+                        function success(response) {
+                            $rootScope.dist_files[file.identifier] = file;
+                            $scope.pollUC1(file.identifier, file1.identifier, file2.identifier, response.data.jobID);
+                        }
+                        , 
+                        function error(response) {
+                            console.error("error");
+                            $scope.execution.running = false;
+                            window.alert("An error occurred.");
+                        }
+                    );
+                }
+
+            })
+
+
+        }
+
+    }
 
     // Asks the backend to compute distances (if needed) and plots the result
-    $scope.load = function(filename1, filename2, tumorType) {
+    $scope.load = function(file1, file2, descr) {
+
+        console.log("plotting "+file1.identifier+" "+file2.identifier+" descr:"+descr);
         
         $("svg").css("height", window.innerHeight);
 
         $scope.test.pvalue = null;
 
-        $scope.file_selector.file1 = $rootScope.getSelectedFile(filename1);
-        $scope.file_selector.file2 = $rootScope.getSelectedFile(filename2);
+        // Filter by selected tumor type
+        res1 = $rootScope.filterDistances(file1.result, $rootScope.tumorTypes.current.identifier);
+        res2 = $rootScope.filterDistances(file2.result, $rootScope.tumorTypes.current.identifier);
+        
+        plotData = $scope.getData(file1.identifier, file2.identifier, res1, res2);
 
-        file1 = $scope.file_selector.file1;
-        file2 = $scope.file_selector.file2;
-
-
-        if(file1==null || file2==null || tumorType==null) {
-            console.log("Load: missing argument");
-            return;
-        }
 
         $scope.loaded = true;
 
         // Coordinate available range as the minimum and maximum coordinate in the data
-        minMaxDistance = Math.min(file1.maxDistance, file2.maxDistance);
+        minMaxDistance = Math.min(file1.result.maxDistance, file2.result.maxDistance);
 
 
         // Slider
@@ -57,8 +167,8 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
             $scope.slider = document.getElementById("slider");
 
             dataRange = {
-                min : -file1.maxDistance,
-                max : +file1.maxDistance
+                min : -1000,
+                max : +1000
             };
 
             selectedRange = {
@@ -94,8 +204,11 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
             }
         }
 
+        // Save last result
+        $rootScope.lastResult = JSON.stringify(plotData);
+        
         // Generate the plot
-        $scope.plot.d3graph = uc2($scope.getData(file1, file2, tumorType),
+        $scope.plot.d3graph = uc2(plotData,
                                   $scope.plot.binSize,
                                   selectedRange,
                                   $scope.getSelectedTypes());
@@ -113,7 +226,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
             // Rescale the plot according to the new coordinate range. 
             // rescaleX function is defined in uc2.js.
-            uc2_rescaleX($scope.getData(file1, file2, tumorType), 
+            uc2_rescaleX(plotData,
                          $scope.plot.d3graph,
                          $scope.plot.binSize, 
                          selectedRange,
@@ -139,7 +252,15 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
         // update function is defined in uc2.js.
 
-        uc2_update($scope.getData(file1, file2, tumorType),
+        f1 = $rootScope.dist_files[file1.identifier];
+        f2 = $rootScope.dist_files[file2.identifier];
+
+        res1 = $rootScope.filterDistances(f1.result, $rootScope.tumorTypes.current.identifier);
+        res2 = $rootScope.filterDistances(f2.result, $rootScope.tumorTypes.current.identifier);
+        
+        plotData = $scope.getData(file1.identifier, file2.identifier, res1, res2);
+
+        uc2_update(plotData,
                    $scope.plot.d3graph,
                    $scope.plot.binSize, 
                    $scope.getSelectedTypes());
@@ -205,14 +326,15 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
     }
 
     $scope.doTest = function() {
-        file1 = $scope.file_selector.file1;
-        file2 = $scope.file_selector.file2;
 
-        dist1 = $rootScope.getDistances(file1,$rootScope.tumorTypes.current)
-        dist2 = $rootScope.getDistances(file2,$rootScope.tumorTypes.current)
+        f1 = $rootScope.dist_files[$scope.file_selector.file1.identifier];
+        f2 = $rootScope.dist_files[$scope.file_selector.file2.identifier];
 
-        console.log(dist1);
-        console.log(dist2);
+        res1 = $rootScope.filterDistances(f1.result, $rootScope.tumorTypes.current.identifier);
+        res2 = $rootScope.filterDistances(f2.result, $rootScope.tumorTypes.current.identifier);
+
+        dist1 = res1.distances;
+        dist2 = res2.distances;
 
         bins1 = get_bins(dist1, $scope.mutationTypes.selectedTypes, $scope.plot.binSize,
                          $scope.slider.noUiSlider.get()[0], $scope.slider.noUiSlider.get()[1]);
@@ -235,38 +357,17 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
         $scope.test.pvalue = uc23_test(norm1, norm2);
 
-        // request_body = {"expected":norm1, "observed":norm2};
-
-        // Call the API
-        /*$http({
-            method: 'POST',
-            data: request_body,
-            headers: {'Content-Type': 'application/json'},
-            url: API_T02
-        }).then(
-            function success(response) {
-                console.log(response);
-                $scope.test.pvalue = response.data.pvalue.toFixed(3);
-            },
-            function error(response) {
-                console.log(response);
-                $scope.test.pvalue = "error";
-            }
-        );*/
+       
     }
 
-    $scope.getData = function(file1, file2, tumorType)  {
+    $scope.getData = function(name1, name2, res1, res2)  {
 
         // Extract distances for the proper tumorType
-        data = {f1:{name:file1.name}, f2:{name:file2.name}}
+        data = {f1:{name:name1}, f2:{name:name2}}
 
-        data.f1.distances = file1.distances.filter(
-            function(x){return x.tumorType==tumorType.identifier
-                       })[0].distances.filter(function(x){return x[1].length==1 && x[2].length==1})
+        data.f1.distances = res1.distances
 
-        data.f2.distances = file2.distances.filter(
-            function(x){return x.tumorType==tumorType.identifier
-                       })[0].distances.filter(function(x){return x[1].length==1 && x[2].length==1})
+        data.f2.distances = res2.distances
 
         return data;
     }

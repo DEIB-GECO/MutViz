@@ -10,31 +10,108 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.plot = {binSize: 10, d3graph: null}
     $scope.loaded = false;
 
-
+    // status
+    $scope.execution = {running:false};
 
     $scope.test = {area:{from:0, to:0, fromPosition:-$scope.plot.binSize/2, toPosition:$scope.plot.binSize/2, visible: true, L:null, H:null}};
 
     // Selected File
-    $scope.files_selector = {name : null, file: null};
+    $scope.file_selector = {file: null};
+
+    $scope.pollUC1 = function(filename, jobID) {
+
+        console.log("Polling "+filename+ " "+jobID);
+
+
+        $http({method: 'GET', url: API_JOBS+ jobID}).then(
+            function success(response) {
+                if( response.data.ready == true) {
+
+                    console.log("result for "+ jobID+" is ready");
+
+                    // Add the new file to the local list of files together with the answer
+                    $rootScope.dist_files[filename].result = response.data.result;
+
+                    $scope.load($rootScope.dist_files[filename].result, true);
+                    $scope.execution.running = false;
+
+                } else {
+
+                    // schedule another call
+                    $timeout($scope.pollUC1, POLLING_TIMEOUT, true, filename, jobID);
+
+                }
+            }, 
+            function error(response) {
+
+                // Attempt another computation
+                console.error("Error polling for uc1.");
+                $scope.execution.running = false;
+                window.alert("An error occurred.");
+
+            }
+        );
+    }
+
+    $scope.loadFile = function(file) {
+
+        $scope.loaded = false;
+
+        filename = file.identifier;
+        console.log("Load "+filename);
+
+        $("#uc3").html("<svg></svg>")
+
+        $scope.execution.running = true;
+
+
+        if( filename in $rootScope.dist_files && "result" in $rootScope.dist_files[filename] ){ 
+            $scope.load($rootScope.dist_files[filename].result, true);
+            $scope.execution.running = false;
+            return;
+        } else {
+
+            request_body = {
+                file_name: filename,
+                maxDistance: $rootScope.maxDistance 
+            }
+
+            // Call the API
+            $http({
+                method: 'POST',
+                data: $.param(request_body),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                url: API_R01
+            }).then(
+                function success(response) {
+                    $rootScope.dist_files[filename] = file;
+                    $scope.pollUC1(filename, response.data.jobID);
+                }
+                , 
+                function error(response) {
+                    console.error("error");
+                    $scope.execution.running = false;
+                    window.alert("An error occurred.");
+                }
+            );
+
+
+        }
+
+    }
 
 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
-    $scope.load = function(filename, selectedTumorTypes) {
+    $scope.load = function(result) {
+        
+        selectedTumorTypes = $rootScope.selectedTumorTypes;
 
         $("svg").css("height", 100+145*selectedTumorTypes.length);
 
         $scope.test.pvalue = null;
 
-        console.log("carico file "+filename);
-
         $scope.loaded = true;
 
-        file = $rootScope.getSelectedFile(filename);
-        $scope.files_selector.file = file;
-
-
-        if(file==null)
-            return;
 
         // Slider
         if($scope.slider == null) {
@@ -42,8 +119,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             $scope.slider = document.getElementById("slider");
 
             dataRange = {
-                min : -file.maxDistance,
-                max : +file.maxDistance
+                min : -1000,
+                max : +1000
             };
 
             selectedRange = {
@@ -80,8 +157,12 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         }
 
         // Generate the plot
-        data = $scope.getData(file, selectedTumorTypes);
-        $("#uc1 svg").css("height", (data.length*150)+"px");
+        data = $scope.getData(result, selectedTumorTypes);
+        
+        // Save last result
+        $rootScope.lastResult = JSON.stringify(data);
+        
+        //todo:check $("#uc1 svg").css("height", (data.length*150)+"px");
         $scope.plot.d3graph = uc3(data,
                                   $scope.plot.binSize,
                                   selectedRange, $scope.getSelectedTypes());
@@ -99,7 +180,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
             // Rescale the plot according to the new coordinate range. 
             // rescaleX function is defined in uc3.js.
-            uc3_rescaleX($scope.getData(file, selectedTumorTypes),
+            uc3_rescaleX($scope.getData(result, selectedTumorTypes),
                          $scope.plot.d3graph,
                          $scope.plot.binSize, 
                          selectedRange, $scope.getSelectedTypes());
@@ -163,7 +244,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             $scope.mutationTypes.invalidSelection = true;
         } else {
             $scope.mutationTypes.invalidSelection = false;
-            $scope.updatePlot($scope.files_selector.file, $rootScope.selectedTumorTypes);
+            $scope.updatePlot($scope.file_selector.file, $rootScope.selectedTumorTypes);
         }
     };
 
@@ -172,16 +253,12 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         if($rootScope.selectedTumorTypes.length != 2)
             return;
 
-        file = $scope.files_selector.file;
+        file = $rootScope.dist_files[$scope.file_selector.file.identifier].result
 
         type1 = $rootScope.selectedTumorTypes[0]
         type2 = $rootScope.selectedTumorTypes[1]
-
-        dist1 = $rootScope.getDistances(file,type1)
-        dist2 = $rootScope.getDistances(file,type2)
-
-        console.log(dist1);
-        console.log(dist2);
+        
+        console.log($scope.mutationTypes.selectedTypes);
 
         bins1 = get_bins(dist1, $scope.mutationTypes.selectedTypes, $scope.plot.binSize,
                          $scope.slider.noUiSlider.get()[0], $scope.slider.noUiSlider.get()[1]);
@@ -231,9 +308,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     $scope.getData = function(file, selectedTumorTypes){
 
-
         function getDist(file, typeId) {
-            return file.distances.filter(
+            return file.filter(
                 function(x){return x.tumorType==typeId
                            })[0].distances.filter(function(x){return x[1].length==1 && x[2].length==1})
         }
@@ -247,7 +323,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.addTumorType = function(type) {
         if(type!=undefined) { 
             $rootScope.selectedTumorTypes.push(type);
-            $scope.load($scope.files_selector.name, $rootScope.selectedTumorTypes); 
+            $scope.loadFile($scope.file_selector.file); 
 
         }
     }
@@ -255,7 +331,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     $scope.removeTumorType = function(type) {
         $rootScope.selectedTumorTypes = $rootScope.selectedTumorTypes.filter(function(t){return t!=type});
         if($rootScope.selectedTumorTypes.length>0)
-            $scope.load($scope.files_selector.name, $rootScope.selectedTumorTypes)
+            $scope.loadFile($scope.file_selector.file)
     }
 
 
@@ -277,7 +353,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.mutationTypes.selectedTypes = [ {from: "C", to: "T"}, {from: "G", to: "A"} ];
         $rootScope.selectedTumorTypes = $rootScope.tumorTypes.available.slice(0,4);
 
-        $scope.load($scope.files_selector.name, $rootScope.selectedTumorTypes)
+        $scope.loadFile($scope.file_selector.file)
     }
 
 });

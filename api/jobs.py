@@ -1,17 +1,20 @@
+from api import jobs, job_counter
 import time
+import threading
 
 from flask import json, abort
+import uuid
 
 # job_id -> (TTL, result)
-jobs = dict()
+#from api import logger
 
 
 def ttl():
     return int(time.time()) + 3600
 
-
-def get_job_result(job_id):
+def get_job_result(job_id, logger):
     try:
+
         update_ttl(job_id)
         job_value = jobs[job_id][1]
 
@@ -22,27 +25,31 @@ def get_job_result(job_id):
     except KeyError:
         abort(404)
 
+def generateJobId():
+    jobID = str(uuid.uuid1()).replace('-', '_')
+    return jobID
 
-def register_job(job_id):
+def register_job():
+    job_id = generateJobId()
     update_job(job_id, None)
-
+    #logger.debug(f"Job registered with ID: {job_id}")
+    return job_id
 
 def unregister_job(job_id):
     del jobs[job_id]
 
-
 def update_job(job_id, result):
-    jobs[job_id] = (ttl(), result)
+    if result:
+        print('JOB DONE: ' + job_id)
 
+    jobs[job_id] = (ttl(), result)
 
 def update_ttl(job_id):
     jobs[job_id] = (ttl(), jobs[job_id][1])
 
-
 def auto_delete():
     print("auto_delete is started")
     while True:
-        global jobs
         now = int(time.time())
         print("auto_delete is active. now: ", now)
         jobs = dict([x for x in jobs.items() if x[1][0] > now])
