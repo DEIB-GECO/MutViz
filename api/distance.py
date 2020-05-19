@@ -41,6 +41,7 @@ def get_distances(logger):
 
             if CACHE_ID in RESULTS_CACHE:
                 update_job(jobID, RESULTS_CACHE[CACHE_ID])
+                return
 
             session = db.session
             session.execute("set enable_seqscan=false")
