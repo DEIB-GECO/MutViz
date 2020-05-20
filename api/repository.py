@@ -26,7 +26,7 @@ def get_tumor_types():
 
 
 def generateRegionId(name):
-    region_id = "TEMP_"+name+str(uuid.uuid1()).replace('-', '_')
+    region_id = "temp_"+name+str(uuid.uuid1()).replace('-', '_')
     return region_id
 
 
