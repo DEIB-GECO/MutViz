@@ -152,7 +152,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         res1 = $rootScope.filterDistances(file1.result, $rootScope.tumorTypes.current.identifier);
         res2 = $rootScope.filterDistances(file2.result, $rootScope.tumorTypes.current.identifier);
         
-        plotData = $scope.getData(file1.identifier, file2.identifier, res1, res2);
+        plotData = $scope.getData(file1.name, file2.name, res1, res2);
 
 
         $scope.loaded = true;
