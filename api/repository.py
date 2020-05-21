@@ -26,7 +26,7 @@ def get_tumor_types():
 
 
 def generateRegionId(name):
-    region_id = "temp_"+name+str(uuid.uuid1()).replace('-', '_')
+    region_id = "temp_"+name.lower()+str(uuid.uuid1()).replace('-', '_')
     return region_id
 
 
@@ -69,6 +69,8 @@ def upload_regions(logger):
     if not regions or not regions_name:
         logger.error("Missing regions or region_name.")
         abort(400)
+
+    regions_name = regions_name
 
     regions, error_regions = parse_input_regions(regions)
 
