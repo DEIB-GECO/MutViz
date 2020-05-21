@@ -27,6 +27,7 @@ def get_tumor_types():
 
 def generateRegionId(name):
     region_id = "temp_"+name.lower()+str(uuid.uuid1()).replace('-', '_')
+    regions_id = ''.join(e for e in region_id if e.isalnum())
     return region_id
 
 
