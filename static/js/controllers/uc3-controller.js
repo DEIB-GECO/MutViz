@@ -203,7 +203,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.test.pvalue = null;
 
         // update function is defined in uc3.js.
-        uc3_update($scope.getData(file, selectedTumorTypes),
+        uc3_update($scope.getData(file.result, selectedTumorTypes),
                    $scope.plot.d3graph,
                    $scope.plot.binSize,
                    $scope.getSelectedTypes());
