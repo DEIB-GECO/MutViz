@@ -22,7 +22,7 @@ def get_uc5(logger):
     if not repoId:
         abort(400)
 
-    CACHE_ID = "DONORS#" + repoId + "#" + str(tumorType) + "#" +trinucleotide
+    CACHE_ID = "DONORS#" + repoId + "#" + str(tumorType) + "#" +str(trinucleotide)
 
     jobID = register_job()
 
