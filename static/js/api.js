@@ -4,6 +4,7 @@ API_ROOT =  "http://geco.deib.polimi.it/mutviz/";
 
 var API_L01 = API_ROOT+"api/tumor_types/";
 var API_L02 = API_ROOT+"api/repository/";
+var API_L03 = API_ROOT+"api/attributes/";
 
 var API_R01 = API_ROOT+"api/distance/";
 var API_R02 = API_ROOT+"api/trinucleotide/";

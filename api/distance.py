@@ -96,7 +96,6 @@ def get_distances(logger):
 
             result = defaultdict(list)
 
-
             for t in query_result:
                 from_allele, to_allele = mutation_code_dict[t[2]]
                 result[t.tumor_type_id].append([t[1], from_allele, to_allele, t[3]])

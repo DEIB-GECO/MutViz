@@ -19,7 +19,7 @@ def get_repository():
 def get_tumor_types():
     result = [{"name": x[0] + " - " + x[1],
                "identifier": x[0],
-               "mutation_count": x[2],}
+               "mutation_count": x[2], "description": x[3], "attributes":x[4], "donor_count":x[5]}
               for x in sorted(tumor_type_dict.values())
               ]
     return json.dumps(result)

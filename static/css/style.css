@@ -1,6 +1,10 @@
 body {  background: white;}
 
 
+.clickable-item { cursor:pointer}
+.clickable-item:hover, .clickable-item-selected {
+    background-color: aliceblue;
+}
  .info-btn {
      line-height: 12px;
      width: 18px;
@@ -13,6 +17,11 @@ body {  background: white;}
  }
 .info-btn i {
          color:#193144;
+}
+
+.filter-active {
+    color: white;
+    background-color: #4CAF50;
 }
 
 /* sub-menu */

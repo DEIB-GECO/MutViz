@@ -12,9 +12,94 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         stacked: true // whether to use different colors for different mutation types or plot them with a single color
     }
 
+    // Filter
+    $rootScope.filter = {
+
+        conditions : {},
+        keys : ["age", "sex", "stage", "cell-line"],
+        values : ["1","2","4", "5"],
+        undefined_count: null,
+        newCondition: { key: null, values: []}
+    }
+
+    $rootScope.isObjectEmpty = function(card){
+        return Object.keys(card).length === 0;
+    }
+
+    $rootScope.removeFilterCond = function(key) {
+        delete $rootScope.filter.conditions[key];
+    }
+    
+
+    $rootScope.addFilterCond = function(key, values) {
+        if(key!=null && values.length>0)
+            $rootScope.filter.conditions[key] = values.slice(0);
+        $rootScope.filter.newCondition =   { key: null, values: null};
+        $rootScope.filter.values = [];
+        $rootScope.filter.searchKey = "";
+        $rootScope.filter.searchValue = "";
+
+    }
+    
+    $rootScope.resetFilter = function(){
+        $rootScope.filter.conditions = {}
+        $rootScope.filter.keys = []
+        $rootScope.filter.values = []
+        $rootScope.filter.newCondition = { key: null, values: []}
+    }
+
+    $rootScope.getKeys = function() {
+        if($rootScope.tumorTypes.current.attributes)
+            return $rootScope.tumorTypes.current.attributes.split(",");
+        else
+            return [];
+    }
+
+    $rootScope.getValues = function(key) {
+
+        // Call the API
+        $http({method: 'GET', url: API_L03+$rootScope.tumorTypes.current.identifier +"/"+key
+              }).then(
+            function success(response) {
+                $rootScope.filter.values = response.data.values;
+                $rootScope.filter.undefined_count = $rootScope.tumorTypes.current.donor_count - response.data.values_count;
+                //[{value:.., count...}]
+            }, 
+            function error(response) {
+                console.error("error retrieving values.")
+            });
+
+    }
+
+    $rootScope.setNewKey = function(key) {
+        $rootScope.filter.newCondition.key = key;
+        $rootScope.filter.newCondition.values = [];
+
+        // Retrieve new values
+        $rootScope.getValues(key);
+
+    }
+
+    $rootScope.toggleNewValue = function(value) {
+
+        var idx = $rootScope.filter.newCondition.values.indexOf(value);
+
+        // Is currently selected
+        if (idx > -1) {
+            $rootScope.filter.newCondition.values.splice(idx, 1);
+        }
+
+        // Is newly selected
+        else {
+            $rootScope.filter.newCondition.values.push(value);
+        }
+
+    }
+
+
     // Maximum distance from center
     $rootScope.maxDistance = 1000;
-    
+
     // Cache for distance API
     $rootScope.dist_files = {}
 
@@ -100,7 +185,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
                 //window.alert("Error. File "+file.name+" will be removed.");
                 //index =  $rootScope.files.indexOf(file);
                 //$rootScope.files.splice(index, 1);
-                
+
                 file.ready = true;
                 file.valid = false;
                 window.alert("An error occurred.")
@@ -109,8 +194,8 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
             });
 
     }
-    
-     $rootScope.checkExists = function checkExists(file) {
+
+    $rootScope.checkExists = function checkExists(file) {
 
         console.log("Checking if file: "+file.name+" exists");
 
@@ -125,7 +210,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
                 //window.alert("Error. File "+file.name+" will be removed.");
                 //index =  $rootScope.files.indexOf(file);
                 //$rootScope.files.splice(index, 1);
-                
+
                 file.ready = true;
                 file.valid = false;
 
@@ -133,7 +218,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
             });
 
     }
-     
+
     //http://bl.ocks.org/Rokotyan/0556f8facbaf344507cdc45dc3622177
 
     // Recover files from local storage
@@ -173,7 +258,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
 
         document.getElementById("dwn").click();
     }
-    
+
     // Download last json
     $scope.downloadPlotData = function() {
 
@@ -183,7 +268,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
 
         document.getElementById("dwn_data").click();
     }
-    
+
 
     // ########### //
 
@@ -210,7 +295,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         .then(
         function success (response) {
             $rootScope.repository = response.data;
-   
+
             if($rootScope.repository.length>0)
                 $rootScope.repoEl = $rootScope.repository[0];
             console.log("loaded repository");
