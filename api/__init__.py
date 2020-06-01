@@ -123,6 +123,10 @@ def get_trinucleotide():
 def get_uc5():
     return api.donors.get_uc5(logger)
 
+@app.route(MUTVIZ_CONF["base_url"] + '/api/signatures/', methods=['POST'])
+def get_uc6():
+    return api.signature.get_uc6(logger)
+
 @app.route(MUTVIZ_CONF["base_url"] + '/api/attributes/<string:tumor_type>/<string:attribute_name>', methods=['GET'])
 def get_values(tumor_type, attribute_name):
     return api.clinical.get_values(logger,tumor_type, attribute_name)
