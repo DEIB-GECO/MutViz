@@ -3,7 +3,8 @@ from collections import defaultdict
 from flask import json, request, abort
 
 from api import DEBUG_MODE, repositories_dict, \
-    trinucleotides_dict, tumor_type_dict, executor, RESULTS_CACHE
+    trinucleotides_dict, tumor_type_dict, executor, RESULTS_CACHE, tumor_type_reverse_dict
+from api.clinical import get_donors
 from api.db import *
 from api.jobs import register_job, update_job, unregister_job
 from api.model.models import *
@@ -12,10 +13,22 @@ from api.spark.intersection import spark_intersect
 
 def get_trinucleotide(logger):
     repoId = request.form.get('file_name')
+
     tumorType = request.form.get('tumorType')
 
     logger.debug(f"tumorType: {tumorType}")
     logger.debug(f"repoId: {repoId}")
+
+    filter =  request.form.get('filter')
+    logger.debug(f"filter: {filter}")
+
+    if tumorType and filter:
+        tumor_type_id=str(tumor_type_reverse_dict[tumorType])
+        donors = get_donors(tumorType, filter)
+    else:
+        tumor_type_id = None
+        donors = None
+
 
     if not repoId:
         abort(400)
@@ -26,7 +39,7 @@ def get_trinucleotide(logger):
 
     def async_function():
         try:
-            if CACHE_ID in RESULTS_CACHE:
+            if not filter and CACHE_ID in RESULTS_CACHE:
                 update_job(jobID, RESULTS_CACHE[CACHE_ID])
                 return
 
@@ -43,9 +56,14 @@ def get_trinucleotide(logger):
             else:
                 logger.debug("Computing result from scratch.")
                 if DEBUG_MODE:
-                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repoId , DB_CONF, lambda r: [r["tumor_type_id"],r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id", "trinucleotide_id_r"], )
+                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repoId , DB_CONF, lambda r: [r["tumor_type_id"],r["trinucleotide_id_r"], r["count"]],
+                                                groupby=["tumor_type_id", "trinucleotide_id_r"],
+                                                tumorType=tumor_type_id, filter=donors)
                 else:
-                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repoId , DB_CONF, lambda r: [r["tumor_type_id"],r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id", "trinucleotide_id_r"])
+                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repoId , DB_CONF, lambda r: [r["tumor_type_id"],r["trinucleotide_id_r"], r["count"]],
+                                                groupby=["tumor_type_id", "trinucleotide_id_r"],
+                                                tumorType=tumor_type_id, filter=donors)
+
 
                     values = list(map(lambda m:  TrinucleotideCache(file_id=file_id, tumor_type_id=m[0], trinucleotide_id=m[1], count=m[2]), mutations))
                     session.add_all(values)
@@ -60,8 +78,8 @@ def get_trinucleotide(logger):
                 result[m[0]][m[1]] = {"trinucleotide":m[1], "mutation":m[1][2:-2], "count" : m[2]}
 
 
-
-            RESULTS_CACHE[CACHE_ID] = result
+            if not filter and not tumorType:
+                RESULTS_CACHE[CACHE_ID] = result
 
             update_job(jobID, result)
 

@@ -39,7 +39,7 @@ def unregister_job(job_id):
     del jobs[job_id]
 
 def update_job(job_id, result):
-    if result:
+    if result!=None:
         print('JOB DONE: ' + job_id)
 
     jobs[job_id] = (ttl(), result)

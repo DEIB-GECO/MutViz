@@ -130,3 +130,7 @@ def get_uc6():
 @app.route(MUTVIZ_CONF["base_url"] + '/api/attributes/<string:tumor_type>/<string:attribute_name>', methods=['GET'])
 def get_values(tumor_type, attribute_name):
     return api.clinical.get_values(logger,tumor_type, attribute_name)
+
+@app.route(MUTVIZ_CONF["base_url"] + '/api/attributes/test/', methods=['POST'])
+def testCondition():
+    return api.clinical.test_condition(logger)

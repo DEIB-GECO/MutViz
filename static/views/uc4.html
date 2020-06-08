@@ -58,8 +58,6 @@
 
                 </div>
 
-
-
                 <div class="col-md-12 text-center" style="margin-top:10px;">
                     <button class="btn btn-white"  style="width: 100%;"
                             ng-click="loadFile(file_selector.name)"
@@ -138,13 +136,16 @@
                     <a id="dwn_data" target="_blank" style="display: none"></a>
 
                 </div>
+                
+
 
                 <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-bottom: 20px!important;">
 
                     <button class="btn btn-white" 
+                            id="saveButton"
                             style="width:100%"
                             ng-click="downloadPlot()"
-                            type="submit"><i class="fa fa-download"></i> Download Image (SVG)</button>
+                            type="submit"><i class="fa fa-download"></i> Download Image (PNG)</button>
                     <a id="dwn" target="_blank" style="display: none"></a>
 
                 </div>
@@ -204,7 +205,8 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header" style="display: block;">
-                Filter Mutations ( <b style="color:blue;">{{tumorTypes.current.donor_count}}</b> donors found for {{tumorTypes.current.identifier}})
+                Filter Mutations ( <b style="color:blue;">{{tumorTypes.current.donor_count}}</b> donors in {{tumorTypes.current.identifier}}  
+                <span ng-if="filter.showTest">-</span>  <span ng-if="filter.showTest" style="padding:2px; background-color: {{filter.testCount>0?'white':'#ffbdbd'}}"><b style="color:blue; "> {{filter.testCount}}</b> donors matched.</span>)
             </div>
             <div class="modal-body">
 

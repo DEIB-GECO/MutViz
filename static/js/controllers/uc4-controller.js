@@ -58,7 +58,7 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     }
 
     $scope.loadFile = function(file) {
-        
+
         filename = file.identifier;
         console.log("Load "+filename);
 
@@ -67,7 +67,7 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.execution.running = true;
         $scope.loaded = false;
 
-        if( filename in $scope.uc4_files && "result" in $scope.uc4_files[filename] 
+        if( Object.keys($rootScope.filter.conditions).length==0 && filename in $scope.uc4_files && "result" in $scope.uc4_files[filename] 
            && $rootScope.tumorTypes.current.identifier in $scope.uc4_files[filename].result){ 
             $scope.load( $scope.uc4_files[filename].result, true);
             $scope.execution.running = false;
@@ -76,6 +76,12 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             request_body = {
                 file_name: filename
             }
+            
+            if( Object.keys($rootScope.filter.conditions).length > 0 ) {
+                request_body.filter = JSON.stringify($rootScope.filter.conditions);
+                request_body.tumorType = $rootScope.tumorTypes.current.identifier;
+            }
+            
 
             // Call the API
             $http({
@@ -144,6 +150,10 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         //$("#uc4 svg").css("height", (data.length*150)+"px");
         $scope.plot.d3graph = uc4(plot_data, $scope.selectedTypes, width, height, animate);
 
+        // Set-up the export button
+        svg = d3.select('svg');
+        console.log(svg);
+        console.log(d3.select('#saveButton'));
     }
 
 

@@ -11,7 +11,7 @@ from pyspark.sql.types import StructType, StructField, IntegerType
 from api import spark
 
 
-def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_format, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=False, minCount=-1):
+def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_format, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=False, minCount=-1, tumorType=None, filter=None):
 
     # SQL VS MINE8: 388[1h] , 1507 (25min), 1018[bin=20], (1h,  no bins), 1101 (5 bins), 994 [100] - 952 [200] 916(ctcf) 941[41]
     # 590 ETS1
@@ -39,6 +39,10 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
     print("Using memory: "+memory)
     print("Using partitions: "+str(numPartitions))
     print("Debug enabled: " + str(sparkDebug))
+    if tumorType:
+        print("Tumor Type id: "+str(tumorType))
+    if filter:
+        print("Filter count: "+str(len(filter)))
     print("#############################")
 
     spark = SparkSession.builder \
@@ -71,6 +75,17 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
         )
 
         mutations = spark.read.format("csv").option("header", "true").schema(customSchema).load(fs_db_dir + "/"+mutation_table_name)
+
+    if tumorType:
+        mutations = mutations.rdd.filter(lambda x: x["tumor_type_id"] == tumorType)
+        if filter:
+            mutations = mutations.filter(lambda x: x["donor_id"] in filter)
+
+        if mutations.isEmpty():
+            return []
+        else:
+            mutations = mutations.toDF()
+
 
 
     regions_df = DataFrameReader(sql_ctx).jdbc(
@@ -184,6 +199,7 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
                 print("############ results after grouping ==> ", res.count())
 
     res = res.collect()
+    sc.stop()
 
     print("Spark execution took %s seconds ---" % (time.time() - start_time))
 

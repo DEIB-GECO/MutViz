@@ -63,12 +63,12 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             }
         );
     }
-    
+
     $scope.loadFile = function(file) {
-        
+
         filename = file.identifier;
         console.log("Load "+filename);
-        
+
         $("#uc5").html("<svg></svg>");
 
         $scope.execution.running = true;
@@ -85,6 +85,11 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             request_body = {
                 file_name: filename,
                 trinucleotide: $scope.trinucleotides.show
+            }
+
+            if( Object.keys($rootScope.filter.conditions).length > 0 ) {
+                request_body.filter = JSON.stringify($rootScope.filter.conditions);
+                request_body.tumorType = $rootScope.tumorTypes.current.identifier;
             }
 
             // Call the API

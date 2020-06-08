@@ -1,10 +1,75 @@
-import uuid
+import json
 
 from sqlalchemy import text
 
 from api import MUTVIZ_CONF, app, repositories_dict, tumor_type_dict, parse_input_regions, db, \
     create_upload_table, logger, create_upload_table_full, UserFile, ClinicalDatum, tumor_type_reverse_dict
 from flask import json, request, abort
+
+
+
+
+def get_donors(tumor_type, filter_json):
+
+    filter = json.loads(filter_json)
+
+    table_name = ClinicalDatum.__tablename__
+
+    tumor_type_id=str(tumor_type_reverse_dict[tumor_type])
+    print("tumor_type_id =>",tumor_type_id, "=",tumor_type)
+    query = "SELECT DISTINCT(donor_id)  FROM "+table_name+" WHERE tumor_type_id="+tumor_type_id+" AND ("
+
+    conditions = []
+    for key in filter:
+        alternatives = []
+        for value in filter[key]:
+            if isinstance(value, int) or  isinstance(value, float):
+                alternatives.append( key +" = "+str(value)  )
+            else:
+                alternatives.append(key + " = '" + value +"'")
+        conditions.append( "("+(' OR '.join(alternatives))+")")
+
+    conditions_string =  ' AND '.join(conditions)
+
+    query += conditions_string+");"
+
+    print(query)
+
+    donors = []
+
+    try:
+        connection = db.get_engine().connect()
+        # session.execute("set enable_seqscan=false")
+
+        result = connection.execute(text(query))
+
+        for value in result:
+            donors.append(value[0])
+
+        return donors
+
+    except:
+        abort(500)
+
+
+def test_condition(logger):
+    tumorType = request.form.get('tumorType')
+    filter = request.form.get('filter')
+
+    if not tumorType or not filter:
+        logger.error("Missing tumor or filter.")
+        abort(400)
+
+    donors = get_donors(tumorType, filter)
+
+
+    answer= {"tumor_type": tumorType,
+                 "filter": filter,
+                "count":  len(donors)}
+
+    return json.dumps(answer)
+
+
 
 def get_values(logger, tumor_type, attribute_name):
 

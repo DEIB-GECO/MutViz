@@ -14,12 +14,46 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
 
     // Filter
     $rootScope.filter = {
-
         conditions : {},
         keys : ["age", "sex", "stage", "cell-line"],
         values : ["1","2","4", "5"],
         undefined_count: null,
-        newCondition: { key: null, values: []}
+        newCondition: { key: null, values: []},
+        testCount : 0,
+        showTest: false
+    }
+
+    $rootScope.testConditions = function() {
+        
+        if(Object.keys($rootScope.filter.conditions).length == 0)
+            return;
+
+        request_body = {}
+        // Call the API
+        request_body.filter = JSON.stringify($rootScope.filter.conditions);
+        request_body.tumorType = $rootScope.tumorTypes.current.identifier;
+
+
+        // Call the API
+        $http({
+            method: 'POST',
+            data: $.param(request_body),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            url: API_L03+"test/"
+        }).then(
+            function success(response) {
+                $rootScope.filter.testCount = response.data.count;
+                $rootScope.filter.showTest = true;
+            }
+            , 
+            function error(response) {
+                console.error("error");
+                $scope.execution.running = false;
+                window.alert("An error occurred.");
+            }
+        );
+
+
     }
 
     $rootScope.isObjectEmpty = function(card){
@@ -27,25 +61,31 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
     }
 
     $rootScope.removeFilterCond = function(key) {
+        $rootScope.filter.showTest = false;
         delete $rootScope.filter.conditions[key];
+        $rootScope.testConditions();
     }
-    
+
 
     $rootScope.addFilterCond = function(key, values) {
+        $rootScope.filter.showTest = false;
         if(key!=null && values.length>0)
             $rootScope.filter.conditions[key] = values.slice(0);
         $rootScope.filter.newCondition =   { key: null, values: null};
         $rootScope.filter.values = [];
         $rootScope.filter.searchKey = "";
         $rootScope.filter.searchValue = "";
+        $rootScope.testConditions();
 
     }
-    
+
     $rootScope.resetFilter = function(){
+        $rootScope.filter.showTest = false;
         $rootScope.filter.conditions = {}
         $rootScope.filter.keys = []
         $rootScope.filter.values = []
         $rootScope.filter.newCondition = { key: null, values: []}
+        $rootScope.testConditions();
     }
 
     $rootScope.getKeys = function() {
@@ -71,6 +111,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
 
     }
 
+
     $rootScope.setNewKey = function(key) {
         $rootScope.filter.newCondition.key = key;
         $rootScope.filter.newCondition.values = [];
@@ -95,6 +136,8 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         }
 
     }
+
+
 
 
     // Maximum distance from center
@@ -234,7 +277,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
                 }
 
             // Restart polling
-            $rootScope.files.forEach(function(f){
+            $rootScope.files.forEach(function(f) {
                 if(f.source!="repo") {
                     $rootScope.someAreValid = true;
                     f.ready = false;
@@ -243,6 +286,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
                     $rootScope.someAreValid = true;
                 }
             });
+
         }
     }
 
@@ -252,11 +296,21 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
     // Extract the svg of the plot and download it
     $scope.downloadPlot = function() {
 
-        $('#dwn').attr('href', 'data:application/octet-stream;base64,' + btoa($(".plot-container").first().html())); 
-        $('#dwn').attr('download', 'plot.svg');
-        $('#dwn').click();
+        svg = d3.select("svg");
 
-        document.getElementById("dwn").click();
+        console.log("Download PNG");
+        var svgString = getSVGString(svg.node());
+        height = d3.select("g").node().getBoundingClientRect().height+d3.select("g.xaxis, g.tick").node().getBoundingClientRect().height;
+        width = d3.select("svg").node().getBoundingClientRect().width;
+
+        svgString2Image( svgString, width, height, 'png', save ); // passes Blob and filesize String to the callback
+
+
+        //$('#dwn').attr('href', 'data:application/octet-stream;base64,' + btoa($(".plot-container").first().html())); 
+        //$('#dwn').attr('download', 'plot.svg');
+        //$('#dwn').click();
+
+        //document.getElementById("dwn").click();
     }
 
     // Download last json

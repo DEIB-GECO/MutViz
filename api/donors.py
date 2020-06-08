@@ -19,6 +19,9 @@ def get_uc5(logger):
     tumorType = request.form.get('tumorType')
     logger.debug(f"tumorType: {tumorType}")
 
+    filter =  request.form.get('filter')
+    logger.debug(f"filter: {filter}")
+
     if not repoId:
         abort(400)
 
