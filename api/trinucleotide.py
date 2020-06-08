@@ -70,11 +70,11 @@ def intersect_and_group(mutation_table_name, file_name, groupbylist, tumor_type=
 
         # Filter
         if tumor_type and filter_json:
-            donors = get_donors(tumor_type, filter)
+            donors = get_donors(tumor_type, filter_json)
             res_df = res_df[(res_df["tumor_type_id"]==tumor_type_id) & (res_df["donor_id"].isin(donors))]
         else:
             if filter_json:
-                donors = get_donors(tumor_type, filter)
+                donors = get_donors(tumor_type, filter_json)
                 res_df = res_df[res_df["donor_id"].isin(donors)]
             if tumor_type:
                 res_df = res_df[res_df["tumor_type_id"]==tumor_type_id]
@@ -94,7 +94,7 @@ def get_trinucleotide(logger):
 
     logger.debug(f"tumor_type: {tumor_type}")
     logger.debug(f"file_name: {file_name}")
-    logger.debug(f"filter: {filter}")
+    logger.debug(f"filter: {filter_json}")
 
     if not file_name:
         abort(400)
@@ -105,7 +105,7 @@ def get_trinucleotide(logger):
 
     def async_function():
         try:
-            if not filter and CACHE_ID in RESULTS_CACHE:
+            if not filter_json and CACHE_ID in RESULTS_CACHE:
                 update_job(jobID, RESULTS_CACHE[CACHE_ID])
                 return
 
