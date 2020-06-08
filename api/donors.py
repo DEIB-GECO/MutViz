@@ -30,7 +30,7 @@ def get_uc5(logger):
 
     def async_function():
         try:
-            if CACHE_ID in RESULTS_CACHE:
+            if not filter_json and CACHE_ID in RESULTS_CACHE:
                 update_job(jobID, RESULTS_CACHE[CACHE_ID])
                 return
 
@@ -56,7 +56,7 @@ def get_uc5(logger):
 
                 result[m[0]]["data"].append({"mutation": m[1], "donor_id": int(m[2]), "count": int(m[3])})
 
-            if not filter:
+            if not filter_json:
                 RESULTS_CACHE[CACHE_ID] = result
 
             update_job(jobID, result)

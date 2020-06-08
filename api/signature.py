@@ -14,33 +14,27 @@ from api.signatures.signatures_refitting import get_refitting
 import pandas as pd
 
 from api.spark.intersection import spark_intersect
+from api.trinucleotide import intersect_and_group
+
 
 def get_uc6(logger):
-    repoId = request.form.get('file_name')
-    logger.debug(f"repoId: {repoId}")
 
+    # Get Params
+    file_name = request.form.get('file_name')
+    tumor_type = request.form.get('tumorType')
+    filter_json = request.form.get('filter')
     threshold_active = request.form.get('threshold_active')=="true"
     threshold_min = int(request.form.get('threshold_min'))
 
-    CACHE_ID = "SIGNATURES#"+repoId+"#"+str(threshold_active)
+    logger.debug(f"tumor_type: {tumor_type}")
+    logger.debug(f"file_name: {file_name}")
+    logger.debug(f"filter: {filter_json}")
+    logger.debug(f"threshold_active: {str(threshold_active)}")
+    logger.debug(f"threshold_min: {str(threshold_min)}")
 
-    logger.debug("Threshold active: "+str(threshold_active))
-    logger.debug("Threshold min: "+str(threshold_min))
+    CACHE_ID = "SIGNATURES#"+file_name+"#"+str(threshold_active)
 
-    tumorType = request.form.get('tumorType')
-    logger.debug(f"tumorType: {tumorType}")
-
-    filter =  request.form.get('filter')
-    logger.debug(f"filter: {filter}")
-
-    if tumorType and filter:
-        tumor_type_id = str(tumor_type_reverse_dict[tumorType])
-        donors = get_donors(tumorType, filter)
-    else:
-        tumor_type_id = None
-        donors = None
-
-    if not repoId:
+    if not file_name:
         abort(400)
 
     jobID = register_job()
@@ -48,39 +42,24 @@ def get_uc6(logger):
     def async_function():
         try:
 
-            if not filter and CACHE_ID in RESULTS_CACHE:
+            if not filter_json and CACHE_ID in RESULTS_CACHE:
                 update_job(jobID, RESULTS_CACHE[CACHE_ID])
                 return
 
-            session = db.session
+            mutation_table_name = t_mutation_trinucleotide_test.name if DEBUG_MODE else t_mutation_trinucleotide.name
 
-            file_id = db.session.query(UserFile).filter_by(name=repoId).one().id
-            exists = db.session.query(db.session.query(SignaturesCache).filter_by(file_id=file_id).exists()).scalar()
-
-            if  exists:
-                logger.debug("Using cached result.")
-                mutations = db.session.query( SignaturesCache.tumor_type_id, SignaturesCache.donor_id, SignaturesCache.trinucleotide_id_r, SignaturesCache.count).filter_by(file_id=file_id)
-            else:
-
-                if DEBUG_MODE:
-                    print("t_mutation_trinucleotide_test.name ==> ",t_mutation_trinucleotide_test.name)
-                    mutations = spark_intersect(t_mutation_trinucleotide_test.name, "full_"+repoId , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"])
-                else:
-                    mutations = spark_intersect(t_mutation_trinucleotide.name, "full_"+repoId , DB_CONF, lambda r: [r["tumor_type_id"], r["donor_id"], r["trinucleotide_id_r"], r["count"]], groupby=["tumor_type_id",  "donor_id", "trinucleotide_id_r"])
-
-                    values = list(map(lambda m:  SignaturesCache(file_id=file_id, tumor_type_id=m[0], donor_id=m[1], trinucleotide_id_r=m[2], count=m[3]), mutations))
-                    session.add_all(values)
-                    session.commit()
-                    session.close()
-
+            mutations = intersect_and_group(mutation_table_name,
+                                            file_name,
+                                            ["tumor_type_id", "donor_id", "trinucleotide_id_r"],
+                                            tumor_type=tumor_type,
+                                            filter_json=filter_json)
 
             result  = defaultdict(list)
 
             mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  x[1], trinucleotides_dict[x[2]][0], x[3]], mutations))
 
             for m in mutations:
-                if filter and m[1] in donors or not filter:
-                    result[m[0]].append([ m[1], m[2],  m[3]])
+                result[m[0]].append([ int(m[1]), m[2],  int(m[3])])
 
             # result ( tumorTypeString -> [donor, trinucleotide, count] )
 
@@ -124,12 +103,11 @@ def get_uc6(logger):
                 if num_patients<5:
                     table_donors = table_donors.sum().to_frame().transpose()
 
-                region_file_table_name = "full_"+repoId
+                region_file_table_name = "full_"+file_name
                 #user_file =  create_upload_table_full(session, region_file_table_name, create=False, upload=False)
 
-                user_file_df = pd.read_sql("SELECT * FROM "+region_file_table_name+";", session.bind)
+                user_file_df = pd.read_sql("SELECT * FROM "+region_file_table_name+";", db.engine())
                 user_file_df.columns = ["chrom", "start", "stop"]
-
 
                 (with_donors, cacheit) =  get_refitting(table_donors, user_file_df, sigs_df_norm)
                 sigs_df_norm = cacheit
@@ -140,7 +118,7 @@ def get_uc6(logger):
                 final_results[tumor]["threshold_min"] = threshold_min
                 final_results[tumor]["threshold_active"] = threshold_active
 
-            if not filter:
+            if not filter_json:
                 RESULTS_CACHE[CACHE_ID] = final_results
 
             update_job(jobID, final_results)
