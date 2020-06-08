@@ -122,7 +122,7 @@ def get_trinucleotide(logger):
             file_id = db.session.query(UserFile).filter_by(name=repoId).one().id
             exists = db.session.query(db.session.query(TrinucleotideCache).filter_by(file_id=file_id).exists()).scalar()
 
-            if not filter and not DEBUG_MODE and exists:
+            if False and not filter and not DEBUG_MODE and exists:
                 logger.debug("Found cached result.")
                 mutations = db.session.query( TrinucleotideCache.tumor_type_id, TrinucleotideCache.trinucleotide_id, TrinucleotideCache.count).filter_by(file_id=repositories_dict[repoId][0])
                 logger.debug("Retrieved result.")
