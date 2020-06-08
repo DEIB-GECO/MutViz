@@ -104,9 +104,8 @@ def get_uc6(logger):
                     table_donors = table_donors.sum().to_frame().transpose()
 
                 region_file_table_name = "full_"+file_name
-                #user_file =  create_upload_table_full(session, region_file_table_name, create=False, upload=False)
 
-                user_file_df = pd.read_sql("SELECT * FROM "+region_file_table_name+";", db.engine())
+                user_file_df = pd.read_sql("SELECT * FROM "+region_file_table_name+";", db.get_engine())
                 user_file_df.columns = ["chrom", "start", "stop"]
 
                 (with_donors, cacheit) =  get_refitting(table_donors, user_file_df, sigs_df_norm)
