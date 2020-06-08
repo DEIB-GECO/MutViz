@@ -34,9 +34,10 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                     console.log("result for "+ jobID+" is ready");
 
                     // Add the new file to the local list of files together with the answer
-                    $scope.uc4_files[filename].result = response.data.result;
+                    if( Object.keys($rootScope.filter.conditions).length==0 )
+                        $scope.uc4_files[filename].result = response.data.result;
 
-                    $scope.load($scope.uc4_files[filename].result, true);
+                    $scope.load(response.data.result, true);
                     $scope.execution.running = false;
 
                 } else {

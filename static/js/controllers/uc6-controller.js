@@ -53,9 +53,10 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                     console.log("result for "+ jobID+" is ready");
 
                     // Add the new file to the local list of files together with the answer
-                    $scope.uc6_files[filename].result = response.data.result;
+                    if( Object.keys($rootScope.filter.conditions).length==0 )
+                        $scope.uc6_files[filename].result = response.data.result;
 
-                    $scope.load($scope.uc6_files[filename].result, true);
+                    $scope.load(response.data.result, true);
                     $scope.execution.running = false;
 
                 } else {
