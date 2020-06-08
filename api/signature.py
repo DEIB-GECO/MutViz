@@ -48,7 +48,7 @@ def get_uc6(logger):
     def async_function():
         try:
 
-            if CACHE_ID in RESULTS_CACHE:
+            if not filter and CACHE_ID in RESULTS_CACHE:
                 update_job(jobID, RESULTS_CACHE[CACHE_ID])
                 return
 
