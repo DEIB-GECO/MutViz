@@ -57,7 +57,7 @@ def get_uc6(logger):
             file_id = db.session.query(UserFile).filter_by(name=repoId).one().id
             exists = db.session.query(db.session.query(SignaturesCache).filter_by(file_id=file_id).exists()).scalar()
 
-            if exists:
+            if not filter and exists:
                 logger.debug("Using cached result.")
                 mutations = db.session.query( SignaturesCache.tumor_type_id, SignaturesCache.donor_id, SignaturesCache.trinucleotide_id_r, SignaturesCache.count).filter_by(file_id=file_id)
             else:
