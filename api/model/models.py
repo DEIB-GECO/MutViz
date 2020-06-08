@@ -215,3 +215,15 @@ class ClinicalDatum(db.Model):
     first_therapy_type = db.Column(db.String)
     first_therapy_duration = db.Column(db.Integer)
     first_therapy_response = db.Column(db.String)
+
+t_mutation_trinucleotide_cache = db.Table(
+    'mutation_trinucleotide_cache',
+    db.Column('file_id', db.ForeignKey(u'user_file.id', ondelete=u'CASCADE'), nullable=False),
+    db.Column('donor_id', db.Integer, nullable=False),
+    db.Column('tumor_type_id', db.SmallInteger, nullable=False),
+    db.Column('chrom', db.SmallInteger, nullable=False),
+    db.Column('position', db.Integer, nullable=False),
+    db.Column('mutation_code_id', db.SmallInteger, nullable=False),
+    db.Column('trinucleotide_id_r', db.SmallInteger, nullable=False)
+)
+

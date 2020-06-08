@@ -7,41 +7,36 @@ from api import MUTVIZ_CONF, app, repositories_dict, tumor_type_dict, parse_inpu
 from flask import json, request, abort
 
 
-
-
-def get_donors(tumor_type, filter_json):
-
+def get_query(tumor_type_id, filter_json):
     filter = json.loads(filter_json)
-
     table_name = ClinicalDatum.__tablename__
-
-    tumor_type_id=str(tumor_type_reverse_dict[tumor_type])
-    print("tumor_type_id =>",tumor_type_id, "=",tumor_type)
-    query = "SELECT DISTINCT(donor_id)  FROM "+table_name+" WHERE tumor_type_id="+tumor_type_id+" AND ("
+    query = "SELECT DISTINCT(donor_id)  FROM " + table_name + " WHERE tumor_type_id=" + tumor_type_id + " AND ("
 
     conditions = []
     for key in filter:
         alternatives = []
         for value in filter[key]:
-            if isinstance(value, int) or  isinstance(value, float):
-                alternatives.append( key +" = "+str(value)  )
+            if isinstance(value, int) or isinstance(value, float):
+                alternatives.append(key + " = " + str(value))
             else:
-                alternatives.append(key + " = '" + value +"'")
-        conditions.append( "("+(' OR '.join(alternatives))+")")
+                alternatives.append(key + " = '" + value + "'")
+        conditions.append("(" + (' OR '.join(alternatives)) + ")")
 
-    conditions_string =  ' AND '.join(conditions)
+    conditions_string = ' AND '.join(conditions)
 
-    query += conditions_string+");"
+    query += conditions_string + ")"
 
-    print(query)
+    return query
+
+
+def get_donors(tumor_type, filter_json):
+    tumor_type_id=str(tumor_type_reverse_dict[tumor_type])
+    query = get_query(tumor_type_id, filter_json)
 
     donors = []
 
     try:
-        connection = db.get_engine().connect()
-        # session.execute("set enable_seqscan=false")
-
-        result = connection.execute(text(query))
+        result = db.get_engine().connect().execute(text(query))
 
         for value in result:
             donors.append(value[0])

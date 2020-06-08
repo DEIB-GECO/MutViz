@@ -165,7 +165,7 @@ def spark_intersect(regions, mutations):
     #        res_df = res.toDF().groupBy(groupby).count()
     #        res = res_df.filter(res_df["count"]>minCount).rdd.map(output_format)
 
-    res = res.collect()
+    res = res.toDF().toPandas()
 
     # print(partitioned)
     #
@@ -183,11 +183,9 @@ print(regions.head())
 print(mutations.head())
 
 res = spark_intersect(regions, mutations)
-print(mutations.shape)
-res_df = pd.DataFrame(map(lambda x: [x.chrom, x.position], res), columns=["chrom", "position"])
-print(res_df)
-print("RESULT SHAPE=>",res_df.shape)
+print(res.head)
+print("RESULT SHAPE=>",res.shape)
 
-missing = pd.concat([mutations,res_df]).drop_duplicates(keep=False)
+missing = pd.concat([mutations,res]).drop_duplicates(keep=False)
 print(missing)
 
