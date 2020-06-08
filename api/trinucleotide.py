@@ -4,8 +4,7 @@ import psycopg2
 from flask import json, request, abort
 from sqlalchemy import text
 
-from api import DEBUG_MODE, repositories_dict, \
-    trinucleotides_dict, tumor_type_dict, executor, RESULTS_CACHE, tumor_type_reverse_dict
+from api import DEBUG_MODE, trinucleotides_dict, tumor_type_dict, executor, RESULTS_CACHE, tumor_type_reverse_dict
 from api.clinical import get_donors, get_query
 from api.db import *
 from api.jobs import register_job, update_job, unregister_job
