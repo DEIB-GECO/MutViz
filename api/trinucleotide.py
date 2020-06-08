@@ -109,10 +109,7 @@ def get_trinucleotide(logger):
                 update_job(jobID, RESULTS_CACHE[CACHE_ID])
                 return
 
-            if DEBUG_MODE:
-                mutation_table_name = t_mutation_trinucleotide_test.name
-            else:
-                mutation_table_name = t_mutation_trinucleotide.name
+            mutation_table_name = t_mutation_trinucleotide_test.name if DEBUG_MODE else t_mutation_trinucleotide.name
 
             # Get Intersections, grouped
             mutations = intersect_and_group(mutation_table_name,
