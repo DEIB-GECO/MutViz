@@ -54,7 +54,7 @@ def get_uc5(logger):
                 if m[0] not in result:
                     result[m[0]] = {"data": [], "trinucleotide": trinucleotide}
 
-                result[m[0]]["data"].append({"mutation": m[1], "donor_id": m[2], "count": int(m[3])})
+                result[m[0]]["data"].append({"mutation": m[1], "donor_id": int(m[2]), "count": int(m[3])})
 
             if not filter:
                 RESULTS_CACHE[CACHE_ID] = result
