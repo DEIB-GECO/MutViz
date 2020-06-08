@@ -3,7 +3,8 @@ import uuid
 from flask import json, request, abort
 
 from api import MUTVIZ_CONF, app, logger, parse_input_regions, db, DEBUG_MODE, repositories_dict, \
-    trinucleotides_dict, tumor_type_dict, executor, mutation_code_r_dict, RESULTS_CACHE
+    trinucleotides_dict, tumor_type_dict, executor, mutation_code_r_dict, RESULTS_CACHE, tumor_type_reverse_dict
+from api.clinical import get_donors
 from api.db import *
 from api.jobs import register_job, update_job, unregister_job
 from api.model.models import *
@@ -21,6 +22,13 @@ def get_uc5(logger):
 
     filter =  request.form.get('filter')
     logger.debug(f"filter: {filter}")
+
+    if tumorType and filter:
+        tumor_type_id = str(tumor_type_reverse_dict[tumorType])
+        donors = get_donors(tumorType, filter)
+    else:
+        tumor_type_id = None
+        donors = None
 
     if not repoId:
         abort(400)
@@ -100,9 +108,11 @@ def get_uc5(logger):
                 for m in mutations:
                     if m[0] not in result:
                         result[m[0]] = {"data": [], "trinucleotide": trinucleotide}
-                    result[m[0]]["data"].append({"mutation": m[1], "donor_id": m[2], "count": m[3]})
+                    if filter and m[2] in donors or not filter:
+                        result[m[0]]["data"].append({"mutation": m[1], "donor_id": m[2], "count": m[3]})
 
-            RESULTS_CACHE[CACHE_ID] = result
+            if not filter:
+                RESULTS_CACHE[CACHE_ID] = result
 
             update_job(jobID, result)
 

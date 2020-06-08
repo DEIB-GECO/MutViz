@@ -86,7 +86,7 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.execution.running = true;
         $scope.loaded = false;
 
-        condition = filename in $scope.uc6_files && "result" in $scope.uc6_files[filename] 
+        condition =  Object.keys($rootScope.filter.conditions).length==0 && filename in $scope.uc6_files && "result" in $scope.uc6_files[filename] 
         && $rootScope.tumorTypes.current.identifier in $scope.uc6_files[filename].result;
         condition =  condition && Object.keys($scope.uc6_files[filename].result).every(function(k){
             current = $scope.uc6_files[filename].result[k];

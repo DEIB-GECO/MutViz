@@ -76,10 +76,15 @@ def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_for
 
         mutations = spark.read.format("csv").option("header", "true").schema(customSchema).load(fs_db_dir + "/"+mutation_table_name)
 
+    def filter1(x):
+        return int(x["tumor_type_id"]) == int(tumorType)
+    def filter2(x):
+        return  int(x["donor_id"]) in filter
+
     if tumorType:
-        mutations = mutations.rdd.filter(lambda x: x["tumor_type_id"] == tumorType)
-        if filter:
-            mutations = mutations.filter(lambda x: x["donor_id"] in filter)
+        mutations = mutations.rdd.filter(filter1)
+        if filter!=None:
+            mutations = mutations.filter(filter2)
 
         if mutations.isEmpty():
             return []

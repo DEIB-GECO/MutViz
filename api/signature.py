@@ -4,7 +4,8 @@ from collections import defaultdict
 from flask import json, request, abort
 
 from api import MUTVIZ_CONF, app, logger, parse_input_regions, DEBUG_MODE, repositories_dict, \
-    trinucleotides_dict, tumor_type_dict, executor, RESULTS_CACHE
+    trinucleotides_dict, tumor_type_dict, executor, RESULTS_CACHE, tumor_type_reverse_dict
+from api.clinical import get_donors
 from api.db import *
 from api.jobs import register_job, update_job, unregister_job
 from api.model.models import *
@@ -31,6 +32,13 @@ def get_uc6(logger):
 
     filter =  request.form.get('filter')
     logger.debug(f"filter: {filter}")
+
+    if tumorType and filter:
+        tumor_type_id = str(tumor_type_reverse_dict[tumorType])
+        donors = get_donors(tumorType, filter)
+    else:
+        tumor_type_id = None
+        donors = None
 
     if not repoId:
         abort(400)
@@ -71,7 +79,8 @@ def get_uc6(logger):
             mutations = list(map(lambda x: [tumor_type_dict[x[0]][0],  x[1], trinucleotides_dict[x[2]][0], x[3]], mutations))
 
             for m in mutations:
-                result[m[0]].append([ m[1], m[2],  m[3]])
+                if filter and m[1] in donors or not filter:
+                    result[m[0]].append([ m[1], m[2],  m[3]])
 
             # result ( tumorTypeString -> [donor, trinucleotide, count] )
 
@@ -131,7 +140,8 @@ def get_uc6(logger):
                 final_results[tumor]["threshold_min"] = threshold_min
                 final_results[tumor]["threshold_active"] = threshold_active
 
-            RESULTS_CACHE[CACHE_ID] = final_results
+            if not filter:
+                RESULTS_CACHE[CACHE_ID] = final_results
 
             update_job(jobID, final_results)
 

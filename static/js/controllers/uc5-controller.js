@@ -74,7 +74,7 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.execution.running = true;
         $scope.loaded = false;
 
-        if( filename in $scope.uc5_files && "result" in $scope.uc5_files[filename] 
+        if(  Object.keys($rootScope.filter.conditions).length==0 && filename in $scope.uc5_files && "result" in $scope.uc5_files[filename] 
            && $rootScope.tumorTypes.current.identifier in $scope.uc5_files[filename].result && 
            $scope.uc5_files[filename].result[$rootScope.tumorTypes.current.identifier].trinucleotide == $scope.trinucleotides.show) {
 

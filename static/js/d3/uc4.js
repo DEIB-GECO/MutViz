@@ -103,7 +103,7 @@ function uc4(data, mutationTypes, width, height, animate) {
         .attr('class', 'd3-tip')
         .offset([-10, 0])
         .html(function(d) {
-            return "<strong>"+d["trinucleotide"]+"</strong> <span style='color:yellow'>" + d["count"].toFixed(3) + "</span>";
+            return "<strong>"+d["trinucleotide"]+"</strong> <span style='color:yellow'>" + d["count"].toFixed(0) + "</span>";
         });
 
         g.svg[index].call(tip);
