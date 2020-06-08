@@ -72,14 +72,14 @@ def intersect_and_group(mutation_table_name, file_name, groupbylist, tumor_type=
 
 
         # Filter
-        if tumor_type_id and filter_json:
+        if tumor_type and filter_json:
             donors = get_donors(tumor_type_id, filter)
             res_df = res_df[(res_df["tumor_type_id"]==tumor_type_id) & (res_df["donor_id"].isin(donors))]
         else:
             if filter_json:
                 donors = get_donors(tumor_type_id, filter)
                 res_df = res_df[res_df["donor_id"].isin(donors)]
-            if tumor_type_id:
+            if tumor_type:
                 res_df = res_df[res_df["tumor_type_id"]==tumor_type_id]
 
     # GroupBy and count
