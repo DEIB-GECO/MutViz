@@ -13,7 +13,7 @@ from api.model.models import *
 
 import pandas as pd
 
-from api.spark.intersection import spark_intersect, spark_intersect2
+from api.spark.intersection import spark_intersect2
 
 
 def intersect_and_group(mutation_table_name, file_name, groupbylist, tumor_type=None, filter_json=None):
@@ -24,7 +24,6 @@ def intersect_and_group(mutation_table_name, file_name, groupbylist, tumor_type=
 
     if tumor_type:
         tumor_type_id = str(tumor_type_reverse_dict[tumor_type])
-
 
     result = connection.execute(text("SELECT file_id FROM "+t_mutation_trinucleotide_cache.name+" WHERE file_id="+str(file_id)+" LIMIT 1;"))
     exists = result.rowcount==1
@@ -70,14 +69,13 @@ def intersect_and_group(mutation_table_name, file_name, groupbylist, tumor_type=
         cursor.execute('COMMIT;')
         cursor.close()
 
-
         # Filter
         if tumor_type and filter_json:
-            donors = get_donors(tumor_type_id, filter)
+            donors = get_donors(tumor_type, filter)
             res_df = res_df[(res_df["tumor_type_id"]==tumor_type_id) & (res_df["donor_id"].isin(donors))]
         else:
             if filter_json:
-                donors = get_donors(tumor_type_id, filter)
+                donors = get_donors(tumor_type, filter)
                 res_df = res_df[res_df["donor_id"].isin(donors)]
             if tumor_type:
                 res_df = res_df[res_df["tumor_type_id"]==tumor_type_id]
@@ -85,12 +83,7 @@ def intersect_and_group(mutation_table_name, file_name, groupbylist, tumor_type=
     # GroupBy and count
     res =  res_df.groupby(groupbylist)[groupbylist[-1]].agg('count').to_frame('count').reset_index()
 
-    print(res.columns)
-    print(res.head())
-
     return res.values
-
-
 
 
 def get_trinucleotide(logger):
