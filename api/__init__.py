@@ -43,7 +43,7 @@ executor = Executor(app)
 
 with app.app_context():
     DEBUG_MODE = True
-    #DEBUG_MODE = False
+    DEBUG_MODE = False
 
     RESULTS_CACHE = {}
 
