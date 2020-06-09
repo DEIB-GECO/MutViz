@@ -1,5 +1,8 @@
 body {  background: white;}
 
+[type=reset], [type=submit], button, html [type=button] {
+-webkit-appearance: none;
+}
 
 .clickable-item { cursor:pointer}
 .clickable-item:hover, .clickable-item-selected {
