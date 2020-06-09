@@ -93,7 +93,7 @@ def frequencies(df):
         for i in range(len_reg - 2):
             triplet = row['sequence'][i:i + 3]
             local_tot += 1
-            if triplet in codon_freq:
+            if triplet in local_codon_freq:
                 local_codon_freq[triplet] += 1
             else:
                 local_codon_freq[triplet] = 1
