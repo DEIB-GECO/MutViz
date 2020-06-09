@@ -109,7 +109,11 @@ def frequencies(df):
     df_dask = ddf.from_pandas(df,npartitions=10)  # where the number of partitions is the number of cores you want to use
     res = df_dask.map_partitions(lambda x: iteration(x), meta=('str')).compute(scheduler='multiprocessing')
 
+    print(res)
+
     reduced = reduce((lambda x, y: reduction(x, y)), res)
+
+    print(reduced)
 
     codon_freq = dict(reduced[0])
     tot = reduced[1]
