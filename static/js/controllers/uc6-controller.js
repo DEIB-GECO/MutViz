@@ -104,7 +104,7 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                 threshold_min: $scope.threshold.minMutations
             }
             
-            //request_body.tumorType = $rootScope.tumorTypes.current.identifier;
+            request_body.tumorType = $rootScope.tumorTypes.current.identifier;
 
             if( Object.keys($rootScope.filter.conditions).length > 0 ) {
                 request_body.filter = JSON.stringify($rootScope.filter.conditions);

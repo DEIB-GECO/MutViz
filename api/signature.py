@@ -32,7 +32,7 @@ def get_uc6(logger):
     logger.debug(f"threshold_active: {str(threshold_active)}")
     logger.debug(f"threshold_min: {str(threshold_min)}")
 
-    CACHE_ID = "SIGNATURES#"+file_name+"#"+str(threshold_active)
+    CACHE_ID = "SIGNATURES#"+file_name+"#"+str(threshold_active)+"#"+str(tumor_type)
 
     if not file_name:
         abort(400)
