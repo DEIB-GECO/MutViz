@@ -84,6 +84,8 @@ def frequencies(df):
     codon_freq = {}
     tot = 0
 
+    start_time = time.time()
+
     for index, row in df.iterrows():
         len_reg = len(row['sequence'])
         for i in range(len_reg - 2):
@@ -93,12 +95,17 @@ def frequencies(df):
                 codon_freq[triplet] += 1
             else:
                 codon_freq[triplet] = 1
+    print("frequencies: for loop  took %s seconds ---" % (time.time() - start_time))
 
     for k in codon_freq.keys():
         codon_freq[k] = float(codon_freq[k]) / tot
+    print("frequencies: second for loop  took %s seconds ---" % (time.time() - start_time))
 
     df_freq = pd.DataFrame([{"codon": key, "freq": value} for key, value in codon_freq.items()])
+    print("frequencies: pd.DataFrame for loop  took %s seconds ---" % (time.time() - start_time))
     df_freq = reverse_comp(df_freq)
+
+    print("reverse_comp: pd.DataFrame for loop  took %s seconds ---" % (time.time() - start_time))
 
     return df_freq
 
