@@ -113,6 +113,7 @@ class TumorType(db.Model):
     mutation_count = db.Column(db.Integer)
     attributes = db.Column(db.String)
     donor_count = db.Column(db.Integer)
+    clinical_tumor_type_id= db.Column(db.SmallInteger)
 
 
 

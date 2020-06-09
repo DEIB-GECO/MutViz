@@ -8,9 +8,11 @@ from flask import json, request, abort
 
 
 def get_query(tumor_type_id, filter_json):
+    correct_id = str(tumor_type_dict[int(tumor_type_id)][6])
+    print("id " + tumor_type_id + " correct_id " + correct_id)
     filter = json.loads(filter_json)
     table_name = ClinicalDatum.__tablename__
-    query = "SELECT DISTINCT(donor_id)  FROM " + table_name + " WHERE tumor_type_id=" + tumor_type_id + " AND ("
+    query = "SELECT DISTINCT(donor_id)  FROM " + table_name + " WHERE tumor_type_id=" + correct_id + " AND ("
 
     conditions = []
     for key in filter:
@@ -30,8 +32,10 @@ def get_query(tumor_type_id, filter_json):
 
 
 def get_donors(tumor_type, filter_json):
-    tumor_type_id=str(tumor_type_reverse_dict[tumor_type])
-    query = get_query(tumor_type_id, filter_json)
+    tumor_type_id=tumor_type_reverse_dict[tumor_type]
+    correct_id = str(tumor_type_dict[tumor_type_id][6])
+    print("id "+str(tumor_type_id)+" correct_id "+correct_id)
+    query = get_query(correct_id, filter_json)
 
     donors = []
 
@@ -72,9 +76,11 @@ def get_values(logger, tumor_type, attribute_name):
     #attribute_name = request.form.get('regions')
     table_name = ClinicalDatum.__tablename__
 
-    tumor_type_id=str(tumor_type_reverse_dict[tumor_type])
-    print("tumor_type_id =>",tumor_type_id, "=",tumor_type)
-    query = "SELECT "+attribute_name+", count(*) from "+table_name+" where tumor_type_id="+tumor_type_id+" group by "+attribute_name+";"
+    tumor_type_id=tumor_type_reverse_dict[tumor_type]
+    correct_id = str(tumor_type_dict[tumor_type_id][6])
+
+    print("tumor_type_id =>",correct_id, "=",tumor_type)
+    query = "SELECT "+attribute_name+", count(*) from "+table_name+" where tumor_type_id="+correct_id+" group by "+attribute_name+";"
 
 
     if not tumor_type or not attribute_name:
