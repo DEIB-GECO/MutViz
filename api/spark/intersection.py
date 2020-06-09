@@ -4,11 +4,8 @@ from pyspark.sql import SparkSession, DataFrameReader
 import os
 import sys
 import time
-from collections import defaultdict
 
 from pyspark.sql.types import StructType, StructField, IntegerType
-
-from api import spark
 
 
 def spark_intersect(mutation_table_name, regions_table_name, DB_CONF, output_format, regions=None, jdbc_jar='postgresql-42.2.12.jar', groupby=None, useSQL=False, minCount=-1, tumorType=None, filter=None):

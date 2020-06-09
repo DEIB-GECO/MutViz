@@ -1,3 +1,5 @@
+import time
+
 import pandas as pd
 import quadprog, numpy as np
 from sklearn.utils import check_array
@@ -157,6 +159,8 @@ def getPrevalence(exp_df):
 
 def get_refitting( mut_df, user_file_df,  sigs_df_norm = None):
 
+    start_time = time.time()
+
     dirname = os.path.dirname(__file__)
 
     #load the mutations
@@ -170,10 +174,18 @@ def get_refitting( mut_df, user_file_df,  sigs_df_norm = None):
         fasta_file = os.path.join(dirname, "hg19_ref_genome.fa")
 
         genome = pysam.Fastafile(fasta_file)
+
+        print("Reading fasta took %s seconds ---" % (time.time() - start_time))
+
         codon_whole_genome = pd.read_csv(frequencies_wg_file, sep='\t')
+
+        print("Reading frequencies_wg_file took %s seconds ---" % (time.time() - start_time))
 
         # Load the signatures
         sigs_df = pd.read_csv(filename, sep='\t', index_col=2).drop(["Type","SubType","trinucleotide_id"], axis=1).transpose()[categories]
+
+        print("Reading signatures.csv took %s seconds ---" % (time.time() - start_time))
+
         assert(list(sigs_df.columns) == categories)
         sigs = sigs_df.values
 
@@ -184,7 +196,10 @@ def get_refitting( mut_df, user_file_df,  sigs_df_norm = None):
         # user_file : chrom, start, stop
         df = seq(user_file_df, genome)
         df_freq = frequencies(df)
+
+        print("frequencies(df) took %s seconds ---" % (time.time() - start_time))
         df_correction = correction_factor(df_freq, codon_whole_genome)
+        print("correction_factor(..) took %s seconds ---" % (time.time() - start_time))
 
 
         # Load the signatures
@@ -193,6 +208,8 @@ def get_refitting( mut_df, user_file_df,  sigs_df_norm = None):
         sigs_df= sigs_df.T.merge(df_correction, left_index=True, right_index=True)
         sigs_df_mult= sigs_df.loc[:,'SBS1':'SBS85'].multiply(sigs_df['correction'], axis="index")
         sigs_df_norm=sigs_df_mult.div(sigs_df_mult.sum(axis=0), axis=1)
+
+        print("other stuff took %s seconds ---" % (time.time() - start_time))
 
     sigs = sigs_df_norm.T.values
     active_signatures = sigs_df_norm.T.index
