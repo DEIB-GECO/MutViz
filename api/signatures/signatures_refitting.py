@@ -107,7 +107,7 @@ def frequencies(df):
         B = Counter(y[0])
         return (A + B, x[1] + y[1])
 
-    df_dask = ddf.from_pandas(df,npartitions=10)  # where the number of partitions is the number of cores you want to use
+    df_dask = ddf.from_pandas(df,npartitions=20)  # where the number of partitions is the number of cores you want to use
     res = df_dask.map_partitions(lambda x: iteration(x), meta=('str')).compute(scheduler='multiprocessing')
 
 
