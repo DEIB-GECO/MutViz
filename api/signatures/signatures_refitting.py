@@ -85,18 +85,19 @@ def frequencies(df):
     from functools import reduce
     start_time = time.time()
 
-    def iteration(row):
+    def iteration(partition):
         local_tot = 0
         local_codon_freq = {}
 
-        len_reg = len(row['sequence'])
-        for i in range(len_reg - 2):
-            triplet = str(row['sequence'][i:i + 3])
-            local_tot += 1
-            if triplet in local_codon_freq:
-                local_codon_freq[triplet] += 1
-            else:
-                local_codon_freq[triplet] = 1
+        for index, row in partition.iterrows():
+            len_reg = len(row['sequence'])
+            for i in range(len_reg - 2):
+                triplet = row['sequence'][i:i + 3]
+                local_tot += 1
+                if triplet in local_codon_freq:
+                    local_codon_freq[triplet] += 1
+                else:
+                    local_codon_freq[triplet] = 1
 
         return (local_codon_freq, local_tot)
 
@@ -109,11 +110,10 @@ def frequencies(df):
     df_dask = ddf.from_pandas(df,npartitions=10)  # where the number of partitions is the number of cores you want to use
     res = df_dask.map_partitions(lambda x: iteration(x), meta=('str')).compute(scheduler='multiprocessing')
 
-    print(res[0])
+
 
     reduced = reduce((lambda x, y: reduction(x, y)), res)
 
-    print(reduced[0])
 
     codon_freq = dict(reduced[0])
     tot = reduced[1]
