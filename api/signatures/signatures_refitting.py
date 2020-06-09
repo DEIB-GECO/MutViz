@@ -5,6 +5,7 @@ import quadprog, numpy as np
 from sklearn.utils import check_array
 import os
 import pysam
+import dask.dataframe as ddf
 
 def signature_estimation_qp(M, P):
     """
@@ -86,7 +87,8 @@ def frequencies(df):
 
     start_time = time.time()
 
-    for index, row in df.iterrows():
+    def iteration(row):
+        global tot,codon_freq
         len_reg = len(row['sequence'])
         for i in range(len_reg - 2):
             triplet = row['sequence'][i:i + 3]
@@ -95,6 +97,11 @@ def frequencies(df):
                 codon_freq[triplet] += 1
             else:
                 codon_freq[triplet] = 1
+
+    df_dask = ddf.from_pandas(df,npartitions=10)  # where the number of partitions is the number of cores you want to use
+    df_dask.apply(lambda x: iteration(x), meta=('str')).compute(scheduler='multiprocessing')
+
+
     print("frequencies: for loop  took %s seconds ---" % (time.time() - start_time))
 
     for k in codon_freq.keys():
