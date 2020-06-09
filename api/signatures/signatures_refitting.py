@@ -82,25 +82,37 @@ def seq(sample, genome):
     return sample
 
 def frequencies(df):
-    codon_freq = {}
-    tot = 0
-
+    from functools import reduce
     start_time = time.time()
 
     def iteration(row):
-        global tot,codon_freq
+        local_tot = 0
+        local_codon_freq = {}
+
         len_reg = len(row['sequence'])
         for i in range(len_reg - 2):
             triplet = row['sequence'][i:i + 3]
-            tot += 1
+            local_tot += 1
             if triplet in codon_freq:
-                codon_freq[triplet] += 1
+                local_codon_freq[triplet] += 1
             else:
-                codon_freq[triplet] = 1
+                local_codon_freq[triplet] = 1
+
+        return (local_codon_freq, local_tot)
+
+    def reduction(x, y):
+        from collections import Counter
+        A = Counter(x[0])
+        B = Counter(y[0])
+        return (A + B, x[1] + y[1])
 
     df_dask = ddf.from_pandas(df,npartitions=10)  # where the number of partitions is the number of cores you want to use
-    df_dask.apply(lambda x: iteration(x), meta=('str'), axis=1).compute(scheduler='multiprocessing')
+    res = df_dask.map_partitions(lambda x: iteration(x), meta=('str')).compute(scheduler='multiprocessing')
 
+    reduced = reduce((lambda x, y: reduction(x, y)), res)
+
+    codon_freq = dict(reduced[0])
+    tot = reduced[1]
 
     print("frequencies: for loop  took %s seconds ---" % (time.time() - start_time))
 
