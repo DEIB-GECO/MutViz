@@ -253,12 +253,21 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         if($rootScope.selectedTumorTypes.length != 2)
             return;
 
-        file = $rootScope.dist_files[$scope.file_selector.file.identifier].result
-
-        type1 = $rootScope.selectedTumorTypes[0]
-        type2 = $rootScope.selectedTumorTypes[1]
+        f = $rootScope.dist_files[$scope.file_selector.file.identifier]
+    
         
-        console.log($scope.mutationTypes.selectedTypes);
+        console.log(f.result);
+
+        type1 = $rootScope.selectedTumorTypes[0].identifier;
+        type2 = $rootScope.selectedTumorTypes[1].identifier;
+        
+        res1 = $rootScope.filterDistances(f.result, type1);
+        res2 = $rootScope.filterDistances(f.result, type2);
+        
+        dist1 = res1.distances;
+        dist2 = res2.distances;
+        
+        
 
         bins1 = get_bins(dist1, $scope.mutationTypes.selectedTypes, $scope.plot.binSize,
                          $scope.slider.noUiSlider.get()[0], $scope.slider.noUiSlider.get()[1]);
@@ -266,42 +275,96 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                          $scope.slider.noUiSlider.get()[0], $scope.slider.noUiSlider.get()[1]);
 
 
-        mbins1 = bins1.map(function(bin){
-            return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
-        })
+        reg1_start = -(f.avgLength-1)/2
+        reg1_stop  = +(f.avgLength-1)/2
 
-        mbins2 = bins2.map(function(bin){
-            return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
-        })
+        reg2_start = -(f.avgLength-1)/2
+        reg2_stop  = +(f.avgLength-1)/2
+        
+          region_bins1 = bins1.filter(function(bin){
+            return reg1_start>=bin.x0  && reg1_start<bin.x1 || reg1_stop>bin.x0  && reg1_stop<=bin.x1 || (bin.x0>reg1_start && bin.x1<reg1_stop)
+        }) 
 
-        mutation_count_1 = type1.mutation_count;
-        mutation_count_2 = type2.mutation_count;
+        region_bins2 = bins2.filter(function(bin){
+            return reg2_start>=bin.x0  && reg2_start<bin.x1 || reg2_stop>bin.x0  && reg2_stop<=bin.x1 || (bin.x0>reg2_start && bin.x1<reg2_stop)
+        }) 
 
-        norm1 = mbins1.map(function(x){return x/mutation_count_1});
-        norm2 = mbins2.map(function(x){return x/mutation_count_2});
+        flanking_bins1 =  bins1.filter(function(bin){
+            return !region_bins1.includes(bin)
+        }) 
+
+        flanking_bins2 =  bins2.filter(function(bin){
+            return !region_bins2.includes(bin)
+        }) 
 
 
-        $scope.test.pvalue = uc23_test(norm1, norm2);
+        function mapvalues(x){
+            return x.map(function(x){return x[3];}).reduce(function(x,y){return x+y},0)
+        }
 
-        /*
-        request_body = {"expected":norm1, "observed":norm2};
+
+        region_bins1_count = region_bins1.map(mapvalues).reduce(function(x,y){return x+y},0);
+        region_bins2_count = region_bins2.map(mapvalues).reduce(function(x,y){return x+y},0);
+        flanking_bins1_count = flanking_bins1.map(mapvalues).reduce(function(x,y){return x+y},0);
+        flanking_bins2_count = flanking_bins2.map(mapvalues).reduce(function(x,y){return x+y},0);
+
+        region_bins1_len =region_bins1.map(function(x){return Math.abs(x.x1-x.x0)}).reduce(function(x,y){return x+y},0);
+        region_bins2_len =region_bins2.map(function(x){return Math.abs(x.x1-x.x0)}).reduce(function(x,y){return x+y},0);
+        flanking_bins1_len = flanking_bins1.map(function(x){return Math.abs(x.x1-x.x0)}).reduce(function(x,y){return x+y},0);
+        flanking_bins2_len = flanking_bins2.map(function(x){return Math.abs(x.x1-x.x0)}).reduce(function(x,y){return x+y},0);
+
+        console.log("r1: "+reg1_start+"-"+reg1_stop)
+        console.log("r2: "+reg2_start+"-"+reg2_stop)
+        console.log(region_bins1)
+        console.log(region_bins2)
+        console.log(flanking_bins1)
+        console.log(flanking_bins2)
+        
+        
+         if(region_bins1_count==0) {
+            region_bins1_count = flanking_bins1_count;
+            region_bins1_len = flanking_bins1_len;
+        }
+
+        if(region_bins2_count==0) {
+            region_bins2_count = flanking_bins2_count;
+            region_bins2_len = flanking_bins2_len;
+        }
+
+        a = region_bins1_count/region_bins1_len
+        b = flanking_bins1_count/flanking_bins1_len
+        c = region_bins2_count/region_bins2_len
+        d = flanking_bins2_count/flanking_bins2_len
+
+        console.log("region_bins1_count:"+region_bins1_count)
+        console.log("region_bins1_len:"+region_bins1_len)
+        console.log("flanking_bins1_count:"+flanking_bins1_count)
+        console.log("flanking_bins1_len:"+flanking_bins1_len)
+        console.log("region_bins2_count:"+region_bins2_count)
+        console.log("region_bins2_len:"+region_bins2_len)
+        console.log("flanking_bins2_count:"+flanking_bins2_count)
+        console.log("flanking_bins2_len:"+flanking_bins2_len)
+
+        console.log("a: "+a+", b: "+b+", c: "+c+", d:"+d);
+        request_body = {a:a,b:b,c:c,d:d};
 
         // Call the API
         $http({
             method: 'POST',
-            data: request_body,
-            headers: {'Content-Type': 'application/json'},
-            url: API_T03
+            data: $.param(request_body),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            url: API_R01+"test"
         }).then(
             function success(response) {
-                console.log(response);
-                $scope.test.pvalue = response.data.pvalue.toFixed(3);
-            },
-            function error(response) {
-                console.log(response);
-                $scope.test.pvalue = "error";
+               $scope.test.pvalue = response.data.p.toExponential(3);
             }
-        );*/
+            , 
+            function error(response) {
+                console.error("error");
+                window.alert("An error occurred.");
+            }
+        );
+
 
 
     }

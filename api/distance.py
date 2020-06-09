@@ -1,7 +1,8 @@
 from collections import defaultdict
 
 from flask import  json, request, abort
-from sqlalchemy import func, between
+from sqlalchemy import func, between, text
+import numpy as np
 import psycopg2
 
 from api import MUTVIZ_CONF, app, logger, parse_input_regions, repositories_dict, mutation_code_dict, \
@@ -9,9 +10,37 @@ from api import MUTVIZ_CONF, app, logger, parse_input_regions, repositories_dict
 from api.jobs import register_job, update_job, unregister_job
 from api.model.models import *
 from api.jobs import update_job
+from scipy.stats import chi2_contingency
 
 from api.utils import create_upload_table
 import pandas as pd
+
+def get_test_distances(logger):
+    a = request.form.get('a')
+    b = request.form.get('b')
+    c = request.form.get('c')
+    d = request.form.get('d')
+
+    logger.debug(f"a: {a}")
+    logger.debug(f"b: {b}")
+    logger.debug(f"c: {c}")
+    logger.debug(f"d: {d}")
+
+    if not a or not b or not c or not d:
+        abort(400)
+
+    a = float(a)
+    b = float(b)
+    c = float(c)
+    d = float(d)
+
+    observations =  np.array([[a,b],[c,d]])
+    p = chi2_contingency(observations)[1]
+    logger.debug("p-value "+str(p))
+    return json.dumps(
+        {"p": float(p)}
+    )
+
 
 def get_distances(logger):
     repoId = request.form.get('file_name')
@@ -47,11 +76,22 @@ def get_distances(logger):
             session.execute("set enable_seqscan=false")
 
             file_id = db.session.query(UserFile).filter_by(name=repoId).one().id
-            exists = db.session.query(db.session.query(DistanceCache).filter_by(file_id=file_id).exists()).scalar()
+            #exists = db.session.query(db.session.query(DistanceCache).filter_by(file_id=file_id).exists()).scalar()
+
+            connection = db.get_engine().connect()
+            result = connection.execute(text(
+                "SELECT file_id FROM " + DistanceCache.__tablename__ + " WHERE file_id=" + str(file_id) + " LIMIT 1;"))
+            exists = result.rowcount == 1
 
             if exists:
                 logger.debug("Using cached result.")
-                query_result = db.session.query( DistanceCache.tumor_type_id, DistanceCache.distance, DistanceCache.mutation_code_id, DistanceCache.count).filter_by(file_id=file_id)
+
+                query = "SELECT t.tumor_type_id,t.distance,t.mutation_code_id,t.count  FROM " + DistanceCache.__tablename__ + " t WHERE file_id="+ str(file_id)+";"
+                res_df = pd.read_sql_query(query, db.get_engine())
+                print("finished reading from sql")
+                #query_result = db.session.query( DistanceCache.tumor_type_id, DistanceCache.distance, DistanceCache.mutation_code_id, DistanceCache.count).filter_by(file_id=file_id)
+                query_result = res_df.values
+
             else:
 
                 RegionTable = create_upload_table(session, repoId, create=False)
@@ -98,7 +138,7 @@ def get_distances(logger):
 
             for t in query_result:
                 from_allele, to_allele = mutation_code_dict[t[2]]
-                result[t.tumor_type_id].append([t[1], from_allele, to_allele, t[3]])
+                result[t[0]].append([int(t[1]), from_allele, to_allele, int(t[3])])
 
             result = [
                 {"tumorType": tumorType,

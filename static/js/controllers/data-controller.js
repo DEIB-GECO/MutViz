@@ -40,6 +40,7 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
                 file.identifier = response.data.id;
                 file.name = response.data.name;
                 file.parsed_lines =  response.data.parsed_lines;
+                file.avgLength=response.data.avgLength;
 
                 if(response.data.error && response.data.error.length>0)
                     file.errors = response.data.error;
@@ -131,6 +132,7 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
         file.repoId = repoEl.identifier;
         file.ready = true;
         file.valid = true;
+        file.avgLength =repoEl.avgLength;
         file.parsed_lines = repoEl.count;
 
         console.log(file);

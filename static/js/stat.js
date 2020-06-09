@@ -37,7 +37,9 @@ function uc1_test(full, selected) {
 }
 
 //
-function uc23_test(arr1, arr2) {
+function uc23_test(arr1, arr2, len1, len2) {
+    
+    console.log(len1, len2);
 
     TIMES = 10000;
 

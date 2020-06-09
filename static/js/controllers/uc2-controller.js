@@ -47,7 +47,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
 
                         f1 = $rootScope.dist_files[filename1];
                         f2 = $rootScope.dist_files[filename2];
-                        
+
                         descr = filename1+" "+filename2
 
                         $scope.load(f1, f2, descr);
@@ -78,7 +78,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
 
         filename1 = file1.identifier;
         filename2 = file2.identifier;
-        
+
         console.log("Load "+filename1+" "+filename2);
 
         $("#uc2").html("<svg></svg>")
@@ -87,7 +87,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
 
         if( filename1 in $rootScope.dist_files && "result" in $rootScope.dist_files[filename1] 
            && filename2 in $rootScope.dist_files && "result" in $rootScope.dist_files[filename2] ){ 
-            
+
             console.log("using cached")
 
             f1 = $rootScope.dist_files[filename1];
@@ -100,9 +100,9 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
             function onlyUnique(value, index, self) { 
                 return self.indexOf(value) === index;
             }
-            
+
             [file1,file2].filter(onlyUnique).forEach(function(file){
-                
+
                 console.log("asking to api file: "+file.identifier)
 
                 if(!(file.identifier in $rootScope.dist_files)) {
@@ -143,7 +143,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
     $scope.load = function(file1, file2, descr) {
 
         console.log("plotting "+file1.identifier+" "+file2.identifier+" descr:"+descr);
-        
+
         $("svg").css("height", window.innerHeight);
 
         $scope.test.pvalue = null;
@@ -151,7 +151,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         // Filter by selected tumor type
         res1 = $rootScope.filterDistances(file1.result, $rootScope.tumorTypes.current.identifier);
         res2 = $rootScope.filterDistances(file2.result, $rootScope.tumorTypes.current.identifier);
-        
+
         plotData = $scope.getData(file1.name, file2.name, res1, res2);
 
 
@@ -206,7 +206,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
 
         // Save last result
         $rootScope.lastResult = JSON.stringify(plotData);
-        
+
         // Generate the plot
         $scope.plot.d3graph = uc2(plotData,
                                   $scope.plot.binSize,
@@ -257,7 +257,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
 
         res1 = $rootScope.filterDistances(f1.result, $rootScope.tumorTypes.current.identifier);
         res2 = $rootScope.filterDistances(f2.result, $rootScope.tumorTypes.current.identifier);
-        
+
         plotData = $scope.getData(file1.name, file2.name, res1, res2);
 
         uc2_update(plotData,
@@ -330,6 +330,8 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         f1 = $rootScope.dist_files[$scope.file_selector.file1.identifier];
         f2 = $rootScope.dist_files[$scope.file_selector.file2.identifier];
 
+        console.log(f1)
+
         res1 = $rootScope.filterDistances(f1.result, $rootScope.tumorTypes.current.identifier);
         res2 = $rootScope.filterDistances(f2.result, $rootScope.tumorTypes.current.identifier);
 
@@ -342,22 +344,103 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
                          $scope.slider.noUiSlider.get()[0], $scope.slider.noUiSlider.get()[1]);
 
 
-        mbins1 = bins1.map(function(bin){
-            return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
-        })
+        console.log(bins1);
 
-        mbins2 = bins2.map(function(bin){
-            return bin.map(function(mut){return mut[3]}).reduce(function(x,y){return x+y}, 0)
-        })
+        reg1_start = -(f1.avgLength-1)/2
+        reg1_stop  = +(f1.avgLength-1)/2
 
-        mutation_count = $rootScope.tumorTypes.current.mutation_count;
+        reg2_start = -(f2.avgLength-1)/2
+        reg2_stop  = +(f2.avgLength-1)/2
 
-        norm1 = mbins1.map(function(x){return x/mutation_count});
-        norm2 = mbins2.map(function(x){return x/mutation_count});
 
-        $scope.test.pvalue = uc23_test(norm1, norm2);
+        region_bins1 = bins1.filter(function(bin){
+            return reg1_start>=bin.x0  && reg1_start<bin.x1 || reg1_stop>bin.x0  && reg1_stop<=bin.x1 || (bin.x0>reg1_start && bin.x1<reg1_stop)
+        }) 
 
-       
+        region_bins2 = bins2.filter(function(bin){
+            return reg2_start>=bin.x0  && reg2_start<bin.x1 || reg2_stop>bin.x0  && reg2_stop<=bin.x1 || (bin.x0>reg2_start && bin.x1<reg2_stop)
+        }) 
+
+        flanking_bins1 =  bins1.filter(function(bin){
+            return !region_bins1.includes(bin)
+        }) 
+
+        flanking_bins2 =  bins2.filter(function(bin){
+            return !region_bins2.includes(bin)
+        }) 
+
+
+        function mapvalues(x){
+            return x.map(function(x){return x[3];}).reduce(function(x,y){return x+y},0)
+        }
+
+
+        region_bins1_count = region_bins1.map(mapvalues).reduce(function(x,y){return x+y},0);
+        region_bins2_count = region_bins2.map(mapvalues).reduce(function(x,y){return x+y},0);
+        flanking_bins1_count = flanking_bins1.map(mapvalues).reduce(function(x,y){return x+y},0);
+        flanking_bins2_count = flanking_bins2.map(mapvalues).reduce(function(x,y){return x+y},0);
+
+        region_bins1_len =region_bins1.map(function(x){return Math.abs(x.x1-x.x0)}).reduce(function(x,y){return x+y},0);
+        region_bins2_len =region_bins2.map(function(x){return Math.abs(x.x1-x.x0)}).reduce(function(x,y){return x+y},0);
+        flanking_bins1_len = flanking_bins1.map(function(x){return Math.abs(x.x1-x.x0)}).reduce(function(x,y){return x+y},0);
+        flanking_bins2_len = flanking_bins2.map(function(x){return Math.abs(x.x1-x.x0)}).reduce(function(x,y){return x+y},0);
+
+        console.log("r1: "+reg1_start+"-"+reg1_stop)
+        console.log("r2: "+reg2_start+"-"+reg2_stop)
+        console.log(region_bins1)
+        console.log(region_bins2)
+        console.log(flanking_bins1)
+        console.log(flanking_bins2)
+
+        if(region_bins1_count==0) {
+            region_bins1_count = flanking_bins1_count;
+            region_bins1_len = flanking_bins1_len;
+        }
+
+        if(region_bins2_count==0) {
+            region_bins2_count = flanking_bins2_count;
+            region_bins2_len = flanking_bins2_len;
+        }
+
+        a = region_bins1_count/region_bins1_len
+        b = flanking_bins1_count/flanking_bins1_len
+        c = region_bins2_count/region_bins2_len
+        d = flanking_bins2_count/flanking_bins2_len
+
+        console.log("region_bins1_count:"+region_bins1_count)
+        console.log("region_bins1_len:"+region_bins1_len)
+        console.log("flanking_bins1_count:"+flanking_bins1_count)
+        console.log("flanking_bins1_len:"+flanking_bins1_len)
+        console.log("region_bins2_count:"+region_bins2_count)
+        console.log("region_bins2_len:"+region_bins2_len)
+        console.log("flanking_bins2_count:"+flanking_bins2_count)
+        console.log("flanking_bins2_len:"+flanking_bins2_len)
+
+        console.log("a: "+a+", b: "+b+", c: "+c+", d:"+d);
+        request_body = {a:a,b:b,c:c,d:d};
+
+        // Call the API
+        $http({
+            method: 'POST',
+            data: $.param(request_body),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            url: API_R01+"test"
+        }).then(
+            function success(response) {
+               $scope.test.pvalue = response.data.p.toExponential(3);
+            }
+            , 
+            function error(response) {
+                console.error("error");
+                window.alert("An error occurred.");
+            }
+        );
+
+
+
+        //$scope.test.pvalue = uc23_test(norm1, norm2,f1.avgLength, f2.avgLength );
+
+
     }
 
     $scope.getData = function(name1, name2, res1, res2)  {

@@ -43,7 +43,7 @@ executor = Executor(app)
 
 with app.app_context():
     DEBUG_MODE = True
-    DEBUG_MODE = False
+    #DEBUG_MODE = False
 
     RESULTS_CACHE = {}
 
@@ -74,7 +74,7 @@ with app.app_context():
     res = UserFile.query.filter_by(preloaded=True).all()
     repositories_dict = dict()
     for r in res:
-        repositories_dict[str(r.name)] = (r.id, r.name, r.description, r.count)
+        repositories_dict[str(r.name)] = (r.id, r.name, r.description, r.count, r.avg_length)
     del res
 
 
@@ -106,6 +106,10 @@ def check(regions_name):
 @app.route(MUTVIZ_CONF["base_url"] + '/api/distance/', methods=['POST'])
 def get_distances():
     return api.distance.get_distances(logger)
+
+@app.route(MUTVIZ_CONF["base_url"] + '/api/distance/test', methods=['POST'])
+def get_test_distances():
+    return api.distance.get_test_distances(logger)
 
 @app.route(MUTVIZ_CONF["base_url"] + '/api/repository/')
 def get_repository():

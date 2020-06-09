@@ -1,4 +1,5 @@
 import uuid
+import pandas as pd
 
 from api import MUTVIZ_CONF, app, repositories_dict, tumor_type_dict, parse_input_regions, db, \
     create_upload_table, logger, create_upload_table_full, UserFile
@@ -10,8 +11,9 @@ def get_repository():
                      "name": name,
                      "description": description,
                      "count": count,
+                     "avgLength":avg
                      }
-                    for identifier, (id, name, description, count) in
+                    for identifier, (id, name, description, count, avg) in
                     sorted(repositories_dict.items(), key=lambda x: x[1][1])  # sort by name
                     ]
     return json.dumps(repositories)
@@ -83,8 +85,13 @@ def upload_regions(logger):
         create_upload_table_full(session, id, createUpload=True, regions=regions)
         create_upload_table(session, id, create=True)
 
+        df_regions = pd.DataFrame(regions, columns=['chr', 'start', 'stop'])
+        df_regions["len"] = df_regions["stop"]-df_regions["start"]+1
+        avg_len = df_regions["len"].mean()
+
+
         # Add an entry to the user file
-        uf = UserFile(name=id, preloaded=False, count=len(regions))
+        uf = UserFile(name=id, preloaded=False, count=len(regions), avg_length=avg_len)
         session.add(uf)
 
         session.commit()
