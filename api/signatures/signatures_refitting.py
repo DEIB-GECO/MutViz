@@ -99,7 +99,7 @@ def frequencies(df):
                 codon_freq[triplet] = 1
 
     df_dask = ddf.from_pandas(df,npartitions=10)  # where the number of partitions is the number of cores you want to use
-    df_dask.apply(lambda x: iteration(x), meta=('str')).compute(scheduler='multiprocessing')
+    df_dask.apply(lambda x: iteration(x), meta=('str'), axis=1).compute(scheduler='multiprocessing')
 
 
     print("frequencies: for loop  took %s seconds ---" % (time.time() - start_time))
