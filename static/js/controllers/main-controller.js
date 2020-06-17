@@ -15,8 +15,8 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
     // Filter
     $rootScope.filter = {
         conditions : {},
-        keys : ["age", "sex", "stage", "cell-line"],
-        values : ["1","2","4", "5"],
+        keys : [],
+        values : [],
         undefined_count: null,
         newCondition: { key: null, values: []},
         testCount : 0,
