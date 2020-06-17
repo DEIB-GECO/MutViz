@@ -81,9 +81,10 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
 
     $rootScope.resetFilter = function(){
         $rootScope.filter.showTest = false;
-        $rootScope.filter.conditions = {}
-        $rootScope.filter.keys = []
-        $rootScope.filter.values = []
+        $rootScope.filter.conditions = {};
+        $rootScope.filter.keys = [];
+        $rootScope.filter.values = [];
+        $rootScope.filter.undefined_count = 0;
         $rootScope.filter.newCondition = { key: null, values: []}
         $rootScope.testConditions();
     }
@@ -103,6 +104,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
             function success(response) {
                 $rootScope.filter.values = response.data.values;
                 $rootScope.filter.undefined_count = $rootScope.tumorTypes.current.donor_count - response.data.values_count;
+                if($rootScope.filter.undefined_count<0) $rootScope.filter.undefined_count=0;
                 //[{value:.., count...}]
             }, 
             function error(response) {
