@@ -281,15 +281,33 @@
 </main>
 
 <div class="modal" tabindex="-1" role="dialog" id="infoModal">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog" role="document" style="max-width: 700px;">
         <div class="modal-content">
             <div class="modal-header">
-                Description
+                HISTOGRAM
             </div>
             <div class="modal-body">
-                <p id="modal_description">
-                    ...
-                </p>
+                <div id="modal_description">
+                    The visualization consists of an histogram showing the distribution of mutations around the regions in the provided region-set. The <b>x-axis</b> represents the distance from the middle point of the provided regions, computed as <code>(start+stop)/2</code>, and the <b>y-axis</b> represents the number of mutations falling in the corresponding bin.
+                    Use the toolbar on the left to select:
+                    <ul>
+                        <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
+                    <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed.</li>
+                    <li><b>Mutation classes</b>: while they gray rectangles show all the mutations, colored bars represent only the selected mutation classes. </li>
+                        <li>By enabling the <b>stacked</b> option the tool will represent each selected mutation class with a different color. </li>
+                         
+                        <li>Disabling <b>show total</b>, the gray bars representing all the mutations will be removed from the plot.</li>
+                        <li><b>bin size</b>: number of base pairs per bin.</li>
+                        <li><b>min-y</b>: the mininum height for the y-axis.</li>
+                </ul>
+                    
+                    The horizontal slider helps restricting the domain.<br>
+                    
+                    The <b>statistical test</b> box allows to select the area to test for hyper(hypo)-mutation by specifying  the initial and final x-coordinate of the area. The testing area is displayed in the plot as a light-blue rectangle. The <b>bin-coordinate</b> column shows the bins corresponding to the selected coordinates. The p-value is the result of the performed permutation test. 
+                    <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
+                    For further details, please refer to our latest <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">publication</a>.
+
+                </div>
 
             </div>
             <div class="modal-footer">

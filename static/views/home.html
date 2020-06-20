@@ -41,31 +41,19 @@ TADs are particular three-dimensional structures that can be found in chromosome
         <h2 style="padding: 5px;">MutViz</h2>
 
         <div style="padding-left: 15px; margin-bottom: 10px;">
-            <p>This tool is designed to help analysts visualize the mutation activity in the surroundings of user-provided DNA regions or in the surroundings of regions contained in one of the datasets available in our repository, with the possibility of selecting: </p>
-            <ul>
+            <p>MutViz helps identifying <b>enrichments of somatic mutations</b> on qualified sets of genomic regions. The tool provides <b>visualization</b> as well assimple <b>statistical</b>  features,  finding  its  best  application  in  the exploration of mutation enrichments in given cancer types on arbitrarily selected genomic regions. <br>Users can choose among <b>several  mutation  datasets</b>  collected  from  public  repositories and  upload  <b>custom  sets  of  genomic  regions</b>  in  a  bed  file format.  <br>Moreover,  the  tool  provides  visualization  features that ease the comparative analysis between different types ofmutations (e.g., ”C→T” is one such type) and different sets of regions and mutations. </p>
+        
+            
+            We currently support mutations for the following tumor types:<br>
 
-                <li>
-                    Mutations from a  specific <b>Tumor Type:</b> Available tumor types are:<br>
-                
-                        <select style="margin-bottom: 5px;">
-                             <option ng-repeat="t in tumorTypes.available">{{t.name}}</option>
-                        </select>
-                       
-                
-                </li>
-                <li>
-                    <b>Mutation Type:</b> consider only subsets of all the possible mutations. The following are three examples of the notation used for denoting a mutation:
-                    <ul>
-                        <li>A mutation from A to C is denoted by <i>"A > C"</i>.</li>
-                        <!--li>An addition of C is denoted by <i>"- > C"</i>.</li>
-<li>An deletion of C is denoted by <i>"C > -"</i>.</li-->
-                        <li>A mutation of A to any of the other nucleobases is denoted by  <i>"A > *"</i>.
-                        </li>
-                        <li>A mutation of any other nucleobase to A is denoted by  <i>"* > A"</i>.
-                        </li>
-                    </ul>
-                </li>
-            </ul>
+                    <select style="margin-bottom: 5px;">
+                        <option ng-repeat="t in tumorTypes.available">{{t.name}}</option>
+            </select>
+            <br>
+            The database was build starting from <a href="https://icgc.org/">ICGC</a> data.
+            
+            <br><br>
+         
 
             <h4>Data and Workspace</h4>
             <p>
@@ -76,85 +64,103 @@ TADs are particular three-dimensional structures that can be found in chromosome
 chr10	102639678	102639697	*</pre>
 
                 </li>
-                <li>Or choosing a dataset from our public repository.</li>
+                <li>Or choosing a dataset from our public repository.<br>
+                
+                    <select style="margin-bottom: 5px;">
+                        <option ng-repeat="t in repository">{{t.name}}</option>
+                    </select>
+
+                </li>
             </ul>
 
-            Once the dataset is added, the processing required to produce the visualizations will be triggered on the server. The dataset will be available in the worskpace only when the processing terminates. 
-
-            The same result returned by the server to the visualization tool can be download by the user in CSV format by clicking on the "download" link available for any processed dataset in the workspace and selecting the desired tumor type:
-            <br> <br>
-            <pre style="background-color: aliceblue; padding: 15px;">distance	A->G	G->A	C->T	T->C	A->C	A->T	C->A	C->G	G->C	G->T	T->A	T->G	total
-0	2	0	2	0	0	0	1	0	0	0	0	0	5
-1	0	0	2	0	0	0	2	0	0	0	0	0	4
-2	0	0	0	3	0	0	0	0	2	0	0	0	5
-3	0	0	0	0	0	0	0	0	0	1	0	0	1</pre><br>
-            <p>
-                where the first column represents the distance from a region in the dataset, the following 12 columns represent the number of mutations found at that distance for one of the 12 possible types of mutation, and the last column represents the total number of mutations at that distance (i.e. the sum of the previous 12 cells).
-            </p>
+            The workspace structure is stored on the browser's local storage and will be available until the local storage is deleted.  Therefore, closing the browser or reloading the page won't erase data in your work space. However, uploaded region sets will disappear from the workspace as soon as their survival time on our database expires (few days).
 
 
-            <h4>Horizontal axis and interaction</h4>
+            <!--h4>Horizontal axis and interaction</h4>
 
-            <p>In all the plots the horizontal axis represents the distance of a mutation w.r.t. the center of a region. The domain can be enlarged or shrinked by using the availble range-selector component.</p>
-            <br>
-            <img src="img/slider.png" width="500">
+<p>In all the plots the horizontal axis represents the distance of a mutation w.r.t. the center of a region. The domain can be enlarged or shrinked by using the availble range-selector component.</p>
+<br>
+<img src="img/slider.png" width="500">
 
-            <br><br>
+<br><br>
 
-            <h4>Binning and interaction</h4>
-            Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can be changed by using the form available on the left side of each plot. Bins are centered on the motif (i.e. on 0).
-            <br><br>
-            <img src="img/bin_size.png" width="200">
+<h4>Binning and interaction</h4>
+Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can be changed by using the form available on the left side of each plot. Bins are centered on the motif (i.e. on 0).
+<br><br>
+<img src="img/bin_size.png" width="200">
 
-            <br><br>
-            <h4>Mutation Set selector</h4>
-            <p>The tooldbar on the left of every plot allows to restrict the set of mutations to consider. Mutations in the defined set must be independed (e.g. you cannot choose "A > *" and "A > C"). If the set contains conditions that are not independed an error message will popup and the plot will not be updated until the defined set is fixed. </p>
-            <img src="img/mutations.png" width="200">
+<br><br>
+<h4>Mutation Set selector</h4>
+<p>The tooldbar on the left of every plot allows to restrict the set of mutations to consider. Mutations in the defined set must be independed (e.g. you cannot choose "A > *" and "A > C"). If the set contains conditions that are not independed an error message will popup and the plot will not be updated until the defined set is fixed. </p>
+<img src="img/mutations.png" width="200"-->
 
+            <div class="text-center">
+                <h2>MUTVIZ 2019</h2>
+                <hr>
+            </div>
 
-            <h2>View 1: Mutations</h2>
+            Visualizations in this section were presented at the IEEE BIBM 2019 Conference, San Diego. You can find the related publication on <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">IEEE Xplore</a>. <br><br>
+
+            <h2> <a href="#!/uc1" target="_blank" style="color: #24587e;">Histogram</a></h2>
             <div class="row">
                 <div class="col-md-8">
-                    <p>The first interactive plot is an histogram that aims to provide an insight on the class of mutations that are mostly affecting the area surrounding the regions in a selected dataset. The interactive toolbar on the left side allows the selection of: </p>
+                    The visualization consists of an histogram showing the distribution of mutations around the regions in the provided region-set. The <b>x-axis</b> represents the distance from the middle point of the provided regions, computed as <code>(start+stop)/2</code>, and the <b>y-axis</b> represents the number of mutations falling in the corresponding bin.
+                    Use the toolbar on the left to select:
                     <ul>
-                        <li>A dataset among those available in the workspace</li>
-                        <li>A specific tumor type</li>
-                        <li>A class of mutations</li>
+                        <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
+                        <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed.</li>
+                        <li><b>Mutation classes</b>: while they gray rectangles show all the mutations, colored bars represent only the selected mutation classes. </li>
+                        <li>By enabling the <b>stacked</b> option the tool will represent each selected mutation class with a different color. </li>
+
+                        <li>Disabling <b>show total</b>, the gray bars representing all the mutations will be removed from the plot.</li>
+                        <li><b>bin size</b>: number of base pairs per bin.</li>
+                        <li><b>min-y</b>: the mininum height for the y-axis.</li>
                     </ul>
 
-                    <!--p>It is known that specific tumor types are associated to specific classes of mutations. For instance, Melanoma and Skin Tumor are generally associated to mutations of type "C > T" and "G > A", that are supposed to be caused by sun rays.</p>
-<p>Independently on the selected class of mutations, grey bars on the background will always represent the total amount of mutations, of any kind, contained in their respective bin.</p>
-<p>The mutation types defined in the mutation set will be displayed as stacked bars of different color (or as a single bar if the "stacked" option is unselected). </p>
-<p>This visualization can help determine the set of mutations that should be considered in the remaining interactive visualizations described in the next sections. </p-->
+                    The horizontal slider helps restricting the domain.<br>
+
+                    The <b>statistical test</b> box allows to select the area to test for hyper(hypo)-mutation by specifying  the initial and final x-coordinate of the area. The testing area is displayed in the plot as a light-blue rectangle. The <b>bin-coordinate</b> column shows the bins corresponding to the selected coordinates. The p-value is the result of the performed permutation test. 
+                    <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
+                    For further details, please refer to our latest <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">publication</a>.
 
                 </div>
                 <div class="col-md-4 text-center" >
                     <div style="background-image: url('img/example1.png');background-repeat: no-repeat; background-position: center; background-size: contain;">
 
-                        <div style="background-color: #0000001c;  height: 200px; line-height: 200px;">
+                        <div style="background-color: #dedede1c;  height: 200px; line-height: 200px;">
                             <!--a href="index.html#!/uc1?showExample=1" class="btn btn-primary" style=" vertical-align: middle;">Load Example</a-->
                         </div>
                     </div>
                 </div>
 
-          
+
             </div>
 
             <br><br>
 
-            <h2>View 2: Region Comparison</h2>
+            <h2><a href="#!/uc2" target="_blank" style="color: #24587e;">Region Comparison</a></h2>
             <div class="row">
                 <div class="col-md-8">
 
-                    <p>The second interactive plot helps comparing the mutation activity for two different datasets given a tumor type and a set of mutation types. </p>
+                    The visualization allows to compare the distribution of mutations around regions in <b>two different region-sets</b> through a heat-map. The <b>x-axis</b> represents the distance from the middle point of the provided regions, computed as <code>(start+stop)/2</code>, the <b>y-axis</b> discriminates the two selected region sets and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations.
+                    Use the toolbar on the left to select:
+                    <ul>
+                        <li><b>Two region sets</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
+                        <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed.</li>
+                        <li><b>Mutation classes</b>: only mutations belonging to the selected classes will be displayed. </li>
+                        <li><b>bin size</b>: number of base pairs per bin.</li>
+                    </ul>
 
-                    <p>In each row of the heatmap (independently), normalization is performed by dividing the number of elements in each bin by the maximum number of element contained in a bin in that row. Note that the same color on different rows does not denote the same amount of mutations; the objective is to compare densities. </p>
+                    The horizontal slider helps restricting the domain.<br/>
+
+                    The <b>statistical test</b> returns a p-value representing how different are the currently-displayed distributions. <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
+                    For further details, please refer to our latest <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">publication</a>.
 
                 </div>
                 <div class="col-md-4 text-center" >
                     <div style="background-image: url('img/example2.png');background-repeat: no-repeat; background-position: center; background-size: contain;">
 
-                        <div style="background-color: #0000001c;  height: 200px; line-height: 200px;">
+                        <div style="background-color: #dedede1c;  height: 200px; line-height: 200px;">
                             <!--a href="index.html#!/uc2?showExample=1" class="btn btn-primary" style=" vertical-align: middle;">Load Example</a-->
                         </div>
                     </div>
@@ -163,19 +169,27 @@ chr10	102639678	102639697	*</pre>
 
             <br><br>
 
-            <h2>View 3: Tumor Types Comparison</h2>
+            <h2><a href="#!/uc3" target="_blank" style="color: #24587e;">Tumor types comparison</a></h2>
             <div class="row">
                 <div class="col-md-8">
-                    <p>The third interactive plot is a heatmap can be used to compare the effect of a selected set of mutations from different tumor types, provided a datasets from the workspace. For instance, considering only "C > T" and "G > A", we can see how they are mostly affecting motifs in patients with Melanoma and Skin Tumor, since those mutations are most likely caused by sun rays. </p>
+                    The visualization allows to compare the distribution of <b>mutations from different tumor-types</b> around regions in two provided region-set through a heat-map. The <b>x-axis</b> represents the distance from the middle point of the provided regions, computed as <code>(start+stop)/2</code>, the <b>y-axis</b> discriminates the selected tumor-types and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations.
+                    Use the toolbar on the left to select:
+                    <ul>
+                        <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
+                        <li><b>Multiple tumor types</b>: each row of the heatmap shows the distribution of mutations for a given tumor type.</li>
+                        <li><b>Mutation classes</b>: only mutations belonging to the selected classes will be displayed. </li>
+                        <li><b>bin size</b>: number of base pairs per bin.</li>
+                    </ul>
 
-                    <p> Each row of the heatmap shows the mutation density of the selected class of mutations for a specific tumor type. </p>
+                    The horizontal slider helps restricting the domain.<br/>
 
-                    <p>In each row (independently), normalization is performed by dividing the number of elements in each bin by the maximum number of element contained in a bin in that row./p>
+                    The <b>statistical test</b> returns a p-value representing how different are the currently-displayed distributions. <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
+                    For further details, please refer to our latest <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">publication</a>.
                 </div>
                 <div class="col-md-4 text-center" >
                     <div style="background-image: url('img/example3.png');background-repeat: no-repeat; background-position: center; background-size: contain;">
 
-                        <div style="background-color: #0000001c;  height: 200px; line-height: 200px;">
+                        <div style="background-color: #dedede1c;  height: 200px; line-height: 200px;">
                             <!--a href="index.html#!/uc3?showExample=1" class="btn btn-primary" style=" vertical-align: middle;">Load Example</a-->
                         </div>
                     </div>
@@ -183,7 +197,118 @@ chr10	102639678	102639697	*</pre>
             </div>
         </div>
 
+
+        <div class="text-center">
+            <h2>MUTVIZ 2020</h2>
+            <hr>
+        </div>
+        
+        Differently from the visualiations in MutViz 2019 (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given M the set of mutations and R the region set, the considered set of mutations is:
+             
+                    <div class="text-center">
+                        <code>{m in M : &exist;r in R, m.position &ge; r.start AND m.position &le;= r.stop} </code>
+                    </div>
+
+
         <br><br>
+        
+        <h2><a href="#!/uc4" target="_blank" style="color: #24587e;">Trinucleotide</a></h2>
+            <div class="row">
+                <div class="col-md-8">
+                   The visualization consists of bar-plot representing the distribution of the six classes of base substitution (C→A,C→G, C→T, T→A, T→C, T→G) w.r.t the provided region set. <br><br>
+                    
+                    This visualization takes into account the  information  from  the  5’  and  3’  adjacent  bases  (also called  flanking  base  pairs  or  trinucleotide  context)  leading  to <b>96</b> possible mutation types (e.g. A[C→A]A, A[C→A]T, etc.). The  mutation  catalog  of  a  tumor  is  created  by  categorizing each  single  nucleotide  variant  (SNV)  (synonyms:  base-pairsubstitution  or  substitution  point  mutation)  in  one  of  the  96 mutation types and counting the total number of substitutionsfor each of these 96 mutation types.<br><br>
+
+                    The <b>horizontal-axis</b> discriminates the  96 mutation types and the <b>y-axis</b> represents the number of mutations intersecting the region-set for that type. Plots are grouped by the class of base substitution.<br>
+                    Use the toolbar on the left to select: <br>
+                    <ul>
+                        <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
+                        <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed. You can further <b>filter mutations</b> by providing a predicate on the <b>clinical condition</b> of donors associated to the selected tumor type. Click on the filter-button next to the tumor-type selector to open the predicate editor. On top of the editor you will see the number of donors matching the current predicate.</li>
+                        <li><b>Mutation classes</b>: only mutations belonging to the selected classes will be displayed. </li>
+                    </ul>
+                    
+                </div>
+                <div class="col-md-4 text-center" >
+                    <div style="background-image: url('img/example4.png');background-repeat: no-repeat; background-position: center; background-size: contain;">
+
+                        <div style="background-color: #dedede1c;  height: 200px; line-height: 200px;">
+                            <!--a href="index.html#!/uc1?showExample=1" class="btn btn-primary" style=" vertical-align: middle;">Load Example</a-->
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <br><br>
+        
+        <h2><a href="#!/uc5" target="_blank" style="color: #24587e;">Donors distribution</a></h2>
+            <div class="row">
+                <div class="col-md-8">
+                    The visualization shows a box plot for each class of base substitution (C→A,C→G, C→T, T→A, T→C, T→G), representing the distribution of <b>mutations per-donor</b> overlapping regions in the provided region set. The box-plots on the right group the selected mutation types into transitions (Ti) and transversions (Tv).<br>
+
+                    When the <b>show trinucleotide</b> option is enabled, the visualization takes into account the  information  from  the  5’  and  3’  adjacent  bases  (also called  flanking  base  pairs  or  trinucleotide  context)  leading  to <b>96</b> possible mutation types (e.g. A[C→A]A, A[C→A]T, etc.). The  mutation  catalog  of  a  tumor  is  created  by  categorizing each  single  nucleotide  variant  (SNV)  (synonyms:  base-pairsubstitution  or  substitution  point  mutation)  in  one  of  the  96 mutation types and counting the total number of substitutionsfor each of these 96 mutation types.
+
+                    The <b>horizontal-axis</b> discriminates the 6 (96) mutation types (trinucleotide types) and the  <b>vertical-axis</b> represents the number of mutations per-donor, of that type, overlapping regions in the region-set.<br>
+                    Hovering the box-plot with your mouse you will be able to get more information on the distribution and on outliers (e.g. you can get the donor-id associated to an outlier).
+                    Use the toolbar on the left to select:<br>
+                    <ul>
+                        <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
+                        <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed. You can further <b>filter mutations</b> by providing a predicate on the <b>clinical condition</b> of donors associated to the selected tumor type. Click on the filter-button next to the tumor-type selector to open the predicate editor. On top of the editor you will see the number of donors matching the current predicate.</li>
+                        <li><b>Mutation classes</b>: only mutations belonging to the selected classes will be displayed. </li>
+                    </ul>
+
+
+                    
+                </div>
+                <div class="col-md-4 text-center" >
+                    <div style="background-image: url('img/example5.png');background-repeat: no-repeat; background-position: center; background-size: contain;">
+
+                        <div style="background-color: #dedede1c;  height: 200px; line-height: 200px;">
+                            <!--a href="index.html#!/uc1?showExample=1" class="btn btn-primary" style=" vertical-align: middle;">Load Example</a-->
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <br><br>
+        
+        <h2><a href="#!/uc6" target="_blank" style="color: #24587e;">Signatures</a></h2>
+            <div class="row">
+                <div class="col-md-8">
+                    Given  a  catalogue  of  mutational  <b>signatures</b> S and  a  set of  somatic mutations M found in a given  tumor genome, an  exposure e is  computed. The exposure predicts what fraction of the mutations found for the provided region-set can be attributed to a given signature. Exposures are computed such that the exposure-weighted sum of signatures reflects the distribution of mutation types. <br><br>
+                    
+                    This visualization shows an <b>bar-plot</b> in which, for each signature (horizontal-axis), the corresponding exposure (verical-axis) is reported. Alternatively, a <b>box-plot</b> for each signature shows the distribution of exposures over donors.<br><br>
+                    
+                    For higher accuracy in signature refitting, when the <b>threshold</b> is enabled (e.g. <code>threshold=N</code>), the tool will consider only tumors (synonims: donors, patients) for wich more than N mutations overlap regions in the provided region-set. In case less than 5 tumors have more than N mutations, the mutations are merged and an estimation of the average signatures' weights is provided.<br><br>
+                           
+                    In case the box-plot visualization is selected, hovering the box-plot with your mouse you will be able to get more information on the distribution and on outliers (e.g. you can get the donor-id associated to an outlier).<br><br>
+                    Use the toolbar on the left to select:<br>
+                    <ul>
+                        <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
+                        <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed. You can further <b>filter mutations</b> by providing a predicate on the <b>clinical condition</b> of donors associated to the selected tumor type. Click on the filter-button next to the tumor-type selector to open the predicate editor. On top of the editor you will see the number of donors matching the current predicate.</li>
+                        <li>A <b>threshold</b> (N): when enabled and set, only donors (tumors) with more than N mutations overlapping the region-set will be considered.</li>
+                        <li><b>Mutation classes</b>: only mutations belonging to the selected classes will be displayed. </li>
+                    </ul>
+                    <br><br>
+                    
+                    Once the plot is ready the number of considered patients will be displayed in the toolbar.
+                </div>
+                <div class="col-md-4 text-center" >
+                    <div style="background-image: url('img/example6.png');background-repeat: no-repeat; background-position: center; background-size: contain;">
+
+                        <div style="background-color: #dedede1c;  height: 200px; line-height: 200px;">
+                            <!--a href="index.html#!/uc1?showExample=1" class="btn btn-primary" style=" vertical-align: middle;">Load Example</a-->
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <br><br>
 
     </div>
 </main>

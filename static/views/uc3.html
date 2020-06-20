@@ -235,19 +235,29 @@
 </main>
 
 <div class="modal" tabindex="-1" role="dialog" id="infoModal">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog" role="document" style="max-width: 700px;">
         <div class="modal-content">
             <div class="modal-header">
-                Description
+                TUMORS COMPARISON
             </div>
             <div class="modal-body">
-                <p id="modal_description">
-                    ...
-                </p>
+                <div id="modal_description">
+                    The visualization allows to compare the distribution of <b>mutations from different tumor-types</b> around regions in two provided region-set through a heat-map. The <b>x-axis</b> represents the distance from the middle point of the provided regions, computed as <code>(start+stop)/2</code>, the <b>y-axis</b> discriminates the selected tumor-types and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations.
+                    Use the toolbar on the left to select:
+                    <ul>
+                        <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
+                        <li><b>Multiple tumor types</b>: each row of the heatmap shows the distribution of mutations for a given tumor type.</li>
+                        <li><b>Mutation classes</b>: only mutations belonging to the selected classes will be displayed. </li>
+                        <li><b>bin size</b>: number of base pairs per bin.</li>
+                    </ul>
 
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    The horizontal slider helps restricting the domain.<br/>
+
+                    The <b>statistical test</b> returns a p-value representing how different are the currently-displayed distributions. <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
+                    For further details, please refer to our latest <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">publication</a>.
+                </div>
+
+
             </div>
         </div>
     </div>

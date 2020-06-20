@@ -131,7 +131,7 @@
                     <button class="btn btn-white" 
                             style="width:100%"
                             ng-click="downloadPlot()"
-                            type="submit"><i class="fa fa-download"></i> Download Image (SVG)</button>
+                            type="submit"><i class="fa fa-download"></i> Download Image (PNG)</button>
                     <a id="dwn" target="_blank" style="display: none"></a>
 
                 </div>
@@ -180,16 +180,39 @@
 </main>
 
 <div class="modal" tabindex="-1" role="dialog" id="infoModal">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog" role="document" style="max-width: 700px;">
         <div class="modal-content">
             <div class="modal-header">
-                Description
+                DONORS DISTRIBUTION
             </div>
             <div class="modal-body">
-                <p id="modal_description">
-
-                    For higher accuracy in signature refitting, when the threshold is active only tumors with more than N (=threshold) mutations are considered, in case less than 5 tumors have more than N mutations, the mutations are merged and an estimation of the average signatures' weights is provided.
-                </p>
+                <div id="modal_description">
+                    
+                    Given  a  catalogue  of  mutational  <b>signatures</b> S and  a  set of  somatic mutations M found in a given  tumor genome, an  exposure e is  computed. The exposure predicts what fraction of the mutations found for the provided region-set can be attributed to a given signature. Exposures are computed such that the exposure-weighted sum of signatures reflects the distribution of mutation types. <br><br>
+                    
+                    This visualization shows an <b>bar-plot</b> in which, for each signature (horizontal-axis), the corresponding exposure (verical-axis) is reported. Alternatively, a <b>box-plot</b> for each signature shows the distribution of exposures over donors.<br><br>
+                    
+                    For higher accuracy in signature refitting, when the <b>threshold</b> is enabled (e.g. <code>threshold=N</code>), the tool will consider only tumors (synonims: donors, patients) for wich more than N mutations overlap regions in the provided region-set. In case less than 5 tumors have more than N mutations, the mutations are merged and an estimation of the average signatures' weights is provided.
+                    
+                     Differently from the first three visualiations (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given M the set of mutations and R the region set, the considered set of mutations is
+             
+                    <div class="text-center">
+                        <code>{m in M : &exist;r in R, m.position &ge; r.start AND m.position &le;= r.stop} </code>
+                    </div>
+            
+                   
+                    In case the box-plot visualization is selected, hovering the box-plot with your mouse you will be able to get more information on the distribution and on outliers (e.g. you can get the donor-id associated to an outlier).
+                    Use the toolbar on the left to select:<br>
+                    <ul>
+                        <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
+                        <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed. You can further <b>filter mutations</b> by providing a predicate on the <b>clinical condition</b> of donors associated to the selected tumor type. Click on the filter-button next to the tumor-type selector to open the predicate editor. On top of the editor you will see the number of donors matching the current predicate.</li>
+                        <li>A <b>threshold</b> (N): when enabled and set, only donors (tumors) with more than N mutations overlapping the region-set will be considered.</li>
+                        <li><b>Mutation classes</b>: only mutations belonging to the selected classes will be displayed. </li>
+                    </ul>
+                    
+                    Once the plot is ready the number of considered patients will be displayed in the toolbar.
+                    
+                </div>
 
             </div>
             <div class="modal-footer">
