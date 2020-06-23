@@ -39,11 +39,19 @@
                 <div class="col-md-12 text-center" style="margin-top:10px;">
                     <button class="btn btn-white"  style="width: 100%;"
                             ng-click="loadFile(file_selector.file)"
-                            ng-disabled="execution.running || file_selector.file==null"
+                            ng-disabled="execution.running || file_selector.file==null || file_selector.file.parsed_lines > 100000"
                             type="submit">
                         <i class="fa fa-play" style="font-size: 0.9em;
                                                      margin-right: 6px;"></i> Plot</button>
                     <a id="dwn_data" target="_blank" style="display: none"></a>
+                </div>
+
+                <div class="col-md-12" style="margin-top:10px;" ng-if=" file_selector.file!=null &&  file_selector.file.parsed_lines >100000 ">
+                    <p class="text-center" style="background-color: #fff38a; line-height: 30px; height: 90px;">
+                            <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i><br>
+                           This visualization does not support files containing more than 100K regions. 
+                        </p>
+                   
                 </div>
 
                 <div class="col-md-12" style="margin-top:10px;">
@@ -292,17 +300,17 @@
                     Use the toolbar on the left to select:
                     <ul>
                         <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
-                    <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed.</li>
-                    <li><b>Mutation classes</b>: while they gray rectangles show all the mutations, colored bars represent only the selected mutation classes. </li>
+                        <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed.</li>
+                        <li><b>Mutation classes</b>: while they gray rectangles show all the mutations, colored bars represent only the selected mutation classes. </li>
                         <li>By enabling the <b>stacked</b> option the tool will represent each selected mutation class with a different color. </li>
-                         
+
                         <li>Disabling <b>show total</b>, the gray bars representing all the mutations will be removed from the plot.</li>
                         <li><b>bin size</b>: number of base pairs per bin.</li>
                         <li><b>min-y</b>: the mininum height for the y-axis.</li>
-                </ul>
-                    
+                    </ul>
+
                     The horizontal slider helps restricting the domain.<br>
-                    
+
                     The <b>statistical test</b> box allows to select the area to test for hyper(hypo)-mutation by specifying  the initial and final x-coordinate of the area. The testing area is displayed in the plot as a light-blue rectangle. The <b>bin-coordinate</b> column shows the bins corresponding to the selected coordinates. The p-value is the result of the performed permutation test. 
                     <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
                     For further details, please refer to our latest <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">publication</a>.

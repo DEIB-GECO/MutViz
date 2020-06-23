@@ -46,11 +46,19 @@
                 <div class="col-md-12 text-center" style="margin-top:10px;">
                     <button class="btn btn-white"  style="width: 100%;"
                             ng-click="loadFiles(file_selector.file1, file_selector.file2)"
-                            ng-disabled="execution.running || file_selector.file1==null ||  file_selector.file2==null"
+                            ng-disabled="execution.running || file_selector.file1==null ||  file_selector.file2==null || file_selector.file1.parsed_lines > 100000 || file_selector.file2.parsed_lines > 100000"
                             type="submit">
                         <i class="fa fa-play" style="font-size: 0.9em;
                                                      margin-right: 6px;"></i> Plot</button>
                     <a id="dwn_data" target="_blank" style="display: none"></a>
+                </div>
+
+                <div class="col-md-12" style="margin-top:10px;" ng-if=" file_selector.file1!=null &&   file_selector.file2!=null && (file_selector.file1.parsed_lines >100000  || file_selector.file2.parsed_lines >100000)">
+                    <p class="text-center" style="background-color: #fff38a; line-height: 30px; height: 90px;">
+                        <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i><br>
+                        This visualization does not support files containing more than 100K regions. 
+                    </p>
+
                 </div>
 
 
