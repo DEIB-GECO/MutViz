@@ -171,8 +171,8 @@
                 <div class="col-md-12" style="margin-top:10px;" ng-show="loaded" >
                     <div class="row">
 
-                        <div class="col-md-12">
-                            <b>Statistical test</b>
+                        <div class="col-md-12 text-center">
+                            <b>Statistical test for selected mutation types</b>
                         </div>
 
                         <div class="col-md-12" style="margin-top: 10px; margin-bottom: 20px;">
@@ -296,7 +296,7 @@
             </div>
             <div class="modal-body">
                 <div id="modal_description">
-                    The visualization consists of an histogram showing the distribution of mutations around the regions in the provided region-set. The <b>x-axis</b> represents the distance from the middle point of the provided regions, computed as <code>(start+stop)/2</code>, and the <b>y-axis</b> represents the number of mutations falling in the corresponding bin.
+                    The visualization consists of an histogram showing the distribution of mutations around the regions in the provided region-set. The <b>x-axis</b> represents the distance from the center of the provided regions, computed as <code>(start+stop)/2</code>, and the <b>y-axis</b> represents the number of mutations falling in the corresponding bin.
                     Use the toolbar on the left to select:
                     <ul>
                         <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
@@ -313,7 +313,7 @@
 
                     The <b>statistical test</b> box allows to select the area to test for hyper(hypo)-mutation by specifying  the initial and final x-coordinate of the area. The testing area is displayed in the plot as a light-blue rectangle. The <b>bin-coordinate</b> column shows the bins corresponding to the selected coordinates. The p-value is the result of the performed permutation test. 
                     <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
-                    For further details, please refer to our latest <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">publication</a>.
+                    For further details, please refer to our  <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/"> 2019 IEEE BIBM paper</a>.
 
                 </div>
 

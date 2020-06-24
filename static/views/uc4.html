@@ -8,7 +8,7 @@
             <div class="row">
 
                 <div class="col-md-12 text-center">
-                    <h4 style="margin-top: 15px">Trinucleotides</h4>
+                    <h4 style="margin-top: 15px">Trinucleotide mutations</h4>
                     <a class="btn info-btn" data-toggle="modal" data-target="#infoModal"><i class="fa fa-info-circle"></i></a>
                 </div>
 
@@ -189,15 +189,16 @@
             </div>
             <div class="modal-body">
                 <div id="modal_description">
-                    The visualization consists of bar-plot representing the distribution of the six classes of base substitution (C→A,C→G, C→T, T→A, T→C, T→G) w.r.t the provided region set. Differently from the first three visualiations (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given M the set of mutations and R the region set, the considered set of mutations is
+                    The visualization consists of a bar-plot representing the distribution of the six classes of base substitutions (C→A,C→G, C→T, T→A, T→C, T→G) within their immediate sequence context which fall into the provided region set. <br><br>
+                    Differently from the first three visualiations (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given the set of mutations M and the region set R, the considered set of mutations is
              
                     <div class="text-center">
-                        <code>{m in M : &exist;r in R, m.position &ge; r.start AND m.position &le;= r.stop} </code>
+                        <code>{m in M : &exist;r in R, m.position &ge; r.start AND m.position &le; r.stop} </code>
                     </div>
             
-                    This visualization takes into account the  information  from  the  5’  and  3’  adjacent  bases  (also called  flanking  base  pairs  or  trinucleotide  context)  leading  to <b>96</b> possible mutation types (e.g. A[C→A]A, A[C→A]T, etc.). The  mutation  catalog  of  a  tumor  is  created  by  categorizing each  single  nucleotide  variant  (SNV)  (synonyms:  base-pairsubstitution  or  substitution  point  mutation)  in  one  of  the  96 mutation types and counting the total number of substitutionsfor each of these 96 mutation types.
+                    This visualization takes into account the  information  from  the  5’  and  3’  adjacent  bases  (also called  flanking  base  pairs  or  trinucleotide  context)  leading  to <b>96</b> possible mutation types (e.g. A[C→A]A, A[C→A]T, etc.). The  mutation  catalog  of  a  tumor  is  created  by  categorizing each  single  nucleotide  variant  (SNV)  (synonyms:  base-pair-substitution  or  substitution  point  mutation)  in  one  of  the  96 mutation types and counting the total number of substitutions for each of these 96 mutation types.
 
-                    The <b>horizontal-axis</b> discriminates the  96 mutation types and the <b>y-axis</b> represents the number of mutations intersecting the region-set for that type. Plots are grouped by the class of base substitution.<br>
+                    The <b>horizontal-axis</b> discriminates the  96 mutation types and the <b>y-axis</b> represents the number of mutations for that type falling onto the region-set. Plots are grouped by the class of base substitution.<br>
                     Use the toolbar on the left to select: <br>
                     <ul>
                         <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>

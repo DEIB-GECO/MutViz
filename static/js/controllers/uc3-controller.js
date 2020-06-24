@@ -216,6 +216,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.test.pvalue = null;
 
         types = $scope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.to!=null});
+        
+        if(types.length==0) return;
 
         // Make conditions exclusive
         exclusive = types.map( function(t){ 

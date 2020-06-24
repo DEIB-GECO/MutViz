@@ -85,17 +85,20 @@ function uc2_update(data, g, binSize, mutationTypes) {
 
     var maxInf1 = d3.max(binsf1, function(d) { return +uc2_yVal(d) });
     var maxf2 = d3.max(binsf2, function(d) { return +uc2_yVal(d) });
+    
+   g.global_max = Math.max(maxInf1,maxf2);
+    console.log("Max f1 f2: "+g.global_max);
 
 
     var binsf1Norm = binsf1.map( function(b){
-        b.value = uc2_yVal(b) / maxInf1;
+        b.value = uc2_yVal(b) / g.global_max;
         b.variable = data.f1.name;
         b.group = b.x0;
         return b;
     });
 
     var binsf2Norm = binsf2.map(function(b){
-        b.value = uc2_yVal(b) / maxf2; 
+        b.value = uc2_yVal(b) / g.global_max; 
         b.variable = data.f2.name;
         b.group = b.x0;
         return b;
@@ -118,6 +121,44 @@ function uc2_update(data, g, binSize, mutationTypes) {
     data = binsf1Norm.concat(binsf2Norm);
 
     uc2_addTracks(g, data);
+    
+     // ADD LEGEND
+    values = range(0,g.global_max,0.2);
+    
+    // remove 
+    d3.selectAll(".legend").remove();
+    d3.selectAll(".legend_ticks").remove();
+    
+    // create element for legend
+    legend_el = d3.select("#uc2 svg").append("g").lower().attr("transform","translate(" + g.margin.left + "," + 0 + ")")
+    
+    var legend = legend_el.selectAll(".legend") 
+    .data(values, function(d) {return d;})
+    .enter().append("g")
+    .attr("class", "legend");
+    
+    legendElementWidth = g.width/values.length;
+    height = 0;
+    gridSize = 10;
+
+    legend.append("rect")
+        .attr("x", function(d, i){ return legendElementWidth * i;})
+        .attr("y", height)
+        .attr("width", legendElementWidth)
+        .attr("height", gridSize/2)
+        .style("fill", function(d, i) {return uc2_getColor(d/g.global_max)});
+
+    // Setup the x axis
+    legend_scale = d3.scaleLinear().domain([0,g.global_max]).range([0,g.width]);
+    legend_xAxis = legend_el.append("g").attr("class","legend_ticks").attr("transform", "translate(0," + 0+ ")");
+    
+    yAxisTicks = legend_scale.ticks().filter(function(tick){return  Number.isInteger(tick);});
+    yAxis = d3.axisBottom(legend_scale)
+    .tickValues(yAxisTicks)
+    .tickFormat(d3.format('d'));
+    legend_xAxis.call(yAxis);
+    
+   
 
 
 }
@@ -141,7 +182,7 @@ function uc2(data, binSize, range, mutationTypes, stacked) {
     var g = {} // here we put all useful objects describing our plot
 
     // Set the dimensions and margins of the plot
-    g.margin = {top: 10, right: 30, bottom: 30, left: 40};
+    g.margin = {top: 30, right: 30, bottom: 30, left: 40};
     g.width  = 700 - g.margin.left - g.margin.right;
     g.height = 400 - g.margin.top - g.margin.bottom;
 

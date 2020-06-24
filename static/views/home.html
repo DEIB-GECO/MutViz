@@ -41,7 +41,7 @@ TADs are particular three-dimensional structures that can be found in chromosome
         <h2 style="padding: 5px;">MutViz</h2>
 
         <div style="padding-left: 15px; margin-bottom: 10px;">
-            <p>MutViz helps identifying <b>enrichments of somatic mutations</b> on qualified sets of genomic regions. The tool provides <b>visualization</b> as well assimple <b>statistical</b>  features,  finding  its  best  application  in  the exploration of mutation enrichments in given cancer types on arbitrarily selected genomic regions. <br>Users can choose among <b>several  mutation  datasets</b>  collected  from  public  repositories and  upload  <b>custom  sets  of  genomic  regions</b>  in  a  bed  file format.  <br>Moreover,  the  tool  provides  visualization  features that ease the comparative analysis between different types ofmutations (e.g., ”C→T” is one such type) and different sets of regions and mutations. </p>
+            <p>MutViz helps to identify <b>enrichments of somatic mutations</b> (single nucelotide variants) falling on predefined or user-specified sets of genomic regions, such as transcription factor binding sites, promoters, specific gene sets and others. <br>Users can choose among <b>several  mutation  datasets</b>  collected  from  public  repositories and  upload  <b>custom  sets  of  genomic  regions</b>  in  a  BED  file format.  <br>Moreover, MutViz provides visualization features _and simple statistics that ease the comparative analysis between different types ofmutations (e.g., ”C→T” is one such type) and different sets of regions and mutations. </p>
         
             
             We currently support mutations for the following tumor types:<br>
@@ -105,7 +105,7 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
             <h2> <a href="#!/uc1" target="_blank" style="color: #24587e;">Histogram</a></h2>
             <div class="row">
                 <div class="col-md-8">
-                    The visualization consists of an histogram showing the distribution of mutations around the regions in the provided region-set. The <b>x-axis</b> represents the distance from the middle point of the provided regions, computed as <code>(start+stop)/2</code>, and the <b>y-axis</b> represents the number of mutations falling in the corresponding bin.
+                    The visualization consists of an histogram showing the distribution of mutations around the regions in the provided region-set. The <b>x-axis</b> represents the distance from the center of the provided regions, computed as <code>(start+stop)/2</code>, and the <b>y-axis</b> represents the number of mutations falling in the corresponding bin.
                     Use the toolbar on the left to select:
                     <ul>
                         <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
@@ -122,7 +122,7 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
 
                     The <b>statistical test</b> box allows to select the area to test for hyper(hypo)-mutation by specifying  the initial and final x-coordinate of the area. The testing area is displayed in the plot as a light-blue rectangle. The <b>bin-coordinate</b> column shows the bins corresponding to the selected coordinates. The p-value is the result of the performed permutation test. 
                     <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
-                    For further details, please refer to our latest <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">publication</a>.
+                    For further details, please refer to our  <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/"> 2019 IEEE BIBM paper</a>.
 
                 </div>
                 <div class="col-md-4 text-center" >
@@ -139,11 +139,11 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
 
             <br><br>
 
-            <h2><a href="#!/uc2" target="_blank" style="color: #24587e;">Region Comparison</a></h2>
+            <h2><a href="#!/uc2" target="_blank" style="color: #24587e;">Region comparison</a></h2>
             <div class="row">
                 <div class="col-md-8">
 
-                    The visualization allows to compare the distribution of mutations around regions in <b>two different region-sets</b> through a heat-map. The <b>x-axis</b> represents the distance from the middle point of the provided regions, computed as <code>(start+stop)/2</code>, the <b>y-axis</b> discriminates the two selected region sets and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations.
+                    The visualization allows to compare the distribution of mutations around regions in <b>two different region-sets</b> through a heat-map. The <b>x-axis</b> represents the distance from the center of the provided regions, computed as <code>(start+stop)/2</code>, the <b>y-axis</b> discriminates the two selected region sets and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations.
                     Use the toolbar on the left to select:
                     <ul>
                         <li><b>Two region sets</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
@@ -154,8 +154,8 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
 
                     The horizontal slider helps restricting the domain.<br/>
 
-                    The <b>statistical test</b> returns a p-value representing how different are the currently-displayed distributions. <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
-                    For further details, please refer to our latest <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">publication</a>.
+                    The <b>statistical test</b> returns a p-value indicating how different the currently displayed distributions are.. <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
+                    For further details, please refer to our  <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/"> 2019 IEEE BIBM paper</a>.
 
                 </div>
                 <div class="col-md-4 text-center" >
@@ -170,10 +170,10 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
 
             <br><br>
 
-            <h2><a href="#!/uc3" target="_blank" style="color: #24587e;">Tumor types comparison</a></h2>
+            <h2><a href="#!/uc3" target="_blank" style="color: #24587e;">Tumor comparison</a></h2>
             <div class="row">
                 <div class="col-md-8">
-                    The visualization allows to compare the distribution of <b>mutations from different tumor-types</b> around regions in two provided region-set through a heat-map. The <b>x-axis</b> represents the distance from the middle point of the provided regions, computed as <code>(start+stop)/2</code>, the <b>y-axis</b> discriminates the selected tumor-types and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations.
+                    The visualization allows to compare the distribution of <b>mutations from different tumor-types</b> around regions in two provided region-set through a heat-map. The <b>x-axis</b> represents the distance from the center of the provided regions, computed as <code>(start+stop)/2</code>, the <b>y-axis</b> discriminates the selected tumor-types and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations.
                     Use the toolbar on the left to select:
                     <ul>
                         <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
@@ -184,8 +184,8 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
 
                     The horizontal slider helps restricting the domain.<br/>
 
-                    The <b>statistical test</b> returns a p-value representing how different are the currently-displayed distributions. <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
-                    For further details, please refer to our latest <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">publication</a>.
+                    The <b>statistical test</b> returns a p-value indicating how different the currently displayed distributions are.. <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
+                    For further details, please refer to our  <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/"> 2019 IEEE BIBM paper</a>.
                 </div>
                 <div class="col-md-4 text-center" >
                     <div style="background-image: url('img/example3.png');background-repeat: no-repeat; background-position: center; background-size: contain;">
@@ -204,23 +204,23 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
             <hr>
         </div>
         
-        Differently from the visualiations in MutViz 2019 (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given M the set of mutations and R the region set, the considered set of mutations is:
+        Differently from the visualiations in MutViz 2019 (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given the set of mutations M and the region set R, the considered set of mutations is:
              
                     <div class="text-center">
-                        <code>{m in M : &exist;r in R, m.position &ge; r.start AND m.position &le;= r.stop} </code>
+                        <code>{m in M : &exist;r in R, m.position &ge; r.start AND m.position &le; r.stop} </code>
                     </div>
 
 
         <br><br>
         
-        <h2><a href="#!/uc4" target="_blank" style="color: #24587e;">Trinucleotide</a></h2>
+        <h2><a href="#!/uc4" target="_blank" style="color: #24587e;">Trinucleotide mutations</a></h2>
             <div class="row">
                 <div class="col-md-8">
-                   The visualization consists of bar-plot representing the distribution of the six classes of base substitution (C→A,C→G, C→T, T→A, T→C, T→G) w.r.t the provided region set. <br><br>
+                   The visualization consists of a bar-plot representing the distribution of the six classes of base substitutions (C→A,C→G, C→T, T→A, T→C, T→G) within their immediate sequence context which fall into the provided region set. <br><br>
                     
-                    This visualization takes into account the  information  from  the  5’  and  3’  adjacent  bases  (also called  flanking  base  pairs  or  trinucleotide  context)  leading  to <b>96</b> possible mutation types (e.g. A[C→A]A, A[C→A]T, etc.). The  mutation  catalog  of  a  tumor  is  created  by  categorizing each  single  nucleotide  variant  (SNV)  (synonyms:  base-pairsubstitution  or  substitution  point  mutation)  in  one  of  the  96 mutation types and counting the total number of substitutionsfor each of these 96 mutation types.<br><br>
+                    This visualization takes into account the  information  from  the  5’  and  3’  adjacent  bases  (also called  flanking  base  pairs  or  trinucleotide  context)  leading  to <b>96</b> possible mutation types (e.g. A[C→A]A, A[C→A]T, etc.). The  mutation  catalog  of  a  tumor  is  created  by  categorizing each  single  nucleotide  variant  (SNV)  (synonyms:  base-pair-substitution  or  substitution  point  mutation)  in  one  of  the  96 mutation types and counting the total number of substitutions for each of these 96 mutation types.<br><br>
 
-                    The <b>horizontal-axis</b> discriminates the  96 mutation types and the <b>y-axis</b> represents the number of mutations intersecting the region-set for that type. Plots are grouped by the class of base substitution.<br>
+                    The <b>horizontal-axis</b> discriminates the  96 mutation types and the <b>y-axis</b> represents the number of mutations for that type falling onto the region-set. Plots are grouped by the class of base substitution.<br>
                     Use the toolbar on the left to select: <br>
                     <ul>
                         <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
@@ -243,12 +243,12 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
 
             <br><br>
         
-        <h2><a href="#!/uc5" target="_blank" style="color: #24587e;">Donors distribution</a></h2>
+        <h2><a href="#!/uc5" target="_blank" style="color: #24587e;">Mutations per donor</a></h2>
             <div class="row">
                 <div class="col-md-8">
                     The visualization shows a box plot for each class of base substitution (C→A,C→G, C→T, T→A, T→C, T→G), representing the distribution of <b>mutations per-donor</b> overlapping regions in the provided region set. The box-plots on the right group the selected mutation types into transitions (Ti) and transversions (Tv).<br>
 
-                    When the <b>show trinucleotide</b> option is enabled, the visualization takes into account the  information  from  the  5’  and  3’  adjacent  bases  (also called  flanking  base  pairs  or  trinucleotide  context)  leading  to <b>96</b> possible mutation types (e.g. A[C→A]A, A[C→A]T, etc.). The  mutation  catalog  of  a  tumor  is  created  by  categorizing each  single  nucleotide  variant  (SNV)  (synonyms:  base-pairsubstitution  or  substitution  point  mutation)  in  one  of  the  96 mutation types and counting the total number of substitutionsfor each of these 96 mutation types.
+                    When the <b>show trinucleotide</b> option is enabled, the visualization takes into account the  information  from  the  5’  and  3’  adjacent  bases  (also called  flanking  base  pairs  or  trinucleotide  context)  leading  to <b>96</b> possible mutation types (e.g. A[C→A]A, A[C→A]T, etc.). The  mutation  catalog  of  a  tumor  is  created  by  categorizing each  single  nucleotide  variant  (SNV)  (synonyms:  base-pair-substitution  or  substitution  point  mutation)  in  one  of  the  96 mutation types and counting the total number of substitutions for each of these 96 mutation types.
 
                     The <b>horizontal-axis</b> discriminates the 6 (96) mutation types (trinucleotide types) and the  <b>vertical-axis</b> represents the number of mutations per-donor, of that type, overlapping regions in the region-set.<br>
                     Hovering the box-plot with your mouse you will be able to get more information on the distribution and on outliers (e.g. you can get the donor-id associated to an outlier).
@@ -276,14 +276,16 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
 
             <br><br>
         
-        <h2><a href="#!/uc6" target="_blank" style="color: #24587e;">Signatures</a></h2>
+        <h2><a href="#!/uc6" target="_blank" style="color: #24587e;">Signature Refitting</a></h2>
             <div class="row">
                 <div class="col-md-8">
-                    Given  a  catalogue  of  mutational  <b>signatures</b> S and  a  set of  somatic mutations M found in a given  tumor genome, an  exposure e is  computed. The exposure predicts what fraction of the mutations found for the provided region-set can be attributed to a given signature. Exposures are computed such that the exposure-weighted sum of signatures reflects the distribution of mutation types. <br><br>
+                    Given a catalogue of mutational <b>signatures</b> S and a set of somatic mutations M found in a given tumor genome, exposures E can computed ("signature refitting"). The exposures predict what fractions of the mutations can be attributed to the given signatures. Exposures are computed such that the exposure-weighted sum of signatures reflects the distribution of mutation types in the tumor genome.<br><br>
+
+                    Here, the set of somatic mutations M used are only those mutations which fall onto the region set specified by the user. Since, however, the region set may have a largely different trinucleotide content than the whole genome, for which mutational signatures have been originally been determined, the signatures are adjusted according to the trinucleotide content of the region set prior to determining exposures.<br><br>
                     
                     This visualization shows an <b>bar-plot</b> in which, for each signature (horizontal-axis), the corresponding exposure (verical-axis) is reported. Alternatively, a <b>box-plot</b> for each signature shows the distribution of exposures over donors.<br><br>
                     
-                    For higher accuracy in signature refitting, when the <b>threshold</b> is enabled (e.g. <code>threshold=N</code>), the tool will consider only tumors (synonims: donors, patients) for wich more than N mutations overlap regions in the provided region-set. In case less than 5 tumors have more than N mutations, the mutations are merged and an estimation of the average signatures' weights is provided.<br><br>
+                    For higher accuracy in signature refitting, when the <b>threshold</b> is enabled (e.g. <code>threshold=N</code>), the tool will consider only tumors (synonyms: donors, patients) for wich more than N mutations overlap regions in the provided region-set. In case less than 5 tumors have more than N mutations, the mutations are merged and an estimation of the average signature exposure is provided.<br><br>
                            
                     In case the box-plot visualization is selected, hovering the box-plot with your mouse you will be able to get more information on the distribution and on outliers (e.g. you can get the donor-id associated to an outlier).<br><br>
                     Use the toolbar on the left to select:<br>
@@ -295,7 +297,9 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
                     </ul>
                     <br><br>
                     
-                    Once the plot is ready the number of considered patients will be displayed in the toolbar.
+                    Once the plot is ready the number of considered patients will be displayed in the toolbar. <br><br>
+                    
+                    Source of mutational signatures: <a target="_blank" href="https://cancer.sanger.ac.uk/cosmic/signatures">COSMIC Mutational Signatures v3</a> and <a  target="_blank"  href="https://pubmed.ncbi.nlm.nih.gov/32025018/">Alexandrov et al</a>.
                 </div>
                 <div class="col-md-4 text-center" >
                     <div style="background-image: url('img/example6.png');background-repeat: no-repeat; background-position: center; background-size: contain;">

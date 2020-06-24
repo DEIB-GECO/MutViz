@@ -8,7 +8,7 @@
             <div class="row">
 
                 <div class="col-md-12 text-center">
-                    <h4 style="margin-top: 15px">Donor Distribution</h4>
+                    <h4 style="margin-top: 15px">Mutations per donor</h4>
                     <a class="btn info-btn" data-toggle="modal" data-target="#infoModal"><i class="fa fa-info-circle"></i></a>
                 </div>
 
@@ -220,24 +220,24 @@
     <div class="modal-dialog" role="document" style="max-width: 700px;">
         <div class="modal-content">
             <div class="modal-header">
-                DONORS DISTRIBUTION
+                DONOR DISTRIBUTION
             </div>
             <div class="modal-body">
                 <div id="modal_description">
                     The visualization shows a box plot for each class of base substitution (C→A,C→G, C→T, T→A, T→C, T→G), representing the distribution of <b>mutations per-donor</b> overlapping regions in the provided region set. The box-plots on the right group the selected mutation types into transitions (Ti) and transversions (Tv).<br>
 
-                    Differently from the first three visualiations (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given M the set of mutations and R the region set, the considered set of mutations is
+                    Differently from the first three visualiations (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given the set of mutations M and the region set R, the considered set of mutations is
 
 
                     <div class="text-center">
-                        <code>{m in M : &exist;r in R, m.position &ge; r.start AND m.position &le;= r.stop} </code>
+                        <code>{m in M : &exist;r in R, m.position &ge; r.start AND m.position &le; r.stop} </code>
                     </div>
 
 
 
-                    When the <b>show trinucleotide</b> option is enabled, the visualization takes into account the  information  from  the  5’  and  3’  adjacent  bases  (also called  flanking  base  pairs  or  trinucleotide  context)  leading  to <b>96</b> possible mutation types (e.g. A[C→A]A, A[C→A]T, etc.). The  mutation  catalog  of  a  tumor  is  created  by  categorizing each  single  nucleotide  variant  (SNV)  (synonyms:  base-pairsubstitution  or  substitution  point  mutation)  in  one  of  the  96 mutation types and counting the total number of substitutionsfor each of these 96 mutation types.
+                    When the <b>show trinucleotide</b> option is enabled, the visualization takes into account the  information  from  the  5’  and  3’  adjacent  bases  (also called  flanking  base  pairs  or  trinucleotide  context)  leading  to <b>96</b> possible mutation types (e.g. A[C→A]A, A[C→A]T, etc.). The  mutation  catalog  of  a  tumor  is  created  by  categorizing each  single  nucleotide  variant  (SNV)  (synonyms:  base-pair-substitution  or  substitution  point  mutation)  in  one  of  the  96 mutation types and counting the total number of substitutions for each of these 96 mutation types.
 
-                    The <b>horizontal-axis</b> discriminates the 6 (96) mutation types (trinucleotide types) and the  <b>vertical-axis</b> represents the number of mutations per-donor, of that type, overlapping regions in the region-set.<br>
+                    The <b>horizontal-axis</b> discriminates the 6 (or 96) mutation types and the  <b>vertical-axis</b> represents the number of mutations per-donor, of that type, overlapping regions in the region-set.<br>
                     Hovering the box-plot with your mouse you will be able to get more information on the distribution and on outliers (e.g. you can get the donor-id associated to an outlier).
                     Use the toolbar on the left to select:<br>
                     <ul>

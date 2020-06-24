@@ -5,8 +5,8 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
 
     // Mutations
     $rootScope.mutationTypes = {
-        fromList: ["A","C","T","G","*"],
-        toList: ["A","C","T","G","*"],
+        fromList: ["A","C","G","T","*"],
+        toList: ["A","C","G","T","*"],
         selectedTypes : [ {from: "A", to: "C"} ],
         invalidSelection: false, // to check whether conditions are mutually exclusive
         stacked: true // whether to use different colors for different mutation types or plot them with a single color

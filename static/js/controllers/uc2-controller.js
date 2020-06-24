@@ -138,6 +138,17 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         }
 
     }
+    
+    /*$scope.getMax = function(plotData) {
+        
+        f1 = plotData.f1;
+        f2 = plotData.f2;
+        
+        maxF1 = f1.distances.map(function(b){return b[3]}).reduce(function(a, b) {return Math.max(a, b);});
+        maxF2 = f2.distances.map(function(b){return b[3]}).reduce(function(a, b) {return Math.max(a, b);});
+        
+        return Math.max(maxF1, maxF2);
+    }*/
 
     // Asks the backend to compute distances (if needed) and plots the result
     $scope.load = function(file1, file2, descr) {
@@ -153,8 +164,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         res2 = $rootScope.filterDistances(file2.result, $rootScope.tumorTypes.current.identifier);
 
         plotData = $scope.getData(file1.name, file2.name, res1, res2);
-
-
+        
         $scope.loaded = true;
 
         // Coordinate available range as the minimum and maximum coordinate in the data
@@ -269,10 +279,13 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
 
     // Update the plot according to the new bin size
     $scope.changeMutationType =  function() {
+    
 
         $scope.test.pvalue = null;
 
         types = $scope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.to!=null});
+        
+        if(types.length==0) return;
 
         // Make conditions exclusive
         exclusive = types.map( function(t){ 

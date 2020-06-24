@@ -9,7 +9,7 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
     $rootScope.active_menu = "data";
 
     // File prototype
-    $scope.empty_file = {id:null, name: "", type:"bed", file_txt:"",valid:true,
+    $scope.empty_file = {id:null, name: "", type:"BED", file_txt:"",valid:true,
                          maxDistance: $rootScope.maxDistance, count:0, source:null, ready:false, jobID:null};
     $scope.adding_file = clone($scope.empty_file);
 
@@ -23,7 +23,7 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
         request_body = {
             regions_name: file.name,
             regions: file_txt,
-            regionsFormat: file.type
+            regionsFormat: file.type.toLowerCase()
             //maxDistance: file.maxDistance
         }
 

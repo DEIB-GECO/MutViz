@@ -7,7 +7,7 @@
 
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <h4 style="margin-top: 15px">Regions comparison</h4>
+                    <h4 style="margin-top: 15px">Region comparison</h4>
                     <a class="btn info-btn" data-toggle="modal" data-target="#infoModal"><i class="fa fa-info-circle"></i></a>
                 </div>
 
@@ -141,8 +141,8 @@
                 <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">
                     <div class="row">
 
-                        <div class="col-md-12">
-                            <b>Statistical test</b>
+                        <div class="col-md-12 text-center">
+                            <b>Statistical test for selected mutation types</b>
                         </div>
 
                         <div class="col-md-12" style="margin-top: 10px; margin-bottom: 20px;">
@@ -216,6 +216,9 @@
                 <div id="uc2" class="plot-container">
                     <svg></svg>
                 </div>
+                <div id="uc2_legend">
+                    <svg></svg>
+                </div>
             </div>
 
         </div>
@@ -226,11 +229,11 @@
     <div class="modal-dialog" role="document" style="max-width: 700px;">
         <div class="modal-content">
             <div class="modal-header">
-                REGIONS COMPARISON
+                Region comparison
             </div>
             <div class="modal-body">
                 <div id="modal_description">
-                    The visualization allows to compare the distribution of mutations around regions in <b>two different region-sets</b> through a heat-map. The <b>x-axis</b> represents the distance from the middle point of the provided regions, computed as <code>(start+stop)/2</code>, the <b>y-axis</b> discriminates the two selected region sets and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations.
+                    The visualization allows to compare the distribution of mutations around regions in <b>two different region-sets</b> through a heat-map. The <b>x-axis</b> represents the distance from the center of the provided regions, computed as <code>(start+stop)/2</code>, the <b>y-axis</b> discriminates the two selected region sets and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations.
                     Use the toolbar on the left to select:
                     <ul>
                         <li><b>Two region sets</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
@@ -241,8 +244,8 @@
 
                     The horizontal slider helps restricting the domain.<br/>
 
-                    The <b>statistical test</b> returns a p-value representing how different are the currently-displayed distributions. <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
-                    For further details, please refer to our latest <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">publication</a>.
+                    The <b>statistical test</b> returns a p-value indicating how different the currently displayed distributions are.. <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
+                    For further details, please refer to our  <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/"> 2019 IEEE BIBM paper</a>.
                 </div>
 
 
