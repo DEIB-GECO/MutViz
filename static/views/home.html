@@ -66,9 +66,10 @@ chr10	102639678	102639697	*</pre>
                 </li>
                 <li>Or choosing a dataset from our public repository.<br>
                 
-                    <select style="margin-bottom: 5px;">
-                        <option ng-repeat="t in repository">{{t.name}}</option>
+                    <select style="margin-bottom: 5px;" ng-model="repoEl">
+                        <option ng-repeat="t in repository" ng-value="t">{{t.name}}</option>
                     </select>
+                    <div ng-bind-html="repoEl.description" style="background-color: #f6f6ff;"></div>
 
                 </li>
             </ul>

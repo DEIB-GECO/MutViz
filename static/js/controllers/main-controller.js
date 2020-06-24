@@ -1,7 +1,7 @@
 /* ##########################################################
    Main Controller - Always active independently on the view
    ########################################################## */
-app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $timeout) {
+app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $timeout,  $sce) {
 
     // Mutations
     $rootScope.mutationTypes = {
@@ -351,6 +351,11 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         .then(
         function success (response) {
             $rootScope.repository = response.data;
+             $rootScope.repository.map(function(el){
+                 el.description = $sce.trustAsHtml(el.description);
+                 return el;
+             });
+                
 
             if($rootScope.repository.length>0)
                 $rootScope.repoEl = $rootScope.repository[0];

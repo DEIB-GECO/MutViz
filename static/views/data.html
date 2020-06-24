@@ -76,6 +76,8 @@ required="true" placeholder="Enter email"/-->
                         </div>
                     </form>
                 </div>
+                
+                
 
                 <div style="width: 100%; height: auto;border: 1px solid black; margin-top:8px;">
 
@@ -99,6 +101,12 @@ required="true" placeholder="Enter email"/-->
                                             ng-click="submitRepo(repoEl)">Add to Workspace<!--i class="fa fa-plus"></i--></button>
                                 </div> 
                             </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                             <div ng-bind-html="repoEl.description" style="background-color: #f6f6ff;"></div>
+                            </div>
+                        
                         </div>
                     </form>
                 </div>
