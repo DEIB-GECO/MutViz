@@ -130,7 +130,7 @@ function uc2_update(data, g, binSize, mutationTypes) {
     d3.selectAll(".legend_ticks").remove();
     
     // create element for legend
-    legend_el = d3.select("#uc2 svg").append("g").lower().attr("transform","translate(" + g.margin.left + "," + 0 + ")")
+    legend_el = d3.select("#uc2 svg").append("g").lower().attr("class","plot-legend").attr("transform","translate(" + g.margin.left + "," + 0 + ")")
     
     var legend = legend_el.selectAll(".legend") 
     .data(values, function(d) {return d;})
@@ -191,7 +191,7 @@ function uc2(data, binSize, range, mutationTypes, stacked) {
 
     // Setup the plot container
     g.svg = d3.select("#uc2 svg")  
-        .append("g")
+        .append("g").attr("class","main-plot")
         .attr("transform","translate(" + g.margin.left + "," + g.margin.top + ")");
 
     // Setup the x axis

@@ -103,7 +103,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
     $scope.load = function(result) {
-        
+
         selectedTumorTypes = $rootScope.selectedTumorTypes;
 
         $("svg").css("height", 100+145*selectedTumorTypes.length);
@@ -158,10 +158,10 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         // Generate the plot
         data = $scope.getData(result, selectedTumorTypes);
-        
+
         // Save last result
         $rootScope.lastResult = JSON.stringify(data);
-        
+
         //todo:check $("#uc1 svg").css("height", (data.length*150)+"px");
         $scope.plot.d3graph = uc3(data,
                                   $scope.plot.binSize,
@@ -216,7 +216,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.test.pvalue = null;
 
         types = $scope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.to!=null});
-        
+
         if(types.length==0) return;
 
         // Make conditions exclusive
@@ -250,26 +250,35 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         }
     };
 
+
+
+    $scope.getP = function(p){
+        P_float = parseFloat(p);
+        if(P_float==0) return "< 1 e-4"
+        else return p;
+
+    }
+
     $scope.doTest = function() {
 
         if($rootScope.selectedTumorTypes.length != 2)
             return;
 
         f = $rootScope.dist_files[$scope.file_selector.file.identifier]
-    
-        
+
+
         console.log(f.result);
 
         type1 = $rootScope.selectedTumorTypes[0].identifier;
         type2 = $rootScope.selectedTumorTypes[1].identifier;
-        
+
         res1 = $rootScope.filterDistances(f.result, type1);
         res2 = $rootScope.filterDistances(f.result, type2);
-        
+
         dist1 = res1.distances;
         dist2 = res2.distances;
-        
-        
+
+
 
         bins1 = get_bins(dist1, $scope.mutationTypes.selectedTypes, $scope.plot.binSize,
                          $scope.slider.noUiSlider.get()[0], $scope.slider.noUiSlider.get()[1]);
@@ -282,8 +291,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         reg2_start = -(f.avgLength-1)/2
         reg2_stop  = +(f.avgLength-1)/2
-        
-          region_bins1 = bins1.filter(function(bin){
+
+        region_bins1 = bins1.filter(function(bin){
             return reg1_start>=bin.x0  && reg1_start<bin.x1 || reg1_stop>bin.x0  && reg1_stop<=bin.x1 || (bin.x0>reg1_start && bin.x1<reg1_stop)
         }) 
 
@@ -321,9 +330,9 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         console.log(region_bins2)
         console.log(flanking_bins1)
         console.log(flanking_bins2)
-        
-        
-         if(region_bins1_count==0) {
+
+
+        if(region_bins1_count==0) {
             region_bins1_count = flanking_bins1_count;
             region_bins1_len = flanking_bins1_len;
         }
@@ -358,7 +367,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             url: API_R01+"test"
         }).then(
             function success(response) {
-               $scope.test.pvalue = response.data.p.toExponential(3);
+                $scope.test.pvalue = response.data.p.toExponential(3);
             }
             , 
             function error(response) {

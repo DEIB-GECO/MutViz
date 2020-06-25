@@ -159,7 +159,7 @@
                     <div class="row">
 
                         <div class="col-md-12 text-center">
-                            <b>Statistical test for selected mutation types</b>
+                            <b>Statistical test </b> <br><u>for the selected mutation types</u>
                         </div>
 
                         <div class="col-md-12" style="margin-top: 10px; margin-bottom: 30px;" ng-show="selectedTumorTypes.length!=2">
@@ -173,7 +173,7 @@
                                     <tr>
                                         <td class="align-middle" rowspan="2"><b>P-value</b></td>
                                         <td class="align-middle text-center">
-                                            {{test.pvalue==null?'?':test.pvalue}}
+                                            {{test.pvalue==null?'?':getP(test.pvalue)}}
                                         </td>
                                         <td class="align-middle text-center" rowspan="1">
                                             <div class="">

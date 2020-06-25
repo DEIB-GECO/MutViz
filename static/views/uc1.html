@@ -48,10 +48,10 @@
 
                 <div class="col-md-12" style="margin-top:10px;" ng-if=" file_selector.file!=null &&  file_selector.file.parsed_lines >100000 ">
                     <p class="text-center" style="background-color: #fff38a; line-height: 30px; height: 90px;">
-                            <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i><br>
-                           This visualization does not support files containing more than 100K regions. 
-                        </p>
-                   
+                        <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i><br>
+                        This visualization does not support files containing more than 100K regions. 
+                    </p>
+
                 </div>
 
                 <div class="col-md-12" style="margin-top:10px;">
@@ -172,7 +172,7 @@
                     <div class="row">
 
                         <div class="col-md-12 text-center">
-                            <b>Statistical test for selected mutation types</b>
+                            <b>Statistical test </b> <br><u>for the selected mutation types</u>
                         </div>
 
                         <div class="col-md-12" style="margin-top: 10px; margin-bottom: 20px;">
@@ -191,7 +191,7 @@
                                 <tbody>
                                     <tr>
                                         <td class="align-middle">From</td>
-                                        <td  style="width: 150px">
+                                        <td  style="width: 160px">
                                             <input type="number" class="form-control {{test.area.from>test.area.to?'is-invalid':''}}" id="inputBins" 
                                                    ng-model="test.area.from" ng-change="drawArea(test.from, test.to)">
                                         </td>
@@ -209,26 +209,29 @@
                                             {{test.area.toPosition}}
                                         </td>
                                     </tr>
+
                                     <tr>
-                                        <td class="align-middle" rowspan="2"><b>P-value</b></td>
-                                        <td class="align-middle text-center">
-                                            <span ng-if="test.L<test.H">{{test.L}}</span>
-                                            <span ng-if="test.L!=null && test.L>=test.H">{{test.H}}</span>
+                                        <td class="align-middle text-center" colspan="1" style="min-width:77px">
+                                            <b>p-value</b>
+                                        </td>
+                                        <td class="align-middle text-center" colspan="1">
+                                            <span ng-bind="getRightP(test.L,test.H)[0]"></span>
                                             <span ng-if="test.L==null || test.H==null">?</span>
                                         </td>
-                                        <td class="align-middle text-center" rowspan="2">
+                                        <td class="align-middle text-center" rowspan="1">
                                             <div class="">
                                                 <button class="btn btn-sm btn-info" ng-click="doTest(file_selector.file, tumorTypes.current)">compute</button>
                                             </div>
                                         </td>
                                     </tr>
-                                    <tr>
-                                        <td class="align-middle text-center" style="background-color: #e9e9e9;">
-                                            <span ng-if="test.L<test.H">hypermutated</span>
-                                            <span ng-if="test.L!=null && test.L>=test.H">hypomutated</span>
-                                            <span ng-if="test.L==null || test.H==null">?</span>
+                                    <tr ng-if="test.L!=null || test.H!=null" class="text-center">
+                                        <td class="align-middle" colspan="3">
+                                            testing for <b><span ng-bind="getRightP(test.L,test.H)[1]"></span></b><br> 
+                                            (a p-value of <span ng-bind="getRightP(test.L,test.H)[2]"></span> was instead obtained testing for <span ng-bind="getRightP(test.L,test.H)[3]"></span>)
+                                            
                                         </td>
                                     </tr>
+
                                 </tbody>
 
                             </table>

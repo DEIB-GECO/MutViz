@@ -302,7 +302,8 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
 
         console.log("Download PNG");
         var svgString = getSVGString(svg.node());
-        height = d3.select("g").node().getBoundingClientRect().height+d3.select("g.xaxis, g.tick").node().getBoundingClientRect().height;
+        height = d3.select("svg").node().getBoundingClientRect().height;
+            //d3.select("g.plot-legend").node().getBoundingClientRect().height + d3.select("g.main-plot").node().getBoundingClientRect().height+d3.select("g.xaxis, g.tick").node().getBoundingClientRect().height;
         width = d3.select("svg").node().getBoundingClientRect().width;
 
         svgString2Image( svgString, width, height, 'png', save ); // passes Blob and filesize String to the callback

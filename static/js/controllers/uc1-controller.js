@@ -162,7 +162,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         // Filter by selected tumor type
         filtered = $rootScope.filterDistances(data, $rootScope.tumorTypes.current.identifier);
         plot_data = filtered.distances;
-        
+
         // Save last result
         $rootScope.lastResult = JSON.stringify(plot_data);
 
@@ -342,6 +342,22 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
             $scope.updatePlot($scope.file_selector.file, $rootScope.tumorTypes.current);
         }
     };
+
+    $scope.getRightP = function(L,R){
+        L_float = parseFloat(L);
+        R_float = parseFloat(R);
+        
+        displayed = (L_float<R_float ? L : R)
+        excludded_for =  (L_float<R_float ? "decreased mutation rate" : "increased mutation rate")
+        tested_for = (L_float<R_float ? "increased mutation rate" : "decreased mutation rate")
+        excluded_value = (L_float<R_float ? R : L)
+        
+        if(L_float==0 || R_float==0)
+            return ["< 1 e-4",tested_for, excluded_value, excludded_for]
+        else
+            return [displayed,tested_for, excluded_value, excludded_for]
+
+    }
 
     // Set Default area
     $scope.setDefaultArea = function() {

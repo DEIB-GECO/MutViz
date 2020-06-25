@@ -254,6 +254,12 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         return st;
     }
 
+    $scope.getP = function(p){
+        P_float = parseFloat(p);
+        if(P_float==0) return "< 1 e-4"
+        else return p;
+
+    }
 
     // Update the plot
     $scope.updatePlot = function(file1, file2, tumorType) {

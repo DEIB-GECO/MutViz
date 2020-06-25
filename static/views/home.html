@@ -73,7 +73,10 @@ chr10	102639678	102639697	*</pre>
 
                 </li>
             </ul>
-
+            <br>
+            All regions should use <b>reference genome hg19</b>. 
+            <br>
+            
             The workspace structure is stored on the browser's local storage and will be available until the local storage is deleted.  Therefore, closing the browser or reloading the page won't erase data in your work space. However, uploaded region sets will disappear from the workspace as soon as their survival time on our database expires (few days).
 
 
@@ -120,7 +123,7 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
 
                     The horizontal slider helps restricting the domain.<br>
 
-                    The <b>statistical test</b> box allows to select the area to test for hyper(hypo)-mutation by specifying  the initial and final x-coordinate of the area. The testing area is displayed in the plot as a light-blue rectangle. The <b>bin-coordinate</b> column shows the bins corresponding to the selected coordinates. The p-value is the result of the performed permutation test. 
+                    The <b>statistical test</b> box allows to select the area to test for increased (decreased) mutation rate by specifying  the initial and final x-coordinate of the area. The testing area is displayed in the plot as a light-blue rectangle. The <b>bin-coordinate</b> column shows the bins corresponding to the selected coordinates. The p-value is the result of the performed permutation test. 
                     <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
                     For further details, please refer to our  <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/"> 2019 IEEE BIBM paper</a>.
 
@@ -299,7 +302,9 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
                     
                     Once the plot is ready the number of considered patients will be displayed in the toolbar. <br><br>
                     
-                    Source of mutational signatures: <a target="_blank" href="https://cancer.sanger.ac.uk/cosmic/signatures">COSMIC Mutational Signatures v3</a> and <a  target="_blank"  href="https://pubmed.ncbi.nlm.nih.gov/32025018/">Alexandrov et al</a>.
+                    Source of mutational signatures: <a target="_blank" href="https://cancer.sanger.ac.uk/cosmic/signatures">COSMIC Mutational Signatures v3</a> and <a  target="_blank"  href="https://pubmed.ncbi.nlm.nih.gov/32025018/">Alexandrov et al</a>.<br><br>
+                    
+                    We considered only single base substitution (SBS) signatures, excluding those which have been characterized as possible sequencing artifacts (SBS 27, 29, 43,  and 45--60) or identified only in exome sequencing samples (SBS 23, 25,  and 42).
                 </div>
                 <div class="col-md-4 text-center" >
                     <div style="background-image: url('img/example6.png');background-repeat: no-repeat; background-position: center; background-size: contain;">
