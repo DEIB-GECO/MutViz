@@ -50,7 +50,7 @@ TADs are particular three-dimensional structures that can be found in chromosome
                         <option ng-repeat="t in tumorTypes.available">{{t.name}}</option>
             </select>
             <br>
-            The database was build starting from <a href="https://icgc.org/">ICGC</a> data.
+            The database was build starting from <a href="https://icgc.org/">ICGC</a> data (download date July 2018).
             
             <br><br>
          
@@ -282,7 +282,7 @@ Data binning is used in all the plots. The <b>bin size</b>, in base pairs, can b
         <h2><a href="#!/uc6" target="_blank" style="color: #24587e;">Signature Refitting</a></h2>
             <div class="row">
                 <div class="col-md-8">
-                    Given a catalogue of mutational <b>signatures</b> S and a set of somatic mutations M found in a given tumor genome, exposures E can computed ("signature refitting"). The exposures predict what fractions of the mutations can be attributed to the given signatures. Exposures are computed such that the exposure-weighted sum of signatures reflects the distribution of mutation types in the tumor genome.<br><br>
+                    Given a catalogue of mutational <b>signatures</b> S and a set of somatic mutations M found in a given tumor genome, exposures E can be computed ("signature refitting"). The exposures predict what fractions of the mutations can be attributed to the given signatures. Exposures are computed such that the exposure-weighted sum of signatures reflects the distribution of mutation types in the tumor genome.<br><br>
 
                     Here, the set of somatic mutations M used are only those mutations which fall onto the region set specified by the user. Since, however, the region set may have a largely different trinucleotide content than the whole genome, for which mutational signatures have been originally been determined, the signatures are adjusted according to the trinucleotide content of the region set prior to determining exposures.<br><br>
                     
