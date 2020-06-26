@@ -137,8 +137,6 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     // Load data for the provided tumor type ( the plot is (re)-initialized )
     $scope.load = function(data) {
 
-        $("svg").css("height", 100+145);
-
         $scope.numPatients = 0;
         plot_data = $scope.signatures.map(function(s){return {signature:s, value:0}});
 
@@ -174,13 +172,12 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         // Plot area size
         width = 600;
-        height = 400;
+        height = 500;
         if($("#uc6").width()>width)
             width = $("#uc6").width();
         if(window.innerHeight-250>height)
             height=window.innerHeight-260;
-        $("svg").css("height", window.innerHeight);
-
+      
 
         // Save last result
         $rootScope.lastResult = JSON.stringify(plot_data);

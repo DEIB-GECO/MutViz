@@ -3,6 +3,8 @@ var RECT_HEIGHT = 50;
 // List of available colors
 var uc4_colors = ["#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#808000", "#ffd8b1", "#000075", "#a9a9a9", "#ffffff", "#000000"];
 
+//var uc4_colors = ["#004c6d","#346888","#5886a5","#7aa6c2","#9dc6e0","#c1e7ff","#ffa600"];
+
 
 
 
@@ -55,13 +57,13 @@ function uc4(data, mutationTypes, width, height, animate) {
     // Set the dimensions and margins of the plot
     g.margin = {top: 0, right: 0, bottom: 30, left: 50};
     g.width  = (width-1.5*g.margin.left-g.distance*(mutationTypes.length-1))/mutationTypes.length;
-    g.height = height - 2*g.margin.top;
+    g.height = height - 2*g.margin.top-100;
 
 
     // Remove any pre-existing plot
     d3.select("#uc4 svg").html("");
 
-    g.html = d3.select("#uc4 svg");
+    g.html = d3.select("#uc4 svg").attr("width",width).attr("height",height);
 
     g.svg = [];
     g.xAxis = [];

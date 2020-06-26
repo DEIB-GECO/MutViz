@@ -190,7 +190,7 @@ function uc2(data, binSize, range, mutationTypes, stacked) {
     d3.select("#uc2 svg").html("");
 
     // Setup the plot container
-    g.svg = d3.select("#uc2 svg")  
+    g.svg = d3.select("#uc2 svg").attr("width",700).attr("height",400) 
         .append("g").attr("class","main-plot")
         .attr("transform","translate(" + g.margin.left + "," + g.margin.top + ")");
 

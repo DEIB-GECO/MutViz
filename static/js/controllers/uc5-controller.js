@@ -125,9 +125,6 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         show_trinucleotide = false
 
-
-        $("svg").css("height", 100+145);
-
         plot_data = []
 
         if($rootScope.tumorTypes.current.identifier in data) {
@@ -160,23 +157,17 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         // Plot area size
         width = 600;
-        height = 400;
+        height = 500;
         if($("#uc5").width()>width)
             width = $("#uc5").width();
-        if(window.innerHeight-230>height)
-            height=window.innerHeight-230;
-        $("svg").css("height", window.innerHeight);
-
+        if(window.innerHeight-250>height)
+            height=window.innerHeight-250;
 
         wiidth_left = width*(3/4);
         wifth_tt = width*(1/4);
 
-
-
         // Save last result
         $rootScope.lastResult = JSON.stringify(plot_data);
-
-        $("#uc5 svg").css("height", (data.length*150)+"px");
 
         if(show_trinucleotide){
             uc5_tri(plot_data, $scope.outliers.show, mutationTypes, $scope.getBefAft(), width, height);

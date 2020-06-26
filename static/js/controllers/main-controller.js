@@ -24,7 +24,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
     }
 
     $rootScope.testConditions = function() {
-        
+
         if(Object.keys($rootScope.filter.conditions).length == 0)
             return;
 
@@ -299,21 +299,17 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
     $scope.downloadPlot = function() {
 
         svg = d3.select("svg");
+        
+        width = d3.select("svg").attr("width");
+        height= d3.select("svg").attr("height");
 
-        console.log("Download PNG");
+
         var svgString = getSVGString(svg.node());
-        height = d3.select("svg").node().getBoundingClientRect().height;
-            //d3.select("g.plot-legend").node().getBoundingClientRect().height + d3.select("g.main-plot").node().getBoundingClientRect().height+d3.select("g.xaxis, g.tick").node().getBoundingClientRect().height;
-        width = d3.select("svg").node().getBoundingClientRect().width;
+        svgString2Image( svgString, 5*width, 5*height, 'png', save ); // passes Blob and filesize String to the callback
 
-        svgString2Image( svgString, width, height, 'png', save ); // passes Blob and filesize String to the callback
-
-
-        //$('#dwn').attr('href', 'data:application/octet-stream;base64,' + btoa($(".plot-container").first().html())); 
-        //$('#dwn').attr('download', 'plot.svg');
-        //$('#dwn').click();
-
-        //document.getElementById("dwn").click();
+        function save( dataBlob, filesize ){
+            saveAs( dataBlob, 'plot.png' ); // FileSaver.js function
+        }
     }
 
     // Download last json
@@ -352,11 +348,11 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         .then(
         function success (response) {
             $rootScope.repository = response.data;
-             $rootScope.repository.map(function(el){
-                 el.description = $sce.trustAsHtml(el.description);
-                 return el;
-             });
-                
+            $rootScope.repository.map(function(el){
+                el.description = $sce.trustAsHtml(el.description);
+                return el;
+            });
+
 
             if($rootScope.repository.length>0)
                 $rootScope.repoEl = $rootScope.repository[0];

@@ -213,13 +213,13 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         }
 
         // Plot area size
-        width = 600;
+        width = 700;
         height = 400;
         if($("#uc1").width()>width)
             width = $("#uc1").width();
-        if(window.innerHeight-250>height)
-            height=window.innerHeight-250;
-        $("svg").css("height", window.innerHeight);
+        if(window.innerHeight-200>height)
+            height=window.innerHeight-200;
+        //$("svg").css("height", window.innerHeight);
 
 
         // Generate the plot

@@ -178,7 +178,7 @@ function uc3(data, binSize, range, mutationTypes) {
     d3.select("#uc3 svg").html("");
 
     // Setup the plot container
-    g.svg = d3.select("#uc3 svg")  
+    g.svg = d3.select("#uc3 svg").attr("height",150*data.length).attr("width",700)
         .append("g")
         .attr("transform","translate(" + g.margin.left + "," + g.margin.top + ")");
 
@@ -194,7 +194,7 @@ function uc3(data, binSize, range, mutationTypes) {
     g.svg.append("text")             
         .attr("transform",
               "translate(" + (g.width/2) + " ," + 
-              (g.height + g.margin.top + 30) + ")")
+              (g.height + g.margin.top + 20) + ")")
         .style("text-anchor", "middle")
         .style("font-size", "0.8em")
         .text("distance (bp)");

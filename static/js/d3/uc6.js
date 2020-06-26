@@ -12,8 +12,7 @@ function uc6_box(data, showOutliers, signatures, width, height) {
 
     var g = {} // here we put all useful objects describing our plot
 
-
-    g.html = d3.select("#uc6 svg");
+    g.html = d3.select("#uc6 svg").attr("height",height).attr("width",width);
 
     g.titleBoxHeight = 25;
 
@@ -21,7 +20,7 @@ function uc6_box(data, showOutliers, signatures, width, height) {
     // Set the dimensions and margins of the plot
     g.margin = {top: 20, right: 0, bottom: 30, left: 50};
     g.width  = (width-2*g.margin.left);
-    g.height = height - 2*g.margin.top;
+    g.height = height - 2*g.margin.top - 100;
 
 
 
@@ -179,7 +178,7 @@ function uc6_box(data, showOutliers, signatures, width, height) {
             .data(outliers)
             .enter().append("circle", "text")
             .attr("class", "outlier")
-            .attr("r", 5)
+            .attr("r", 3)
             .attr("cx", function(d){return x(d.signature)} )
             .attr("cy", function(d){return y(d.value)} )
             .style("opacity", 1)
@@ -207,13 +206,13 @@ function uc6(data, width, height) {
     // Set the dimensions and margins of the plot
     g.margin = {top: 0, right: 0, bottom: 30, left: 50};
     g.width  = (width-1.5*g.margin.left);
-    g.height = height - 2*g.margin.top;
+    g.height = height - 2*g.margin.top-100;
 
 
     // Remove any pre-existing plot
     d3.select("#uc6 svg").html("");
 
-    g.html = d3.select("#uc6 svg");
+    g.html = d3.select("#uc6 svg").attr("width",width).attr("height",height);
 
     g.svg = [];
     g.xAxis = [];

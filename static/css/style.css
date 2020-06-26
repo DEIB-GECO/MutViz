@@ -128,8 +128,8 @@ svg {
     display: block;
     margin: 0 auto;
     margin-top: 70px;
-    width: 100%;
-    min-height: 700px;
+    /*width: 100%;
+    min-height: 700px;*/
 }
 
 #uc3 svg, #uc2 svg {

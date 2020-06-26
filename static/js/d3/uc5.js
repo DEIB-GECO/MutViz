@@ -15,15 +15,15 @@ function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
     g.distance = 10; // between successive plots
     // Set the dimensions and margins of the plot
     g.margin = {top: 20, right: 0, bottom: 30, left: 50};
-    g.width  = (width);
-    g.height = height - 2*g.margin.top;
+    g.width  = width-40;
+    g.height = height - 2*g.margin.top - 50;
 
 
 
     // append the svg object to the body of the page
     g.svg = g.html.append("g")
         .attr("transform",
-              "translate(" + (left_margin) + "," + g.margin.top + ")");
+              "translate(" + (left_margin-40) + "," + g.margin.top + ")");
 
     // Compute quartiles, median, inter quantile range min and max --> these info are then used to draw the box.
     var sumstat = d3.nest() // nest function allows to group the calculation per level of a factor
@@ -158,7 +158,7 @@ function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
             .data(outliers)
             .enter().append("circle", "text")
             .attr("class", "outlier")
-            .attr("r", 5)
+            .attr("r", 3)
             .attr("cx", function(d){return x(d.mutation)} )
             .attr("cy", function(d){return y(d.count)} )
             .style("opacity", 1)
@@ -176,7 +176,8 @@ function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
 
 /* Build the graph with an initial number of bins */
 function uc5(data, showOutliers, mutationTypes, width, height, trinucleotide) {
-
+    
+  
 
     // Remove any pre-existing plot
     d3.select("#uc5 svg").html("");
@@ -184,15 +185,15 @@ function uc5(data, showOutliers, mutationTypes, width, height, trinucleotide) {
     var g = {} // here we put all useful objects describing our plot
 
 
-    g.html = d3.select("#uc5 svg");
+    g.html = d3.select("#uc5 svg").attr("width",width+0.25*width).attr("height",height);
 
     g.titleBoxHeight = 25;
 
     g.distance = 10; // between successive plots
     // Set the dimensions and margins of the plot
     g.margin = {top: 20, right: 0, bottom: 30, left: 50};
-    g.width  = (width-2*g.margin.left);
-    g.height = height - 2*g.margin.top;
+    g.width  = (width-2*g.margin.left)-40;
+    g.height = height - 2*g.margin.top-50;
 
 
 
@@ -338,7 +339,7 @@ function uc5(data, showOutliers, mutationTypes, width, height, trinucleotide) {
             .data(outliers)
             .enter().append("circle", "text")
             .attr("class", "outlier")
-            .attr("r", 5)
+            .attr("r", 3)
             .attr("cx", function(d){return x(d.mutation)} )
             .attr("cy", function(d){return y(d.count)} )
             .style("opacity", 1)
@@ -364,13 +365,13 @@ function uc5_tri(data,showOutliers, mutationTypes, befaft, width, height) {
     // Set the dimensions and margins of the plot
     g.margin = {top: 0, right: 0, bottom: 30, left: 50};
     g.width  = (width-1.5*g.margin.left-g.distance*(mutationTypes.length-1))/mutationTypes.length;
-    g.height = height - 2*g.margin.top;
+    g.height = height - 2*g.margin.top - 100;
 
 
     // Remove any pre-existing plot
     d3.select("#uc5 svg").html("");
 
-    g.html = d3.select("#uc5 svg");
+    g.html = d3.select("#uc5 svg").attr("width",width).attr("height",height);
 
     g.svg = [];
     g.xAxis = [];
@@ -592,7 +593,7 @@ function uc5_tri(data,showOutliers, mutationTypes, befaft, width, height) {
                 .data(local_outliers)
                 .enter().append("circle", "text")
                 .attr("class", "outlier")
-                .attr("r", 5)
+                .attr("r", 3)
                 .attr("cx", function(d){return (g.xAxis[index](d.mutation[0]+"-"+d.mutation[6]) + g.xAxis[index].bandwidth()/2)} )
                 .attr("cy", function(d){return g.titleBoxHeight +g.yAxis[index](d.count)} )
                 .style("opacity", 1)

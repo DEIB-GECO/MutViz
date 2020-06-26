@@ -37,6 +37,7 @@ function uc1_get_bins(data, mutationTypes, binSize, minX, maxX) {
 
 // List of available colors
 var uc1_colors = ["#e6194B", "#3cb44b", "#ffe119", "#4363d8", "#f58231", "#911eb4", "#42d4f4", "#f032e6", "#bfef45", "#fabebe", "#469990", "#e6beff", "#9A6324", "#fffac8", "#800000", "#aaffc3", "#808000", "#ffd8b1", "#000075", "#a9a9a9", "#ffffff", "#000000"];
+//var uc1_colors = ["rgb(136,233,154)", "rgb(34,79,62)", "rgb(117,213,225)", "rgb(47,147,122)", "rgb(175,198,254)", "rgb(80,84,177)", "rgb(194,137,212)", "rgb(176,0,145)", "rgb(252,103,186)", "rgb(137,75,103)", "rgb(48,138,201)", "rgb(152,218,29)"];
 
 // Get y value
 function uc1_yVal(bin) {
@@ -294,9 +295,9 @@ function uc1(data, binSize, range, mutationTypes, stacked, showTotal, width, hei
     var g = {} // here we put all useful objects describing our plot
 
     // Set the dimensions and margins of the plot
-    g.margin = {top: 0, left: 100}; //bottom
+    g.margin = {top: 10, left: 100}; //bottom
     g.width  = width - 2*g.margin.left;
-    g.height = height - 2*g.margin.top 
+    g.height = height - 2*g.margin.top - 50
 
     console.log("deleting");
 
@@ -304,6 +305,8 @@ function uc1(data, binSize, range, mutationTypes, stacked, showTotal, width, hei
 
 
     g.svg = d3.select("#uc1 svg")  
+        .attr("width",width)
+        .attr("height",height)
         .append("g")
         .attr("transform","translate(" + g.margin.left + "," + g.margin.top + ")");
 

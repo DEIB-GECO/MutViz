@@ -127,8 +127,6 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             })
         } 
 
-        $("svg").css("height", 100+145);
-
         $scope.loaded = true;
 
 
@@ -137,12 +135,12 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         // Plot area size
         width = 600;
-        height = 400;
+        height = 500;
         if($("#uc4").width()>width)
             width = $("#uc4").width();
         if(window.innerHeight-250>height)
-            height=window.innerHeight-260;
-        $("svg").css("height", window.innerHeight);
+            height=window.innerHeight-250;
+        
 
 
         // Save last result
