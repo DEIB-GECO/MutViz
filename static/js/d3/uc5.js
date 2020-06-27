@@ -110,7 +110,7 @@ function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
         .style("width", 40)
 
     // rectangle for the main box
-    var boxWidth = 100
+    var boxWidth = 50
     g.svg
         .selectAll("boxes")
         .data(sumstat)
@@ -290,7 +290,7 @@ function uc5(data, showOutliers, mutationTypes, width, height, trinucleotide) {
         .style("width", 40)
 
     // rectangle for the main box
-    var boxWidth = 100
+    var boxWidth = 50
     g.svg
         .selectAll("boxes")
         .data(sumstat)
