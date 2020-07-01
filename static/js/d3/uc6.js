@@ -168,7 +168,7 @@ function uc6_box(data, showOutliers, signatures, width, height) {
         .offset([-10, 0])
         .html(function(d) {
             //donor_id: "+d.donor_id+"
-            return "<strong style='color:yellow'>"+d.signature+"</strong> <br>count: "+d.value;;
+            return "<strong style='color:yellow'>"+d.signature+"</strong> <br>"+d.value;;
         });
 
         g.svg.call(tip_outliers);
