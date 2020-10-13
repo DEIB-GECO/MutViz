@@ -1,5 +1,57 @@
 body {  background: white;}
 
+[type=reset], [type=submit], button, html [type=button] {
+-webkit-appearance: none;
+}
+
+.clickable-item { cursor:pointer}
+.clickable-item:hover, .clickable-item-selected {
+    background-color: aliceblue;
+}
+ .info-btn {
+     line-height: 12px;
+     width: 18px;
+     font-size: 1em;
+     margin-top: 1px;
+     margin-right: 14px;
+     position:absolute;
+     top:0;
+     right:0;
+ }
+.info-btn i {
+         color:#193144;
+}
+
+.filter-active {
+    color: white;
+    background-color: #4CAF50;
+}
+
+/* sub-menu */
+.sub-menu-item{
+    cursor:grab; height: 50px; line-height: 50px; background-color:#f5f5f57a;
+}
+.sub-menu-item.active{
+    background-color:#f5f5f5; font-weight: 1000;
+}
+
+
+.btn-white {
+    background-color: white;
+}
+
+.btn-white:hover {
+    background-color: #fafafa;
+}
+.sub-menu-item:hover{
+    background-color:#f5f5f5;
+}
+
+.d3-tip {
+    z-index: 99999;
+}
+
+
 .bg-dark {
     background-color: #183144!important;
 }
@@ -75,23 +127,26 @@ opacity:0;
 svg {
     display: block;
     margin: 0 auto;
+    margin-top: 70px;
+    /*width: 100%;
+    min-height: 700px;*/
 }
 
+#uc3 svg, #uc2 svg {
+    width: 700px;
+}
 
-svg {
-    margin-top: 70px;
-    width:  700px;;
-    min-height: 700px;
-    background-color: white;
-} 
+.noUi-horizontal .noUi-tooltip {
+    bottom:-160%;
+}
 
-/* USE CASE 1 */
-#uc1 svg {
-    margin-top: 70px;
-    width: 100%;
-    min-height: 700px;
-    background-color: white;
-} 
+#uc4 svg, #uc6 svg{
+    margin-top: 20px;
+}
+
+#uc5 svg{
+    margin-top: 40px;
+}
 
 .noUi-value-horizontal {
     -webkit-transform: translate(-50%,10%);
@@ -161,6 +216,14 @@ SIDEBAR STYLE
 #sidebar {
     min-width: 400px;
     max-width: 400px;
+    background: #f5f5f5;
+    /* color: #fff;*/
+    transition: all 0.3s;
+}
+
+#sidebar-small {
+    min-width: 300px;
+    max-width: 300px;
     background: #f5f5f5;
     /* color: #fff;*/
     transition: all 0.3s;
@@ -241,4 +304,34 @@ a.article,
 a.article:hover {
     background: #6d7fcc !important;
     color: #fff !important;
+}
+
+/* D3 tip */
+.d3-tip {
+    line-height: 1;
+    font-weight: bold;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-radius: 2px;
+}
+
+/* Creates a small triangle extender for the tooltip */
+.d3-tip:after {
+    box-sizing: border-box;
+    display: inline;
+    font-size: 10px;
+    width: 100%;
+    line-height: 1;
+    color: rgba(0, 0, 0, 0.8);
+    content: "\25BC";
+    position: absolute;
+    text-align: center;
+}
+
+/* Style northward tooltips differently */
+.d3-tip.n:after {
+    margin: -1px 0 0 0;
+    top: 100%;
+    left: 0;
 }

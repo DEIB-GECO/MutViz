@@ -1,25 +1,159 @@
 /* ##########################################################
    Main Controller - Always active independently on the view
    ########################################################## */
-app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $timeout) {
+app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $timeout,  $sce) {
 
     // Mutations
     $rootScope.mutationTypes = {
-        fromList: ["A","C","T","G","*"],
-        toList: ["A","C","T","G","*"],
+        fromList: ["A","C","G","T","*"],
+        toList: ["A","C","G","T","*"],
         selectedTypes : [ {from: "A", to: "C"} ],
         invalidSelection: false, // to check whether conditions are mutually exclusive
         stacked: true // whether to use different colors for different mutation types or plot them with a single color
     }
 
+    // Filter
+    $rootScope.filter = {
+        conditions : {},
+        keys : [],
+        values : [],
+        undefined_count: null,
+        newCondition: { key: null, values: []},
+        testCount : 0,
+        showTest: false
+    }
+
+    $rootScope.testConditions = function() {
+
+        if(Object.keys($rootScope.filter.conditions).length == 0)
+            return;
+
+        request_body = {}
+        // Call the API
+        request_body.filter = JSON.stringify($rootScope.filter.conditions);
+        request_body.tumorType = $rootScope.tumorTypes.current.identifier;
+
+
+        // Call the API
+        $http({
+            method: 'POST',
+            data: $.param(request_body),
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            url: API_L03+"test/"
+        }).then(
+            function success(response) {
+                $rootScope.filter.testCount = response.data.count;
+                $rootScope.filter.showTest = true;
+            }
+            , 
+            function error(response) {
+                console.error("error");
+                $scope.execution.running = false;
+                window.alert("An error occurred.");
+            }
+        );
+
+
+    }
+
+    $rootScope.isObjectEmpty = function(card){
+        return Object.keys(card).length === 0;
+    }
+
+    $rootScope.removeFilterCond = function(key) {
+        $rootScope.filter.showTest = false;
+        delete $rootScope.filter.conditions[key];
+        $rootScope.testConditions();
+    }
+
+
+    $rootScope.addFilterCond = function(key, values) {
+        $rootScope.filter.showTest = false;
+        if(key!=null && values.length>0)
+            $rootScope.filter.conditions[key] = values.slice(0);
+        $rootScope.filter.newCondition =   { key: null, values: null};
+        $rootScope.filter.values = [];
+        $rootScope.filter.searchKey = "";
+        $rootScope.filter.searchValue = "";
+        $rootScope.testConditions();
+
+    }
+
+    $rootScope.resetFilter = function(){
+        $rootScope.filter.showTest = false;
+        $rootScope.filter.conditions = {};
+        $rootScope.filter.keys = [];
+        $rootScope.filter.values = [];
+        $rootScope.filter.undefined_count = 0;
+        $rootScope.filter.newCondition = { key: null, values: []}
+        $rootScope.testConditions();
+    }
+
+    $rootScope.getKeys = function() {
+        if($rootScope.tumorTypes.current.attributes)
+            return $rootScope.tumorTypes.current.attributes.split(",");
+        else
+            return [];
+    }
+
+    $rootScope.getValues = function(key) {
+
+        // Call the API
+        $http({method: 'GET', url: API_L03+$rootScope.tumorTypes.current.identifier +"/"+key
+              }).then(
+            function success(response) {
+                $rootScope.filter.values = response.data.values;
+                $rootScope.filter.undefined_count = $rootScope.tumorTypes.current.donor_count - response.data.values_count;
+                if($rootScope.filter.undefined_count<0) $rootScope.filter.undefined_count=0;
+                //[{value:.., count...}]
+            }, 
+            function error(response) {
+                console.error("error retrieving values.")
+            });
+
+    }
+
+
+    $rootScope.setNewKey = function(key) {
+        $rootScope.filter.newCondition.key = key;
+        $rootScope.filter.newCondition.values = [];
+
+        // Retrieve new values
+        $rootScope.getValues(key);
+
+    }
+
+    $rootScope.toggleNewValue = function(value) {
+
+        var idx = $rootScope.filter.newCondition.values.indexOf(value);
+
+        // Is currently selected
+        if (idx > -1) {
+            $rootScope.filter.newCondition.values.splice(idx, 1);
+        }
+
+        // Is newly selected
+        else {
+            $rootScope.filter.newCondition.values.push(value);
+        }
+
+    }
+
+
+
+
     // Maximum distance from center
     $rootScope.maxDistance = 1000;
+
+    // Cache for distance API
+    $rootScope.dist_files = {}
 
     // Tumor Types
     $rootScope.tumorTypes = {
         current: null,
         available: []
     }
+    $rootScope.selectedTumorTypes = [];
 
     // Repository
     $rootScope.repository = [];
@@ -42,8 +176,8 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         console.log("persisting "+files.length+" files");
 
         for (i=0; i<files.length; i++) {
-            files[i].distances=[]; // don't save the computation result
-            files[i].ready=false;
+            if(files[i].source!="repo")
+                files[i].ready=false;
             localStorage['file-'+i] = JSON.stringify(files[i]); 
         }
 
@@ -53,16 +187,17 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         return $rootScope.files.filter(function(f){return f.name == fileName})[0];
     }
 
-    $rootScope.getDistances = function(file, tumorType) {
+    // returns res with .distances
+    $rootScope.filterDistances = function(data, tumorType) {
         // Extract distances for the proper tumorType
-        distances = file.distances.filter(
-            function(x){return x.tumorType==tumorType.identifier
-                       })[0].distances
+        res = data.filter(
+            function(x){return x.tumorType==tumorType
+                       })[0]
 
 
-        distances = distances.filter(function(x){return x[1].length==1 && x[2].length==1})
+        res.distances = res.distances.filter(function(x){return x[1].length==1 && x[2].length==1})
 
-        return distances;
+        return res;
     }
 
 
@@ -72,7 +207,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         console.log("Polling for file: "+file.name+" with jobId"+file.jobID);
 
         // Call the API
-        $http({method: 'GET', url: API_R01+file.jobID
+        $http({method: 'GET', url: API_JOBS+file.jobID
               }).then(
             function success(response) {
                 if( response.data.ready == true) {
@@ -80,7 +215,6 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
                     console.log("result for "+file.jobID+" is ready");
 
                     // Add the new file to the local list of files together with the answer
-                    file.distances = response.data.result;
                     $rootScope.someAreReady=true;
 
                     // Persist
@@ -97,14 +231,40 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
                 //index =  $rootScope.files.indexOf(file);
                 //$rootScope.files.splice(index, 1);
 
-                // Attempt another computation
-                console.log("Attempting another computation.");
-                $rootScope.computeDistances(file);
+                file.ready = true;
+                file.valid = false;
+                window.alert("An error occurred.")
 
                 $rootScope.persistData();
             });
 
     }
+
+    $rootScope.checkExists = function checkExists(file) {
+
+        console.log("Checking if file: "+file.name+" exists");
+
+        // Call the API
+        $http({method: 'GET', url: API_REGIONS+file.identifier
+              }).then(
+            function success(response) {
+                file.ready = true;
+                file.valid = true;
+            }, 
+            function error(response) {
+                //window.alert("Error. File "+file.name+" will be removed.");
+                //index =  $rootScope.files.indexOf(file);
+                //$rootScope.files.splice(index, 1);
+
+                file.ready = true;
+                file.valid = false;
+
+                $rootScope.persistData();
+            });
+
+    }
+
+    //http://bl.ocks.org/Rokotyan/0556f8facbaf344507cdc45dc3622177
 
     // Recover files from local storage
     $rootScope.recoverData = function() {
@@ -119,13 +279,16 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
                 }
 
             // Restart polling
-            $rootScope.files.forEach(function(f){
-                if(f.valid) {
+            $rootScope.files.forEach(function(f) {
+                if(f.source!="repo") {
                     $rootScope.someAreValid = true;
                     f.ready = false;
-                    $rootScope.pollR01(f);
+                    $rootScope.checkExists(f);
+                } else {
+                    $rootScope.someAreValid = true;
                 }
             });
+
         }
     }
 
@@ -135,61 +298,29 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
     // Extract the svg of the plot and download it
     $scope.downloadPlot = function() {
 
-        $('#dwn').attr('href', 'data:application/octet-stream;base64,' + btoa($(".plot-container").first().html())); 
-        $('#dwn').attr('download', 'plot.svg');
-        $('#dwn').click();
+        svg = d3.select("svg");
+        
+        width = d3.select("svg").attr("width");
+        height= d3.select("svg").attr("height");
 
-        document.getElementById("dwn").click();
-    }
 
-    // Compute Distances
-    $rootScope.computeDistances = function(file) {
+        var svgString = getSVGString(svg.node());
+        svgString2Image( svgString, 5*width, 5*height, 'png', save ); // passes Blob and filesize String to the callback
 
-        // Build the POST request body
-        request_body = {
-            repoId: file.repoId,
-            regions: file.file_txt,
-            regionsFormat: file.type,
-            maxDistance: file.maxDistance
+        function save( dataBlob, filesize ){
+            saveAs( dataBlob, 'plot.png' ); // FileSaver.js function
         }
-
-        // Call the API
-        $http({
-            method: 'POST',
-            data: $.param(request_body),
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            url: API_R01
-        }).then(
-            function success(response) {
-
-                file.jobID = response.data.jobID;
-                file.parsed_lines =  response.data.correct_region_size;
-                if(response.data.error && response.data.error.length>0)
-                    file.errors = response.data.error;
-                else
-                    file.errors = [];
-
-                if(file.parsed_lines==0){
-                    file.valid = false;
-                } else {
-
-                    $rootScope.someAreValid = true;
-                    file.valid = true;
-
-                    // Start polling
-                    $rootScope.pollR01(file);
-                }
-
-                // Persist
-                $rootScope.persistData();
-
-            }, 
-            function error(response) {
-                console.error("error");
-            });
-
     }
 
+    // Download last json
+    $scope.downloadPlotData = function() {
+
+        $('#dwn_data').attr('href', 'data:application/octet-stream;base64,' + btoa($rootScope.lastResult)); 
+        $('#dwn_data').attr('download', 'result.json');
+        $('#dwn_data').click();
+
+        document.getElementById("dwn_data").click();
+    }
 
 
     // ########### //
@@ -200,6 +331,8 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         .then(
         function success (response) {
             $rootScope.tumorTypes.available = response.data;
+            $rootScope.tumorTypes.current = response.data[0];
+            $rootScope.selectedTumorTypes.push(response.data[0]);
             console.log("loaded tumor types");
 
         }).catch(
@@ -210,12 +343,17 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         }
     );
 
-    // Retrieve the list of available tumor types
+    // Retrieve the list of available repository
     $http({method: 'GET', url:  API_L02})
         .then(
         function success (response) {
             $rootScope.repository = response.data;
-            console.log( $rootScope.repository);
+            $rootScope.repository.map(function(el){
+                el.description = $sce.trustAsHtml(el.description);
+                return el;
+            });
+
+
             if($rootScope.repository.length>0)
                 $rootScope.repoEl = $rootScope.repository[0];
             console.log("loaded repository");

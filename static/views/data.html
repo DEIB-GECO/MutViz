@@ -6,15 +6,15 @@
             <div class="col-md-12">
                 <!--h2>Data box-shadow: 1px 1px 9px -3px #b1b1b1;</h2-->
 
-                    <div style="font-size:1.1em; margin-bottom: 5px;">
-                                <b>Upload your custom region file:</b>
-                           
-                            </div>
+                <div style="font-size:1.1em; margin-bottom: 5px;">
+                    <b>Upload your custom region file:</b>
+
+                </div>
                 <div style="width: 100%; height: auto;border: 1px solid black; border-radius: 0px;">
                     <form ng-submit="submit()">
                         <div class="row" style="padding: 10px;">
 
-                        
+
 
                             <div class="col-md-3">
                                 <div style="padding: 0px">
@@ -33,7 +33,7 @@
                                         <label style="font-size: 0.9em"><b>Format:</b></label>
                                         <select class="form-control" aria-describedby="fileTypeHelp" required="true"
                                                 ng-model="adding_file.type">
-                                            <option>bed</option>
+                                            <option>BED</option>
                                             <option>narrowpeak</option>
                                         </select>
                                         <!--small id="fileTypeHelp" class="form-text text-muted">Select the right format for your file. </small-->
@@ -75,11 +75,21 @@ required="true" placeholder="Enter email"/-->
 
                         </div>
                     </form>
+                    <div class="row">
+                            <div class="col-md-12 text-center">
+                             <div style="background-color: white;">
+                                <b>hg19</b> reference genome 
+                            </div>
+                            </div>
+                        
+                        </div>
                 </div>
+                
+                
 
                 <div style="width: 100%; height: auto;border: 1px solid black; margin-top:8px;">
 
-                    <form ng-submit="submit()">
+                    <form>
                         <div class="row" style="padding: 10px;">
                             <div class="col-md-4 my-auto">
                                 <b>Or select a region file from the repository:</b>
@@ -95,10 +105,16 @@ required="true" placeholder="Enter email"/-->
 
                             <div class="col-md-4 my-auto" >
                                 <div class="form-group">
-                                    <button style="bottom:0;"  type="submit" class="btn btn-addws  float-right"
+                                    <button style="bottom:0;"  class="btn btn-addws  float-right"
                                             ng-click="submitRepo(repoEl)">Add to Workspace<!--i class="fa fa-plus"></i--></button>
                                 </div> 
                             </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 text-center">
+                             <div ng-bind-html="repoEl.description" style="background-color: #f6f6ff;"></div>
+                            </div>
+                        
                         </div>
                     </form>
                 </div>
@@ -116,7 +132,8 @@ required="true" placeholder="Enter email"/-->
                                     <span style="color:#007bff" ng-if="file.source=='repo'">(repository)</span>
 
                                     <br>
-                                    <span style="color:green">{{file.parsed_lines}} region{{(file.parsed_lines==1)?'':'s'}}</span>
+                                    <span ng-if="file.valid" style="color:green">{{file.parsed_lines}} region{{(file.parsed_lines==1)?'':'s'}}</span>
+                                    <span ng-if="!file.valid" style="color:red">This file is not valid.</span>
                                     <a ng-if="file.source=='custom' && file.errors.length > 0" href="javascript:void(0);" ng-click="viewErrors(file)" style="color:red">+  errors</a>
 
 
@@ -125,12 +142,8 @@ required="true" placeholder="Enter email"/-->
 
 
                                 <div class="col-md-4 my-auto" ng-if="file.ready || !file.valid">
-                                    <div class="col-md-12 my-auto">
-                                        <div class="btn-group">
-                                            <button class="btn btn-sm btn-danger " ng-click="removeFile($index)"><i class="fa fa-trash"></i></button>
-
-                                            <button class="btn btn-sm btn-default btn-download" ng-click="download($index)"><i class="fa fa-download"></i></button>
-                                        </div>
+                                    <div class="col-md-12 text-right">
+                                        <button class="btn btn-sm btn-danger " ng-click="removeFile($index)"><i class="fa fa-trash"></i></button>
                                     </div>
                                 </div>
 
@@ -202,12 +215,12 @@ required="true" placeholder="Enter email"/-->
                                     </select>
                                 </div>
 
-                            
+
                             </div>
 
                         </div>
                         <div class="modal-footer">
-                             <button class="btn btn btn-addws" ng-click="downloadResults(downloader.file, downloader.tumorType)">Download</button>
+                            <button class="btn btn btn-addws" ng-click="downloadResults(downloader.file, downloader.tumorType)">Download</button>
                         </div>
                     </div>
                 </div>

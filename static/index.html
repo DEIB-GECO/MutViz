@@ -5,6 +5,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="description" content="MutViz - Analysis and Visualization of Mutation Enrichments for Selected Genomic Regions and Cancer Types.">
         <meta name="author" content="Andrea Gulino, Arif Canakoglu, Erini Stamoulakatou, Pietro Pinoli">
+        <meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
+        <meta http-equiv="CACHE-CONTROL" content="NO-STORE">
+        <meta HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2002 11:12:01 GMT">
         <link rel="icon" 
               type="image/png" 
               href="img/logo-black.png">
@@ -15,9 +18,11 @@
         <link href="libs/bootstrap-4/css/bootstrap.min.css" type="text/css" rel="stylesheet">
         <link href="libs/fontawesome/css/all.min.css" type="text/css" rel="stylesheet">
         <link href="libs/noUiSlider/nouislider.min.css" type="text/css" rel="stylesheet">
+        <link href="libs/angular-ui-switch-master/angular-ui-switch.css" rel="stylesheet" 
+              rel="stylesheet" type="text/css"/>
 
         <!-- Custom CSS -->
-        <link href="css/style.css?v=1.0.0" type="text/css" rel="stylesheet">
+        <link href="css/style.css?v=1.1.3" type="text/css" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 
         <link href="https://fonts.googleapis.com/css?family=Titillium+Web&display=swap" rel="stylesheet">
@@ -39,19 +44,37 @@
                 <div class="collapse navbar-collapse" id="navbarCollapse">
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item {{active_menu=='home'?'active':''}}">
-                            <a class="nav-link" href="#!/home">Home</a>
+                            <a class="nav-link" href="#!/home">MutViz 2020</a>
+                        </li>
+                         <li class="nav-item" style="">
+                           <a class="nav-link" href="#" tabindex="-1" aria-disabled="true">|</a>
                         </li>
                         <li class="nav-item {{active_menu=='data'?'active':''}}">
-                            <a class="nav-link" href="#!/data">Data</a>
+                            <a class="nav-link" href="#!/data">Workspace</a>
+                        </li>
+                         <li class="nav-item" style="">
+                           <a class="nav-link" href="#" tabindex="-1" aria-disabled="true">|</a>
                         </li>
                         <li class="nav-item {{active_menu=='uc1'?'active':''}}">
                             <a class="nav-link" href="#!/uc1">Histogram</a>
                         </li>
                         <li class="nav-item {{active_menu=='uc2'?'active':''}}">
-                            <a class="nav-link" href="#!/uc2" tabindex="-1" aria-disabled="true">Regions</a>
+                            <a class="nav-link" href="#!/uc2" tabindex="-1" aria-disabled="true">Region comparison</a>
                         </li>
                         <li class="nav-item {{active_menu=='uc3'?'active':''}}">
-                            <a class="nav-link" href="#!/uc3" tabindex="-1" aria-disabled="true">Tumors</a>
+                            <a class="nav-link" href="#!/uc3" tabindex="-1" aria-disabled="true">Tumor comparison</a>
+                        </li>
+                        <li class="nav-item" style="">
+                           <a class="nav-link" href="#" tabindex="-1" aria-disabled="true">|</a>
+                        </li>
+                        <li class="nav-item {{active_menu=='uc4'?'active':''}}">
+                            <a class="nav-link" href="#!/uc4" tabindex="-1" aria-disabled="true">Trinucleotide mutations</a>
+                        </li>
+                        <li class="nav-item {{active_menu=='uc5'?'active':''}}">
+                            <a class="nav-link" href="#!/uc5" tabindex="-1" aria-disabled="true">Mutations per donor</a>
+                        </li>
+                        <li class="nav-item {{active_menu=='uc6'?'active':''}}">
+                            <a class="nav-link" href="#!/uc6" tabindex="-1" aria-disabled="true">Signature Refitting</a>
                         </li>
                     </ul>
 
@@ -74,6 +97,7 @@
         <script src="js/api.js"></script>
 
         <script src="libs/jquery/jquery-3.3.1.min.js"></script>
+        <script src="libs/bootstrap-4/js/popper.min.js"></script>
         <script src="libs/bootstrap-4/js/bootstrap.min.js"></script>
         <script src="libs/fontawesome/js/fontawesome.min.js"></script>
         <script src="libs/wnumb-1.1.0/wNumb.js"></script>
@@ -81,34 +105,48 @@
         <script src="libs/angularjs/angular.min.js"></script>
         <script src="libs/angularjs/angular-route.min.js"></script>
         <script src="libs/angularjs/angular-animate.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/javascript-canvas-to-blob/3.27.0/js/canvas-to-blob.js"></script>
+        <script src="https://cdn.rawgit.com/eligrey/FileSaver.js/e9d941381475b5df8b7d7691013401e171014e89/FileSaver.min.js"></script>
         <script src="libs/d3/d3.v4.js"></script>
+        <script src="libs/d3/d3-tip.js"></script>
         <script src="libs/simple-statistics.min.js"></script>
 
-        <script src="js/support.js?v=1.0.0"></script>
-        <script src="js/stat.js?v=1.0.0"></script>
-        <script src="data/mutation_types.js?v=1.0.0"></script>
-        <script src="js/d3/uc1.js?v=1.0.0?v=1.0.0"></script>
-        <script src="js/d3/uc2.js?v=1.0.0?v=1.0.0"></script>
-        <script src="js/d3/uc3.js?v=1.0.0?v=1.0.0"></script>
+        <script src="js/support.js?v=1.1.3"></script>
+        <script src="js/stat.js?v=1.1.3"></script>
+        <script src="data/mutation_types.js?v=1.1.3"></script>
+        <script src="js/d3/uc1.js?v=1.1.3"></script>
+        <script src="js/d3/uc2.js?v=1.1.3"></script>
+        <script src="js/d3/uc3.js?v=1.1.3"></script>
+        <script src="js/d3/uc4.js?v=1.1.3"></script>
+        <script src="js/d3/uc5.js?v=1.1.3"></script>
+        <script src="js/d3/uc6.js?v=1.1.3"></script>
 
-        <script src="js/app.js?v=1.0.0"></script>
+        <script src="js/app.js?v=1.1.3"></script>
 
-        <script src="js/controllers/main-controller.js?v=1.0.0"></script>
-        <script src="js/controllers/data-controller.js?v=1.0.0"></script>
-        <script src="js/controllers/uc1-controller.js?v=1.0.0"></script>
-        <script src="js/controllers/uc2-controller.js?v=1.0.0"></script>
-        <script src="js/controllers/uc3-controller.js?v=1.0.0"></script>
+        <script src="js/controllers/main-controller.js?v=1.1.3"></script>
+        <script src="js/controllers/data-controller.js?v=1.1.3"></script>
+        <script src="js/controllers/uc1-controller.js?v=1.1.3"></script>
+        <script src="js/controllers/uc2-controller.js?v=1.1.3"></script>
+        <script src="js/controllers/uc3-controller.js?v=1.1.3"></script>
+        <script src="js/controllers/uc4-controller.js?v=1.1.3"></script>
+        <script src="js/controllers/uc5-controller.js?v=1.1.3"></script>
+        <script src="js/controllers/uc6-controller.js?v=1.1.3"></script>
+
+        <!-- SWITCH BTN -->
+        <script src="libs/angular-ui-switch-master/angular-ui-switch.js"
+                type="text/javascript"></script>
+        <!-- END SWITCH BTN -->
 
 
 
-        <div style="text-align: right">
-        <!-- Begin ShinyStat Code -->
-        <script type="text/javascript" src="//codice.shinystat.com/cgi-bin/getcod.cgi?USER=andreagulino"></script>
-        <noscript >
-            <h6><a  href="http://www.shinystat.com">
-                <img src="//www.shinystat.com/cgi-bin/shinystat.cgi?USER=andreagulino" alt="Free hit counters" style="border:0px" /></a></h6>
-        </noscript>
-            </div>
+        <!--div style="text-align: right">
+           
+            <script type="text/javascript" src="//codice.shinystat.com/cgi-bin/getcod.cgi?USER=andreagulino"></script>
+            <noscript >
+                <h6><a  href="http://www.shinystat.com">
+                    <img src="//www.shinystat.com/cgi-bin/shinystat.cgi?USER=andreagulino" alt="Free hit counters" style="border:0px" /></a></h6>
+            </noscript>
+        </div-->
         <!-- End ShinyStat Code -->
     </body>
 </html>

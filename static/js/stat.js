@@ -26,8 +26,8 @@ function uc1_test(full, selected) {
         v[i] = sample.reduce(function(a,b){return a+b})/N;
     }
 
-    L = (v.filter(function(x){return x>=x_selected}).length / TIMES).toFixed(3);
-    H = (v.filter(function(x){return x<=x_selected}).length / TIMES).toFixed(3);
+    L = (v.filter(function(x){return x>=x_selected}).length / TIMES).toExponential(3);
+    H = (v.filter(function(x){return x<=x_selected}).length / TIMES).toExponential(3);
 
     console.log("L: "+L+" H: "+H)
 
@@ -37,7 +37,9 @@ function uc1_test(full, selected) {
 }
 
 //
-function uc23_test(arr1, arr2) {
+function uc23_test(arr1, arr2, len1, len2) {
+    
+    console.log(len1, len2);
 
     TIMES = 10000;
 
@@ -58,7 +60,7 @@ function uc23_test(arr1, arr2) {
         }
     }
 
-    p = (v.filter(function(x){return x<=D}).length / TIMES).toFixed(3);
+    p = (v.filter(function(x){return x<=D}).length / TIMES).toExponential(3);
 
     return p;
 

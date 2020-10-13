@@ -2,61 +2,76 @@
 <main role="main" class="wrapper">
 
     <!-- Sidebar  -->
-    <nav id="sidebar">
+    <nav id="sidebar-small">
         <div class="col-md-12" style="background-color: #f5f5f5">
 
             <div class="row">
                 <div class="col-md-12 text-center">
-                    <h4 style="margin-top: 15px">Regions comparison</h4>
+                    <h4 style="margin-top: 15px">Region comparison</h4>
+                    <a class="btn info-btn" data-toggle="modal" data-target="#infoModal"><i class="fa fa-info-circle"></i></a>
                 </div>
 
+                <div class="col-md-12" style="margin-top:10px; background-color: #fafafa;">
 
-                <div class="col-md-12 text-center"  ng-if="!someAreReady" style="margin-top:10px;">
-                    <div ng-if="(files.length==0 || !someAreValid) && !someAreReady"
-                         class="col-md-12 text-center"
-                         style="padding-top: 20px;padding-bottom: 20px; background-color: #ffe28d">
-                        No valid file in your <a href="#!/data">workspace</a>. Please, upload a region file or add a file from the repository.
+                    <div ng-show="files.length>1 && someAreValid"
+                         style="height: 90px;">
+                        <label for="jtSelect">File 1:</label>
+                        <select ng-disabled="execution.running"
+                                class="form-control" id="ttSelect" 
+                                ng-model="file_selector.file1">
+                            <option ng-repeat="file in files | filter:valid track by $index" ng-value="file">{{file.name}}</option>
+                        </select>
                     </div>
 
-                    <div ng-if="files.length>0 && !someAreReady && someAreValid"
-                         class="col-md-12 text-center"
-                         style="padding-top: 20px;padding-bottom: 20px;">
-                        Loading your workspace
-                        <div class="col-md-12 text-center" style="padding-top: 10px;">
-                            <img src="img/loading.gif" style="height: 45px; margin-left: 5px; margin-bottom: 4px;">
-                        </div>
+                    <div ng-show="files.length>1 && someAreValid"
+                         style="height: 90px;">
+                        <label for="jtSelect">File 2:</label>
+                        <select ng-disabled="execution.running"
+                                class="form-control" id="ttSelect" 
+                                ng-model="file_selector.file2">
+                            <option ng-repeat="file in files | filter:{valid} track by $index" ng-value="file">{{file.name}}</option>
+                        </select>
+                    </div>
+
+                    <div ng-show="files.length<2 || !someAreValid"
+                         style="height: 90px;">
+                        <label for="jtSelect">Files:</label>
+                        <p class="text-center" style="background-color: #ffdddd; line-height: 30px; height: 30px;">
+                            <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i>
+                            Not enough files in your <a href="#!/data">workspace</a>.
+                        </p>
                     </div>
                 </div>
 
-                <div class="col-md-12" ng-show="files.length>0 && someAreReady" style="margin-top:10px; background-color:#e6e6e6; height: 90px;">
-                    <label for="jtSelect">File 1:</label>
-                    <select class="form-control" id="ttSelect"
-                            ng-model="file_selector.name1"
-                            ng-change="load(file_selector.name1, file_selector.name2, tumorTypes.current)">
-                        <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
-                    </select>
+                <div class="col-md-12 text-center" style="margin-top:10px;">
+                    <button class="btn btn-white"  style="width: 100%;"
+                            ng-click="loadFiles(file_selector.file1, file_selector.file2)"
+                            ng-disabled="execution.running || file_selector.file1==null ||  file_selector.file2==null || file_selector.file1.parsed_lines > 100000 || file_selector.file2.parsed_lines > 100000"
+                            type="submit">
+                        <i class="fa fa-play" style="font-size: 0.9em;
+                                                     margin-right: 6px;"></i> Plot</button>
+                    <a id="dwn_data" target="_blank" style="display: none"></a>
                 </div>
 
-                <div class="col-md-12"  ng-show="files.length>0 && someAreReady" style="margin-top:0px; background-color:#e6e6e6; height: 90px;">
-                    <label for="jtSelect">File 2:</label>
-                    <select class="form-control" id="ttSelect"
-                            ng-model="file_selector.name2"
-                            ng-change="load(file_selector.name1, file_selector.name2, tumorTypes.current)">
-                        <option ng-repeat="file in files | filter:{ready:true} track by $index" ng-value="file.name">{{file.name}}</option>
-                    </select>
+                <div class="col-md-12" style="margin-top:10px;" ng-if=" file_selector.file1!=null &&   file_selector.file2!=null && (file_selector.file1.parsed_lines >100000  || file_selector.file2.parsed_lines >100000)">
+                    <p class="text-center" style="background-color: #fff38a; line-height: 30px; height: 90px;">
+                        <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i><br>
+                        This visualization does not support files containing more than 100K regions. 
+                    </p>
+
                 </div>
+
 
                 <div class="col-md-12" style="margin-top:10px;">
                     <label for="ttSelect">Tumor type:</label>
                     <select class="form-control" id="ttSelect"
-                            ng-model="tumorTypes.current"
-                            ng-change="load(file_selector.name1, file_selector.name2, tumorTypes.current)">
-                        <option ng-repeat="type in tumorTypes.available" ng-value="type">{{type.name}}</option>
+                            ng-model="tumorTypes.current" 
+                            ng-change="loadFiles(file_selector.file1, file_selector.file2)" ng-disabled="execution.running">
+                        <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
-                    <hr>
                 </div>
 
-                <div class="col-md-12" style="margin-top:10px;">
+                <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">
 
                     <label for="inputBins">Mutation types:</label>
 
@@ -67,7 +82,7 @@
                         </div>
 
                         <div class="col-md-3 text-center">
-                            <select class="form-control" id="mtSelect"
+                            <select class="form-control" id="mtSelect" style="width: auto;"
                                     ng-model="st.from"
                                     ng-change="changeMutationType()">
                                 <option ng-repeat="f in mutationTypes.fromList" 
@@ -78,7 +93,7 @@
                             <i class="fas fa-arrow-right"></i>
                         </div>
                         <div class="col-md-3 text-center">
-                            <select class="form-control" id="mtSelect"
+                            <select class="form-control" id="mtSelect" style="width: auto;"
                                     ng-model="st.to"
                                     ng-change="changeMutationType()">
                                 <option ng-repeat="t in mutationTypes.toList" 
@@ -113,7 +128,7 @@
 
                 </div>
 
-                <div class="col-md-12" style="margin-top:10px;">
+                <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">
                     <div class="form-group">
                         <label for="inputBins">Bin size (bp):</label>
                         <input type="number" class="form-control" id="inputBins" 
@@ -123,11 +138,11 @@
                     </div>
                 </div>
 
-                <div class="col-md-12" style="margin-top:10px;" ng-show="file_selector.name1!=null && file_selector.name2!=null">
+                <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">
                     <div class="row">
 
-                        <div class="col-md-12">
-                            <b>Statistical test</b>
+                        <div class="col-md-12 text-center">
+                            <b>Statistical test </b> <br><u>for the selected mutation types</u>
                         </div>
 
                         <div class="col-md-12" style="margin-top: 10px; margin-bottom: 20px;">
@@ -138,7 +153,7 @@
                                     <tr>
                                         <td class="align-middle" rowspan="2"><b>P-value</b></td>
                                         <td class="align-middle text-center">
-                                            {{test.pvalue==null?'?':test.pvalue}}
+                                              {{test.pvalue==null?'?':getP(test.pvalue)}}
                                         </td>
                                         <td class="align-middle text-center" rowspan="1">
                                             <div class="">
@@ -155,11 +170,21 @@
                     </div>
                 </div>
 
+                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:50px!important;margin-bottom: 20px!important;">
+
+                    <button class="btn btn-white"  style="width:100%"
+                            ng-click="downloadPlotData()"
+                            type="submit"><i class="fa fa-download"></i> Download Result (JSON)</button>
+                    <a id="dwn_data" target="_blank" style="display: none"></a>
+
+                </div>
+
                 <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-bottom: 20px!important;">
 
-                    <button class="btn" 
+                    <button class="btn btn-white" 
+                            style="width:100%"
                             ng-click="downloadPlot()"
-                            type="submit"><i class="fa fa-download"></i> Download plot as SVG</button>
+                            type="submit"><i class="fa fa-download"></i> Download Image (PNG)</button>
                     <a id="dwn" target="_blank" style="display: none"></a>
 
                 </div>
@@ -169,26 +194,59 @@
     </nav>
 
 
-    <div id="content">
-
+    <div id="content" style="padding-top: 30px; padding-left: 15px; background-color: {{execution.running?'#5d5d5d':''}}">
         <div class="row">
 
-            <div class="col-md-12 text-center my-auto" ng-if="!loaded">
-                Select files.
+            <div class="col-md-12 text-center" ng-if="execution.running" style="line-height: 40px; margin-top: 20px; color:white;">
+                PROCESSING
+                <br>
+                <img src="img/running.gif" width="80px">
             </div>
 
-            <div class="col-md-12" style="padding-left: 50px; padding-right: 50px;">
+            <div class="col-md-12 text-center" ng-if="!loaded && !execution.running " style="line-height: 40px;">
+                Select two files.
+            </div>
+
+
+            <div class="col-md-12" style="padding-left: 50px; padding-right: 50px;" ng-show="loaded">
                 <div id="slider"></div>
             </div>
 
-            <div class="col-md-12">
+            <div class="col-md-12" window-resize="loadFiles(file_selector.file1, file_selector.file2)">
                 <div id="uc2" class="plot-container">
                     <svg></svg>
                 </div>
             </div>
 
-
         </div>
-
     </div>
 </main>
+
+<div class="modal" tabindex="-1" role="dialog" id="infoModal">
+    <div class="modal-dialog" role="document" style="max-width: 700px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                Region comparison
+            </div>
+            <div class="modal-body">
+                <div id="modal_description">
+                    The visualization allows to compare the distribution of mutations around regions in <b>two different region-sets</b> through a heat-map. The <b>x-axis</b> represents the distance from the center of the provided regions, computed as <code>(start+stop)/2</code>, the <b>y-axis</b> discriminates the two selected region sets and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations.
+                    Use the toolbar on the left to select:
+                    <ul>
+                        <li><b>Two region sets</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
+                        <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed.</li>
+                        <li><b>Mutation classes</b>: only mutations belonging to the selected classes will be displayed. </li>
+                        <li><b>bin size</b>: number of base pairs per bin.</li>
+                    </ul>
+
+                    The horizontal slider helps restricting the domain.<br/>
+
+                    The <b>statistical test</b> returns a p-value indicating how different the currently displayed distributions are.. <b style="color:red">Only the selected mutation classes will be considered for testing.</b><br>
+                    For further details, please refer to our  <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/"> 2019 IEEE BIBM paper</a>.
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>

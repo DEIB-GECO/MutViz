@@ -1,7 +1,7 @@
 /* ####################
    UC1 Controller
    #################### */
-app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
+app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http, $timeout) {
 
     /* # Initialization # */
     window.scroll(0, 0);
@@ -10,10 +10,13 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
     $scope.plot = {binSize: 10, d3graph: null, showTotal: true, minY:10}
     $scope.loaded = false;
 
+    // status
+    $scope.execution = {running:false};
+
     $scope.test = {area:{from:0, to:0, fromPosition:-$scope.plot.binSize/2, toPosition:$scope.plot.binSize/2, visible: true, L:null, H:null}};
 
     // Selected File
-    $scope.file_selector = {name : null, file: null};
+    $scope.file_selector = {file: null};
 
 
     // Initialize with the first tumor type or with the example
@@ -35,8 +38,12 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         min = $scope.slider.noUiSlider.get()[0];
         max = $scope.slider.noUiSlider.get()[1];
 
+        // get data
+        data = $rootScope.dist_files[filename].result
+        distances = $rootScope.filterDistances(data, $rootScope.tumorTypes.current.identifier).distances;
+
         // Get binned
-        bins = uc1_get_bins($rootScope.getDistances(file,tumorType),
+        bins = uc1_get_bins(distances,
                             $scope.getSelectedTypes(),
                             $scope.plot.binSize, 
                             min, 
@@ -62,24 +69,103 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
     }
 
+    $scope.pollUC1 = function(filename, jobID) {
+
+        console.log("Polling "+filename+ " "+jobID);
+
+        $http({method: 'GET', url: API_JOBS+ jobID}).then(
+            function success(response) {
+                if( response.data.ready == true) {
+
+                    console.log("result for "+ jobID+" is ready");
+
+                    // Add the new file to the local list of files together with the answer
+                    $rootScope.dist_files[filename].result = response.data.result;
+
+                    $scope.load($rootScope.dist_files[filename].result, true);
+                    $scope.execution.running = false;
+
+                } else {
+
+                    // schedule another call
+                    $timeout($scope.pollUC1, POLLING_TIMEOUT, true, filename, jobID);
+
+                }
+            }, 
+            function error(response) {
+
+                // Attempt another computation
+                console.error("Error polling for uc1.");
+                $scope.execution.running = false;
+                window.alert("An error occurred.");
+
+            }
+        );
+    }
+
+    $scope.loadFile = function(file) {
+
+        $scope.loaded = false;
+
+        filename = file.identifier;
+        console.log("Load "+filename);
+
+        $("#uc1").html("<svg></svg>")
+
+        $scope.execution.running = true;
+
+
+        if( filename in $rootScope.dist_files && "result" in $rootScope.dist_files[filename] ){ 
+            $scope.load($rootScope.dist_files[filename].result, true);
+            $scope.execution.running = false;
+            return;
+        } else {
+
+            request_body = {
+                file_name: filename,
+                maxDistance: $rootScope.maxDistance 
+            }
+
+            // Call the API
+            $http({
+                method: 'POST',
+                data: $.param(request_body),
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                url: API_R01
+            }).then(
+                function success(response) {
+                    $rootScope.dist_files[filename] = file;
+                    $scope.pollUC1(filename, response.data.jobID);
+                }
+                , 
+                function error(response) {
+                    console.error("error");
+                    $scope.execution.running = false;
+                    window.alert("An error occurred.");
+                }
+            );
+
+
+        }
+
+    }
+
 
     // Asks the backend to compute distances (if needed) and plots the result
-    $scope.load = function(filename, tumorType) {
+    $scope.load= function(data) {
 
         $scope.test.L = null;
         $scope.test.H = null;
 
-        file = $rootScope.getSelectedFile(filename);
-        $scope.file_selector.file = file;
-
-        console.log("loading "+filename);
-
         $scope.loaded = true;
 
-        if(file==null || tumorType==null) {
-            console.log("Load: missing argument");
-            return;
-        }
+        // Filter by selected tumor type
+        filtered = $rootScope.filterDistances(data, $rootScope.tumorTypes.current.identifier);
+        plot_data = filtered.distances;
+
+        // Save last result
+        $rootScope.lastResult = JSON.stringify(plot_data);
+
 
         // Slider
         if($scope.slider == null) {
@@ -87,8 +173,8 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
             $scope.slider = document.getElementById("slider");
 
             dataRange = {
-                min : -file.maxDistance,
-                max : +file.maxDistance
+                min : -filtered.maxDistance,
+                max : +filtered.maxDistance
             };
 
             selectedRange = {
@@ -127,17 +213,17 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         }
 
         // Plot area size
-        width = 600;
+        width = 700;
         height = 400;
         if($("#uc1").width()>width)
             width = $("#uc1").width();
-        if(window.innerHeight-250>height)
-            height=window.innerHeight-250;
-        $("svg").css("height", window.innerHeight);
+        if(window.innerHeight-200>height)
+            height=window.innerHeight-200;
+        //$("svg").css("height", window.innerHeight);
 
 
         // Generate the plot
-        $scope.plot.d3graph = uc1($rootScope.getDistances(file,tumorType), 
+        $scope.plot.d3graph = uc1(plot_data, 
                                   $scope.plot.binSize, 
                                   selectedRange,
                                   $scope.getSelectedTypes(), 
@@ -164,7 +250,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
             // Rescale the plot according to the new coordinate range. 
             // rescaleX function is defined in uc1.js.
-            uc1_rescaleX($rootScope.getDistances(file,tumorType),
+            uc1_rescaleX($rootScope.filterDistances(data,$rootScope.tumorTypes.current.identifier).distances,
                          $scope.plot.d3graph,
                          $scope.plot.binSize, 
                          selectedRange,
@@ -179,9 +265,9 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
 
 
     }
-    
+
     $scope.reload = function() {
-        $scope.load($scope.file_selector.name, $rootScope.tumorTypes.current);
+        $scope.load($scope.file_selector.file, $rootScope.tumorTypes.current);
     }
 
     // Returns the valid mutation types selected in the interface
@@ -197,8 +283,12 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
         $scope.test.L = null;
         $scope.test.H = null;
 
+        // get data
+        data = $rootScope.dist_files[filename].result
+        distances = $rootScope.filterDistances(data, $rootScope.tumorTypes.current.identifier).distances;
+
         // Update function is defined in uc1.js.
-        uc1_update( $rootScope.getDistances(file, tumorType),
+        uc1_update(distances,
                    $scope.plot.d3graph,
                    $scope.plot.binSize,
                    $scope.plot.minY,
@@ -252,6 +342,22 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http) {
             $scope.updatePlot($scope.file_selector.file, $rootScope.tumorTypes.current);
         }
     };
+
+    $scope.getRightP = function(L,R){
+        L_float = parseFloat(L);
+        R_float = parseFloat(R);
+        
+        displayed = (L_float<R_float ? L : R)
+        excludded_for =  (L_float<R_float ? "decreased mutation rate" : "increased mutation rate")
+        tested_for = (L_float<R_float ? "increased mutation rate" : "decreased mutation rate")
+        excluded_value = (L_float<R_float ? R : L)
+        
+        if(L_float==0 || R_float==0)
+            return ["< 1 e-4",tested_for, excluded_value, excludded_for]
+        else
+            return [displayed,tested_for, excluded_value, excludded_for]
+
+    }
 
     // Set Default area
     $scope.setDefaultArea = function() {
