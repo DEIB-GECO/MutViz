@@ -39,7 +39,8 @@ The horizontal slider helps restricting the domain.
 The **statistical test** box allows to select the area to test for increased (decreased) mutation rate by specifying the initial and final x-coordinate of the area. The testing area is displayed in the plot as a light-blue rectangle. The bin-coordinate column shows the bins corresponding to the selected coordinates. The p-value is the result of the performed permutation test. **Only the selected mutation classes will be considered for testing**.
 For further details, please refer to our <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">2019 IEEE BIBM paper</a>.
 
-<img src="https://raw.githubusercontent.com/DEIB-GECO/MutViz/master/static/img/example1.png" height="200px">
+<img src="https://raw.githubusercontent.com/DEIB-GECO/MutViz/master/static/img/example1.png" height="200px"/>
+
 ## Region Comparison
 The visualization allows to compare the distribution of mutations around regions in two different region-sets through a heat-map. The x-axis represents the distance from the center of the provided regions, computed as (start+stop)/2, the y-axis discriminates the two selected region sets and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations. Use the toolbar on the left to select:
 - Two **region sets**, among the ones added to the workspace.
@@ -49,7 +50,8 @@ The visualization allows to compare the distribution of mutations around regions
 The horizontal slider helps restricting the domain.
 The **statistical test** returns a p-value indicating how different the currently displayed distributions are. **Only the selected mutation classes will be considered for testing.**
 For further details, please refer to our <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">2019 IEEE BIBM paper</a>.
-<img src="https://raw.githubusercontent.com/DEIB-GECO/MutViz/master/static/img/example2.png" height="200px">
+<img src="https://raw.githubusercontent.com/DEIB-GECO/MutViz/master/static/img/example2.png" height="200px"/>
+
 ## Tumor Comparison
 The visualization allows to compare the distribution of mutations from different tumor-types around regions in two provided region-set through a heat-map. The x-axis represents the distance from the center of the provided regions, computed as (start+stop)/2, the y-axis discriminates the selected tumor-types and the color-intensity represents the amount of mutations falling in a given bin. The most opaque bin for a region set represents the bin containing the highest number of mutations. Use the toolbar on the left to select:
 - A **region set**, among the ones added to the workspace.
