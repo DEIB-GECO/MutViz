@@ -94,6 +94,7 @@ app.controller('uc6_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             return current.threshold_min == $scope.threshold.minMutations && current.threshold_active == $scope.threshold.active;});
 
         if(condition) {
+            console.log($scope.uc6_files[filename].result);
             $scope.load( $scope.uc6_files[filename].result);
             $scope.execution.running = false;
         } else {

@@ -1,7 +1,7 @@
 var RECT_HEIGHT = 50;
 
 // List of available colors
-var uc6_colors = ["rgb(70, 130, 180)","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#808000", "#ffd8b1", "#000075", "#a9a9a9", "#ffffff", "#000000"];
+var uc6_colors = ["#2196F3","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1","#ff9da7","#9c755f","#bab0ab", "#808000", "#ffd8b1", "#000075", "#a9a9a9", "#ffffff", "#000000"];
 
 /* Build the graph with an initial number of bins */
 function uc6_box(data, showOutliers, signatures, width, height) {
@@ -18,7 +18,7 @@ function uc6_box(data, showOutliers, signatures, width, height) {
 
     g.distance = 10; // between successive plots
     // Set the dimensions and margins of the plot
-    g.margin = {top: 20, right: 0, bottom: 30, left: 50};
+    g.margin = {top: 20, right: 0, bottom: 30, left: 70};
     g.width  = (width-2*g.margin.left);
     g.height = height - 2*g.margin.top - 100;
 
@@ -43,7 +43,7 @@ function uc6_box(data, showOutliers, signatures, width, height) {
     })
     .entries(data)
 
-    console.log(sumstat);
+    //console.log(sumstat);
 
     //Outliers computation
 
@@ -53,11 +53,11 @@ function uc6_box(data, showOutliers, signatures, width, height) {
         sumstat.forEach(function(s){
 
             otl = data.filter(function(d){return d.signature==s.key && (d.value<s.value.min || d.value>s.value.max)});
-            console.log("doing union")
-            outliers = outliers.concat(otl);
+            //console.log("doing union")
+            //outliers = outliers.concat(otl);
 
         })
-        console.log("outliers total: "+outliers.length)
+        //console.log("outliers total: "+outliers.length)
     }
 
 
@@ -189,6 +189,15 @@ function uc6_box(data, showOutliers, signatures, width, height) {
     }
 
 
+    // y-axis label
+    g.svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -63)
+        .attr("x",0 - (g.height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("font-size", "1em")
+        .text("predicted franction of mutations");   
 
     return g;
 }
@@ -204,7 +213,7 @@ function uc6(data, width, height) {
 
     g.distance = 10; // between successive plots
     // Set the dimensions and margins of the plot
-    g.margin = {top: 0, right: 0, bottom: 30, left: 50};
+    g.margin = {top: 0, right: 0, bottom: 30, left: 70};
     g.width  = (width-1.5*g.margin.left);
     g.height = height - 2*g.margin.top-100;
 
@@ -311,6 +320,16 @@ function uc6(data, width, height) {
         .style("stroke", "black")
         .style("fill", "none")
         .style("stroke-width", 2);
+    
+    // y-axis label
+    g.svg[0].append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -68)
+        .attr("x",0 - (g.height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("font-size", "1em")
+        .text("predicted franction of mutations");   
 
 
     return g;

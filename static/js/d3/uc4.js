@@ -55,7 +55,7 @@ function uc4(data, mutationTypes, width, height, animate) {
 
     g.distance = 10; // between successive plots
     // Set the dimensions and margins of the plot
-    g.margin = {top: 0, right: 0, bottom: 30, left: 50};
+    g.margin = {top: 0, right: 0, bottom: 30, left: 80};
     g.width  = (width-1.5*g.margin.left-g.distance*(mutationTypes.length-1))/mutationTypes.length;
     g.height = height - 2*g.margin.top-100;
 
@@ -163,7 +163,8 @@ function uc4(data, mutationTypes, width, height, animate) {
             g.svg[index].append("g")
                 .attr("transform", "translate(-5,"+g.titleBoxHeight+")")
                 .style("font-size", "0.8em")
-                .call(d3.axisLeft(g.yAxis[index]));
+                .call(d3.axisLeft(g.yAxis[index]).tickFormat(function(d) { return d3.format(".2s")(d)}));
+            
         }
 
         g.svg[index].append("rect")
@@ -204,6 +205,16 @@ function uc4(data, mutationTypes, width, height, animate) {
         .style("text-anchor", "middle")
         .style("font-size", "0.8em")
         .text("triplets");*/
+    
+        // Label for the y axis
+    g.svg[0].append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -63)
+        .attr("x",0 - (g.height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("font-size", "1em")
+        .text("mutation count");   
 
 
     // Compute the bins and build the plot
