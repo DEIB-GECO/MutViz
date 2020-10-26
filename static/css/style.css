@@ -8,6 +8,14 @@ body {  background: white;}
 .clickable-item:hover, .clickable-item-selected {
     background-color: aliceblue;
 }
+
+.btn-info {
+    background-color: #2196f3;
+    border-color: #2196f3;
+}
+.btn-info:hover, .btn-info:active{
+    background-color: #0077d5;
+}
  .info-btn {
      line-height: 12px;
      width: 18px;
@@ -53,7 +61,7 @@ body {  background: white;}
 
 
 .bg-dark {
-    background-color: #183144!important;
+    background-color: #009688!important;
 }
 
 .btn-addws {
@@ -169,12 +177,12 @@ svg {
 }
 
 .noUi-horizontal {
-    height: 14px;
+    height: 4px;
 }
 
 .noUi-horizontal .noUi-handle {
-    height: 24px;
-    top: -5px;
+    height: 17px;
+    top: -7px;
 }
 
 .noUi-tooltip {
@@ -187,7 +195,7 @@ svg {
     box-shadow: none;
 }
 .noUi-connect {
-    background-color: #343a40
+    background-color: #969696;
 }
 .noUi-handle {
     outline: none;
