@@ -31,7 +31,7 @@ def intersect_and_group(mutation_table_name, file_name, groupbylist, tumor_type=
 
     if exists:
         print("reading from sql")
-        query = "SELECT * FROM "+t_mutation_trinucleotide_cache.name+ "WHERE file_id="+str(file_id)
+        query = "SELECT * FROM "+t_mutation_trinucleotide_cache.name+ " WHERE file_id="+str(file_id)
         if tumor_type or filter_json:
             query += " AND "
         if tumor_type:
