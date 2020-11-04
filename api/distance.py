@@ -121,17 +121,18 @@ def get_distances(logger):
 
                 import io
 
-                logger.debug("Caching Result.")
-                f = io.StringIO()
-                df = pd.DataFrame.from_records(query_result)
-                df.insert(0, 'file_id',file_id)
-                df.to_csv(f, index=False, header=False)  # removed header
-                f.seek(0)  # move position to beginning of file before reading
-                cursor = connect().cursor()
-                cursor.copy_from(f, DistanceCache.__tablename__, columns=('file_id','tumor_type_id', 'distance', 'mutation_code_id','count'), sep=',')
-                cursor.execute('COMMIT; ')
-                cursor.close()
-                logger.debug("Caching Finished ")
+                if db.session.query(UserFile).filter_by(name=repoId).one().preloaded:
+                    logger.debug("Caching Result.")
+                    f = io.StringIO()
+                    df = pd.DataFrame.from_records(query_result)
+                    df.insert(0, 'file_id',file_id)
+                    df.to_csv(f, index=False, header=False)  # removed header
+                    f.seek(0)  # move position to beginning of file before reading
+                    cursor = connect().cursor()
+                    cursor.copy_from(f, DistanceCache.__tablename__, columns=('file_id','tumor_type_id', 'distance', 'mutation_code_id','count'), sep=',')
+                    cursor.execute('COMMIT; ')
+                    cursor.close()
+                    logger.debug("Caching Finished ")
 
 
             result = defaultdict(list)
