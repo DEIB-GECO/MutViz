@@ -89,10 +89,11 @@ def upload_regions(logger):
         df_regions["start"] = df_regions["start"]+1
         df_regions["len"] = df_regions["stop"]-df_regions["start"]+1
         avg_len = df_regions["len"].mean()
+        max_len = df_regions["len"].max()
 
 
         # Add an entry to the user file
-        uf = UserFile(name=id, preloaded=False, count=len(regions), avg_length=avg_len)
+        uf = UserFile(name=id, preloaded=False, count=len(regions), avg_length=avg_len, max_length=max_len)
         session.add(uf)
 
         session.commit()

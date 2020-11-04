@@ -74,7 +74,7 @@ with app.app_context():
     res = UserFile.query.filter_by(preloaded=True).all()
     repositories_dict = dict()
     for r in res:
-        repositories_dict[str(r.name)] = (r.id, r.name, r.description, r.count, r.avg_length)
+        repositories_dict[str(r.name)] = (r.id, r.name, r.description, r.count, r.avg_length, r.max_length)
     del res
 
 

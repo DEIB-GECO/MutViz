@@ -128,6 +128,7 @@ class UserFile(db.Model):
     expiration = db.Column(db.Date)
     expired = db.Column(db.Boolean, nullable=False, server_default=db.FetchedValue())
     avg_length = db.Column(db.Float)
+    max_length = db.Column(db.Float)
 
 
 class MutationGrouped(db.Model):
