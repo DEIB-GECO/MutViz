@@ -86,6 +86,7 @@ def upload_regions(logger):
         create_upload_table(session, id, create=True)
 
         df_regions = pd.DataFrame(regions, columns=['chr', 'start', 'stop'])
+        df_regions["start"] = df_regions["start"]+1
         df_regions["len"] = df_regions["stop"]-df_regions["start"]+1
         avg_len = df_regions["len"].mean()
 
