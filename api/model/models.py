@@ -120,15 +120,15 @@ class TumorType(db.Model):
 class UserFile(db.Model):
     __tablename__ = 'user_file'
 
-    id = db.Column(db.SmallInteger, primary_key=True, server_default=db.FetchedValue(), autoincrement=True)
+    id = db.Column(db.SmallInteger, primary_key=True, server_default=db.FetchedValue())
     name = db.Column(db.String(100), unique=True)
     description = db.Column(db.Text)
     count = db.Column(db.Integer)
     preloaded = db.Column(db.Boolean, nullable=False, server_default=db.FetchedValue())
     expiration = db.Column(db.Date)
     expired = db.Column(db.Boolean, nullable=False, server_default=db.FetchedValue())
-    avg_length = db.Column(db.Float)
-    max_length = db.Column(db.Float)
+    avg_length = db.Column(db.Float(53))
+    max_length = db.Column(db.Float(53))
 
 
 class MutationGrouped(db.Model):

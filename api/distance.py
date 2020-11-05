@@ -46,22 +46,19 @@ def get_distances(logger):
     repoId = request.form.get('file_name')
     logger.debug(f"repoId: {repoId}")
 
-    maxDistance = request.form.get('maxDistance')
-    logger.debug(f"maxDistance: {maxDistance}")
+    max_len =   db.session.query(UserFile).filter_by(name=repoId).one().max_length
+    maxDistance = max(1000, min(5000, max_len))
+    #logger.debug(f"maxDistance: {maxDistance}")
+
+    print("max_distance: "+str(maxDistance))
 
     tumorType = request.form.get('tumorType')
     logger.debug(f"tumorType: {tumorType}")
 
     CACHE_ID = "DISTANCE#" + repoId + "#" + str(maxDistance) + "#" + str(tumorType)
 
-    if not repoId or not maxDistance:
+    if not repoId:
         abort(400)
-
-    try:
-        maxDistance = int(maxDistance)
-    except ValueError:
-        abort(400, 'max distance integer')
-
 
     jobID = register_job()
 

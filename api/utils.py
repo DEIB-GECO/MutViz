@@ -29,7 +29,7 @@ def parse_input_regions(regions):
                 if chrom in chromosome_dict:
                     chrom = chromosome_dict[chrom]
                     try:
-                        start = int(start)
+                        start = int(start) + 1 # BED is 0 based and we want 1 based
                         stop = int(stop)
                         # position negative check is excluded
                         if True or start >= 0 or stop >=0:

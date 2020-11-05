@@ -11,9 +11,10 @@ def get_repository():
                      "name": name,
                      "description": description,
                      "count": count,
-                     "avgLength":avg
+                     "avgLength":avg,
+                     "maxLength":max
                      }
-                    for identifier, (id, name, description, count, avg) in
+                    for identifier, (id, name, description, count, avg, max) in
                     sorted(repositories_dict.items(), key=lambda x: x[1][1])  # sort by name
                     ]
     return json.dumps(repositories)
@@ -86,10 +87,10 @@ def upload_regions(logger):
         create_upload_table(session, id, create=True)
 
         df_regions = pd.DataFrame(regions, columns=['chr', 'start', 'stop'])
-        df_regions["start"] = df_regions["start"]+1
         df_regions["len"] = df_regions["stop"]-df_regions["start"]+1
-        avg_len = df_regions["len"].mean()
-        max_len = df_regions["len"].max()
+
+        avg_len = df_regions["len"].mean().astype("float")
+        max_len = df_regions["len"].max().astype("float")
 
 
         # Add an entry to the user file
@@ -103,7 +104,7 @@ def upload_regions(logger):
         logger.error("Error uploading regions.", e)
         abort(500)
 
-    result = { "id": id, "name":regions_name, "parsed_lines":len(regions),
+    result = { "id": id, "name":regions_name, "parsed_lines":len(regions), "avg_len":avg_len, "max_len":max_len,
                **({"error": error_regions} if error_regions else {})}
 
     return json.dumps(result)
