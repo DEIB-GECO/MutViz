@@ -23,7 +23,7 @@ All regions should use **reference genome hg19**.
 The workspace structure is stored on the browser's local storage and will be available until the local storage is deleted. Therefore, closing the browser or reloading the page won't erase data in your work space. However, uploaded region sets will disappear from the workspace as soon as their survival time on our database expires (few days).
 
 
-# MutViz 2019
+# MutViz 1.0
 Visualizations in this section were presented at the IEEE BIBM 2019 Conference, San Diego. You can find the related publication on <a target="_blank" href="https://ieeexplore.ieee.org/abstract/document/8983196/">IEEE Xplore</a>. 
 
 ## Histogram
@@ -64,8 +64,8 @@ For further details, please refer to our <a target="_blank" href="https://ieeexp
 
 <img src="https://raw.githubusercontent.com/DEIB-GECO/MutViz/master/static/img/example3.png" height="300px">
 
-# MutViz 2020
-Differently from the visualiations in MutViz 2019 (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given the set of mutations M and the region set R, the considered set of mutations is:
+# MutViz 2.0
+Differently from the visualiations in MutViz 1.0 (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given the set of mutations M and the region set R, the considered set of mutations is:
 
 <code style="color:red">{m in M : ∃r in R, m.position ≥ r.start AND m.position ≤ r.stop} </code>
 
