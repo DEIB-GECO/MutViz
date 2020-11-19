@@ -31,10 +31,9 @@
                                 <div style="padding: 0px">
                                     <div class="form-group">
                                         <label style="font-size: 0.9em"><b>Format:</b></label>
-                                        <select class="form-control" aria-describedby="fileTypeHelp" required="true"
+                                        <select ng-disabled="true" class="form-control" aria-describedby="fileTypeHelp" required="true"
                                                 ng-model="adding_file.type">
                                             <option>BED</option>
-                                            <option>narrowpeak</option>
                                         </select>
                                         <!--small id="fileTypeHelp" class="form-text text-muted">Select the right format for your file. </small-->
                                     </div> 
@@ -125,14 +124,15 @@ required="true" placeholder="Enter email"/-->
                 <div class="row" style="background-color: #fafafa; padding:10px; margin: 2px; border-radius: 5px;">
 
                     <div ng-if="files.length>0" class="col-md-4 file-item" ng-repeat="file in files track by $index">
-                        <div style="border:1px solid {{(file.ready || file.invalid)?'black':'#dadada'}}; padding: 10px; margin-top: 10px; background-color: {{file.valid?'white':'#fff2f2'}}; min-height: 87px;">
+                        <div style="border:1px solid {{(file.ready || file.invalid)?'black':'#dadada'}}; padding: 10px; margin-top: 10px; background-color: {{file.valid?'white':'#fff2f2'}}; min-height: 112px;">
                             <div class="row">
                                 <div class="col-md-8" style="font-size: 1em; line-height: 1.9em;">
                                     {{file.name}} <span ng-if="file.source=='custom'">({{file.type}})</span>
                                     <span style="color:#007bff" ng-if="file.source=='repo'">(repository)</span>
 
                                     <br>
-                                    <span ng-if="file.valid" style="color:green">{{file.parsed_lines}} region{{(file.parsed_lines==1)?'':'s'}}</span>
+                                    <span  ng-if="file.valid" style="color:green">{{file.parsed_lines}} region{{(file.parsed_lines==1)?'':'s'}}</span>
+                                     <br><span ng-if="file.valid" style="color:green; font-size:0.8em">{{file.avgLength.toFixed(0)}} bp (avg) -  {{file.maxLength}} bp (max)</span>
                                     <span ng-if="!file.valid" style="color:red">This file is not valid.</span>
                                     <a ng-if="file.source=='custom' && file.errors.length > 0" href="javascript:void(0);" ng-click="viewErrors(file)" style="color:red">+  errors</a>
 

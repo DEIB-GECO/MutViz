@@ -111,6 +111,9 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.test.pvalue = null;
 
         $scope.loaded = true;
+        
+        console.log(result);
+        console.log("ciao");
 
 
         // Slider
@@ -119,8 +122,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             $scope.slider = document.getElementById("slider");
 
             dataRange = {
-                min : -1000,
-                max : +1000
+                min : -result[0].maxDistance,
+                max : +result[0].maxDistance
             };
 
             selectedRange = {

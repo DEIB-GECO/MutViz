@@ -46,22 +46,19 @@ def get_distances(logger):
     repoId = request.form.get('file_name')
     logger.debug(f"repoId: {repoId}")
 
-    maxDistance = request.form.get('maxDistance')
-    logger.debug(f"maxDistance: {maxDistance}")
+    max_len =   db.session.query(UserFile).filter_by(name=repoId).one().max_length
+    maxDistance = max(1000, min(5000, max_len))
+    #logger.debug(f"maxDistance: {maxDistance}")
+
+    print("max_distance: "+str(maxDistance))
 
     tumorType = request.form.get('tumorType')
     logger.debug(f"tumorType: {tumorType}")
 
     CACHE_ID = "DISTANCE#" + repoId + "#" + str(maxDistance) + "#" + str(tumorType)
 
-    if not repoId or not maxDistance:
+    if not repoId:
         abort(400)
-
-    try:
-        maxDistance = int(maxDistance)
-    except ValueError:
-        abort(400, 'max distance integer')
-
 
     jobID = register_job()
 
@@ -121,17 +118,18 @@ def get_distances(logger):
 
                 import io
 
-                logger.debug("Caching Result.")
-                f = io.StringIO()
-                df = pd.DataFrame.from_records(query_result)
-                df.insert(0, 'file_id',file_id)
-                df.to_csv(f, index=False, header=False)  # removed header
-                f.seek(0)  # move position to beginning of file before reading
-                cursor = connect().cursor()
-                cursor.copy_from(f, DistanceCache.__tablename__, columns=('file_id','tumor_type_id', 'distance', 'mutation_code_id','count'), sep=',')
-                cursor.execute('COMMIT; ')
-                cursor.close()
-                logger.debug("Caching Finished ")
+                if db.session.query(UserFile).filter_by(name=repoId).one().preloaded:
+                    logger.debug("Caching Result.")
+                    f = io.StringIO()
+                    df = pd.DataFrame.from_records(query_result)
+                    df.insert(0, 'file_id',file_id)
+                    df.to_csv(f, index=False, header=False)  # removed header
+                    f.seek(0)  # move position to beginning of file before reading
+                    cursor = connect().cursor()
+                    cursor.copy_from(f, DistanceCache.__tablename__, columns=('file_id','tumor_type_id', 'distance', 'mutation_code_id','count'), sep=',')
+                    cursor.execute('COMMIT; ')
+                    cursor.close()
+                    logger.debug("Caching Finished ")
 
 
             result = defaultdict(list)

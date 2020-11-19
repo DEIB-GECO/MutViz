@@ -168,7 +168,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         $scope.loaded = true;
 
         // Coordinate available range as the minimum and maximum coordinate in the data
-        minMaxDistance = Math.min(file1.result.maxDistance, file2.result.maxDistance);
+        minMaxDistance = Math.min(file1.result[0].maxDistance, file2.result[0].maxDistance);
 
 
         // Slider
@@ -177,8 +177,8 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
             $scope.slider = document.getElementById("slider");
 
             dataRange = {
-                min : -1000,
-                max : +1000
+                min : -minMaxDistance,
+                max : +minMaxDistance
             };
 
             selectedRange = {

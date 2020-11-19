@@ -1,6 +1,4 @@
 # coding: utf-8
-from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, SmallInteger, String, Table, Text
-from sqlalchemy.schema import FetchedValue
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -10,7 +8,7 @@ db = SQLAlchemy()
 
 t_mutation_trinucleotide_cache = db.Table(
     'mutation_trinucleotide_cache',
-    db.Column('file_id', db.ForeignKey(u'user_file.id', ondelete=u'CASCADE'), nullable=False),
+    db.Column('file_id', db.ForeignKey('user_file.id', ondelete='CASCADE'), nullable=False, index=True),
     db.Column('donor_id', db.Integer, nullable=False),
     db.Column('tumor_type_id', db.SmallInteger, nullable=False),
     db.Column('chrom', db.SmallInteger, nullable=False),
@@ -31,3 +29,5 @@ class UserFile(db.Model):
     preloaded = db.Column(db.Boolean, nullable=False, server_default=db.FetchedValue())
     expiration = db.Column(db.Date)
     expired = db.Column(db.Boolean, nullable=False, server_default=db.FetchedValue())
+    avg_length = db.Column(db.Float(53))
+    max_length = db.Column(db.Float(53))

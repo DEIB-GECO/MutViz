@@ -185,7 +185,7 @@ function uc1_update(data, g, binSize, minY, mutationTypes, stacked, showTotal) {
     g.yAxis
         .transition()
         .duration(1000)
-        .call(d3.axisLeft(g.yAxisScale));
+        .call(d3.axisLeft(g.yAxisScale).tickFormat(function(d) { return d3.format(".2s")(d)}));
 
     // Adding vertical bars 
 

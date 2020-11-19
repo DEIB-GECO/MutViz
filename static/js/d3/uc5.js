@@ -14,7 +14,7 @@ function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
 
     g.distance = 10; // between successive plots
     // Set the dimensions and margins of the plot
-    g.margin = {top: 20, right: 0, bottom: 30, left: 50};
+    g.margin = {top: 20, right: 0, bottom: 30, left: 70};
     g.width  = width-40;
     g.height = height - 2*g.margin.top - 50;
 
@@ -81,7 +81,7 @@ function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
     var y = d3.scaleLinear()
     .domain([0,g.yMax])
     .range([g.height, 0])
-    g.svg.append("g").style("font-size", "1em").call(d3.axisLeft(y))
+    g.svg.append("g").style("font-size", "1em").call(d3.axisLeft(y).tickFormat(function(d) { return d3.format(".2s")(d)}));
 
 
     // tooltip
@@ -148,7 +148,7 @@ function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
         .attr('class', 'd3-tip')
         .offset([-10, 0])
         .html(function(d) {
-            return "<strong style='color:yellow'>"+d.mutation+"</strong> <br> donor_id: "+d.donor_id+"<br>count: "+d.count;;
+            return "<strong style='color:yellow'>"+d.mutation+"</strong> <br> donor_id: DO"+d.donor_id+"<br>count: "+d.count;;
         });
 
         g.svg.call(tip_outliers);
@@ -176,8 +176,8 @@ function uc5_tt(data, showOutliers,mutationTypes, width, height, left_margin) {
 
 /* Build the graph with an initial number of bins */
 function uc5(data, showOutliers, mutationTypes, width, height, trinucleotide) {
-    
-  
+
+
 
     // Remove any pre-existing plot
     d3.select("#uc5 svg").html("");
@@ -191,7 +191,7 @@ function uc5(data, showOutliers, mutationTypes, width, height, trinucleotide) {
 
     g.distance = 10; // between successive plots
     // Set the dimensions and margins of the plot
-    g.margin = {top: 20, right: 0, bottom: 30, left: 50};
+    g.margin = {top: 20, right: 0, bottom: 30, left: 70};
     g.width  = (width-2*g.margin.left)-40;
     g.height = height - 2*g.margin.top-50;
 
@@ -261,7 +261,7 @@ function uc5(data, showOutliers, mutationTypes, width, height, trinucleotide) {
     var y = d3.scaleLinear()
     .domain([0,g.yMax])
     .range([g.height, 0])
-    g.svg.append("g").style("font-size", "1em").call(d3.axisLeft(y))
+    g.svg.append("g").style("font-size", "1em").call(d3.axisLeft(y).tickFormat(function(d) { return d3.format(".2s")(d)}));
 
     // tooltip
     var tip = d3.tip()
@@ -329,7 +329,7 @@ function uc5(data, showOutliers, mutationTypes, width, height, trinucleotide) {
         .attr('class', 'd3-tip')
         .offset([-10, 0])
         .html(function(d) {
-            return "<strong style='color:yellow'>"+d.mutation+"</strong> <br> donor_id: "+d.donor_id+"<br>count: "+d.count;;
+            return "<strong style='color:yellow'>"+d.mutation+"</strong> <br> donor_id: DO"+d.donor_id+"<br>count: "+d.count;;
         });
 
         g.svg.call(tip_outliers);
@@ -349,6 +349,17 @@ function uc5(data, showOutliers, mutationTypes, width, height, trinucleotide) {
             .on('mouseout', tip_outliers.hide);
     }
 
+    // y-axis label
+    g.svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -65)
+        .attr("x",0 - (g.height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("font-size", "1em")
+        .text("mutations per donor");   
+
+
     return g;
 }
 
@@ -363,7 +374,7 @@ function uc5_tri(data,showOutliers, mutationTypes, befaft, width, height) {
 
     g.distance = 10; // between successive plots
     // Set the dimensions and margins of the plot
-    g.margin = {top: 0, right: 0, bottom: 30, left: 50};
+    g.margin = {top: 0, right: 0, bottom: 30, left: 70};
     g.width  = (width-1.5*g.margin.left-g.distance*(mutationTypes.length-1))/mutationTypes.length;
     g.height = height - 2*g.margin.top - 100;
 
@@ -459,7 +470,7 @@ function uc5_tri(data,showOutliers, mutationTypes, befaft, width, height) {
         g.yAxis[index]= d3.scaleLinear()
             .domain([0,g.yMax])
             .range([g.height-0, 0])
-        
+
 
 
 
@@ -492,7 +503,7 @@ function uc5_tri(data,showOutliers, mutationTypes, befaft, width, height) {
             g.svg[index].append("g")
                 .attr("transform", "translate(-5,"+g.titleBoxHeight+")")
                 .style("font-size", "0.8em")
-                .call(d3.axisLeft(g.yAxis[index]));
+                .call(d3.axisLeft(g.yAxis[index]).tickFormat(function(d) { return d3.format(".2s")(d)}));
         }
 
         localType = mutationType.from+">"+mutationType.to;
@@ -520,7 +531,7 @@ function uc5_tri(data,showOutliers, mutationTypes, befaft, width, height) {
 
 
         local_stats = local_stats.map(function(s){
-            
+
             s.mutation = s.key;
             s.key = s.key[0]+"-"+s.key[6];
             return s;
@@ -582,7 +593,7 @@ function uc5_tri(data,showOutliers, mutationTypes, befaft, width, height) {
             .attr('class', 'd3-tip')
             .offset([-10, 0])
             .html(function(d) {
-                return "<strong style='color:yellow'>"+d.mutation+"</strong> <br> donor_id: "+d.donor_id+"<br>count: "+d.count;;
+                return "<strong style='color:yellow'>"+d.mutation+"</strong> <br> donor_id: DO"+d.donor_id+"<br>count: "+d.count;;
             });
 
 
@@ -643,6 +654,15 @@ function uc5_tri(data,showOutliers, mutationTypes, befaft, width, height) {
         .style("text-anchor", "middle")
         .style("font-size", "0.8em")
         .text("triplets");*/
+
+    g.svg[0].append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -63)
+        .attr("x",0 - (g.height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .style("font-size", "1em")
+        .text("mutations per donor");   
 
 
     // Compute the bins and build the plot
