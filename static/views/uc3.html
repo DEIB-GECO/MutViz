@@ -88,8 +88,22 @@
                     </div>
 
                 </div>
+                
+                <div class="col-md-8" style="margin-top:20px;" ng-if="loaded">
+                    <p>Normalize by mean</p>
+                </div>
+                
+                <div class="col-md-4 text-center" style="margin-top:20px;" ng-if="loaded">
+                    <div class="form-group">
+                        <switch size="small" id="enabled" name="enabled"
+                                ng-model="plot.normalizeByMean" ng-change="updatePlot(file_selector.file, selectedTumorTypes)">
+                        </switch>
+                        <br>
+                    </div>
+                </div>
+                
 
-                <div class="col-md-12" style="margin-top:30px;" ng-if="loaded">
+                <div class="col-md-12" style="margin-top:0px;" ng-if="loaded">
                     <div class="form-group">
                         <label for="inputBins">Bin size (bp):</label>
                         <input type="number" class="form-control" id="inputBins" 

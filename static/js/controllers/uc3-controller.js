@@ -7,7 +7,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
     window.scroll(0, 0);
     $rootScope.active_menu = "uc3";
 
-    $scope.plot = {binSize: 10, d3graph: null}
+    $scope.plot = {binSize: 10, d3graph: null, normalizeByMean:false}
     $scope.loaded = false;
 
     // status
@@ -168,7 +168,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         //todo:check $("#uc1 svg").css("height", (data.length*150)+"px");
         $scope.plot.d3graph = uc3(data,
                                   $scope.plot.binSize,
-                                  selectedRange, $scope.getSelectedTypes());
+                                  selectedRange, $scope.getSelectedTypes(),
+                                  $scope.plot.normalizeByMean);
 
         // Set callback on slider change
         $scope.slider.noUiSlider.on('set.one', function () { 
@@ -186,7 +187,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             uc3_rescaleX($scope.getData(result, selectedTumorTypes),
                          $scope.plot.d3graph,
                          $scope.plot.binSize, 
-                         selectedRange, $scope.getSelectedTypes());
+                         selectedRange, $scope.getSelectedTypes(),
+                         $scope.plot.normalizeByMean);
 
         });
 
@@ -209,7 +211,8 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         uc3_update($scope.getData(file.result, selectedTumorTypes),
                    $scope.plot.d3graph,
                    $scope.plot.binSize,
-                   $scope.getSelectedTypes());
+                   $scope.getSelectedTypes(),
+                   $scope.plot.normalizeByMean);
     } 
 
 
@@ -218,9 +221,9 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
         $scope.test.pvalue = null;
 
-        types = $scope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.to!=null});
-
-        if(types.length==0) return;
+        types = $scope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.from !="" && t.to!=null && t.to!="" && t.from !=t.to});
+        
+        if(types.length!=$scope.mutationTypes.selectedTypes.length) return;
 
         // Make conditions exclusive
         exclusive = types.map( function(t){ 

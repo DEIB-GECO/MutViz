@@ -84,26 +84,45 @@
                     </div>
                 </div>
 
+                <div class="col-md-8" style="margin-top:5px;" ng-if="loaded">
+                    <p>Stacked</p>
+                </div>
 
-                <div class="col-md-6 text-center" style="margin-top:10px;" ng-if="loaded">
+                <div class="col-md-4 text-center" style="margin-top:5px;" ng-if="loaded">
                     <div class="form-group">
-                        <label for="stacked">Stacked</label><br>
                         <switch size="small" id="enabled" name="enabled"
                                 ng-model="mutationTypes.stacked" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
                         </switch>
                         <br>
                     </div>
                 </div>
+                
+                <div class="col-md-8" style="margin-top:5px;" ng-if="loaded">
+                    <p>Show total</p>
+                </div>
 
-                <div class="col-md-6 text-center" style="margin-top:10px;" ng-if="loaded">
+                <div class="col-md-4 text-center" style="margin-top:5px;" ng-if="loaded">
                     <div class="form-group">
-                        <label for="total">Show Total</label><br>
                         <switch size="small" id="enabled" name="enabled"
                                 ng-model="plot.showTotal" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
                         </switch>
                         <br>
                     </div>
                 </div>
+                
+                <div class="col-md-8" style="margin-top:5px;" ng-if="loaded">
+                    <p>Normalize by mean</p>
+                </div>
+                
+                <div class="col-md-4 text-center" style="margin-top:5px;" ng-if="loaded">
+                    <div class="form-group">
+                        <switch size="small" id="enabled" name="enabled"
+                                ng-model="plot.normalizeByMean" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
+                        </switch>
+                        <br>
+                    </div>
+                </div>
+
 
 
                 <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">

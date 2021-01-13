@@ -7,7 +7,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
     window.scroll(0, 0);
     $rootScope.active_menu = "uc1";
 
-    $scope.plot = {binSize: 10, d3graph: null, showTotal: true, minY:10}
+    $scope.plot = {binSize: 10, d3graph: null, showTotal: true, minY:1, normalizeByMean:false}
     $scope.loaded = false;
 
     // status
@@ -221,7 +221,6 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
             height=window.innerHeight-200;
         //$("svg").css("height", window.innerHeight);
 
-
         // Generate the plot
         $scope.plot.d3graph = uc1(plot_data, 
                                   $scope.plot.binSize, 
@@ -229,6 +228,7 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
                                   $scope.getSelectedTypes(), 
                                   $rootScope.mutationTypes.stacked, 
                                   $scope.plot.showTotal,
+                                  $scope.plot.normalizeByMean,
                                   width,
                                   height);
 
@@ -256,7 +256,8 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
                          selectedRange,
                          $scope.getSelectedTypes(),
                          $rootScope.mutationTypes.stacked,
-                         $scope.plot.showTotal);
+                         $scope.plot.showTotal,
+                         $scope.plot.normalizeByMean);
 
             //$scope.setDefaultArea();
             $scope.drawArea();
@@ -294,7 +295,8 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
                    $scope.plot.minY,
                    $scope.getSelectedTypes(),
                    $rootScope.mutationTypes.stacked, 
-                   $scope.plot.showTotal);
+                   $scope.plot.showTotal,
+                   $scope.plot.normalizeByMean);
 
         // $scope.setDefaultArea();
         $scope.drawArea();
@@ -310,7 +312,10 @@ app.controller('uc1_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         $scope.test.L = null;
         $scope.test.H = null;
 
-        types = $rootScope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.to!=null});
+        
+        types = $scope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.from !="" && t.to!=null && t.to!="" && t.from !=t.to});
+        
+        if(types.length!=$scope.mutationTypes.selectedTypes.length) return;
 
         // Make conditions exclusive
         exclusive = types.map( function(t){ 

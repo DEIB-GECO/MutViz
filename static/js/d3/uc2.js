@@ -4,7 +4,7 @@ var uc2_getColor = d3.scaleLinear()
 .domain([0,1]);
 
 // Get y value
-function uc2_yVal(bin) {
+function uc2_yVal(bin, normalize=false, avg=1) {
     y_val = bin.map( function(x) {
         if(x.length>=4)
             return x[3];
@@ -12,7 +12,7 @@ function uc2_yVal(bin) {
             return 1;
     }).reduce(function(x,y){return x+y},0);
 
-    return y_val;
+    return normalize?y_val/avg:y_val;
 }
 
 // Highlith on the x-axis the interval corresponding to the the motif
@@ -66,7 +66,9 @@ function uc2_getFilteredData(data, mutationTypes) {
 }
 
 // This function (re-)builds the graph g provided the number of bins and selected mutation types
-function uc2_update(data, g, binSize, mutationTypes) {
+function uc2_update(data, g, binSize, mutationTypes, normalize) {
+    
+
 
     // bins intervals centered on 0
     ticks = getTicks(g.xAxisScale.domain()[0], g.xAxisScale.domain()[1], binSize);
@@ -82,23 +84,28 @@ function uc2_update(data, g, binSize, mutationTypes) {
 
     var binsf1    = histogram(filtered_f1);
     var binsf2  = histogram(filtered_f2);
+    
+    
+    let avg_f1 = d3.mean(binsf1, function(d) { return uc2_yVal(d)});
+    let avg_f2 = d3.mean(binsf2, function(d) { return uc2_yVal(d)});
+    
 
-    var maxInf1 = d3.max(binsf1, function(d) { return +uc2_yVal(d) });
-    var maxf2 = d3.max(binsf2, function(d) { return +uc2_yVal(d) });
+    var maxInf1 = d3.max(binsf1, function(d) { return +uc2_yVal(d,normalize, avg_f1) });
+    var maxf2 = d3.max(binsf2, function(d) { return +uc2_yVal(d, normalize, avg_f2) });
     
    g.global_max = Math.max(maxInf1,maxf2);
-    console.log("Max f1 f2: "+g.global_max);
+
 
 
     var binsf1Norm = binsf1.map( function(b){
-        b.value = uc2_yVal(b) / g.global_max;
+        b.value = uc2_yVal(b,normalize, avg_f1) / g.global_max;
         b.variable = data.f1.name;
         b.group = b.x0;
         return b;
     });
 
     var binsf2Norm = binsf2.map(function(b){
-        b.value = uc2_yVal(b) / g.global_max; 
+        b.value = uc2_yVal(b, normalize, avg_f2) / g.global_max; 
         b.variable = data.f2.name;
         b.group = b.x0;
         return b;
@@ -122,9 +129,8 @@ function uc2_update(data, g, binSize, mutationTypes) {
 
     uc2_addTracks(g, data);
     
-     // ADD LEGEND
-    values = range(0,g.global_max,0.2);
-    
+
+
     // remove 
     d3.selectAll(".legend").remove();
     d3.selectAll(".legend_ticks").remove();
@@ -132,21 +138,22 @@ function uc2_update(data, g, binSize, mutationTypes) {
     // create element for legend
     legend_el = d3.select("#uc2 svg").append("g").lower().attr("class","plot-legend").attr("transform","translate(" + g.margin.left + "," + 0 + ")")
     
-    var legend = legend_el.selectAll(".legend") 
-    .data(values, function(d) {return d;})
-    .enter().append("g")
-    .attr("class", "legend");
+    let numElements = 500;
     
-    legendElementWidth = g.width/values.length;
+    legendElementWidth = g.width/numElements;
     height = 0;
     gridSize = 10;
-
-    legend.append("rect")
-        .attr("x", function(d, i){ return legendElementWidth * i;})
+    
+    
+    for(i=0; i<numElements; i++)
+        legend_el.append("g").attr("class", "legend").append("rect")
+        .attr("x",  legendElementWidth * i)
         .attr("y", height)
         .attr("width", legendElementWidth)
         .attr("height", gridSize/2)
-        .style("fill", function(d, i) {return uc2_getColor(d/g.global_max)});
+        .style("fill", uc2_getColor(i/numElements));
+    
+
 
     // Setup the x axis
     legend_scale = d3.scaleLinear().domain([0,g.global_max]).range([0,g.width]);
@@ -164,7 +171,7 @@ function uc2_update(data, g, binSize, mutationTypes) {
 }
 
 /* This function rescales the x axis, given the graph object and the new provided domain (range) */
-function uc2_rescaleX(data, g, binSize, range, mutationTypes) {
+function uc2_rescaleX(data, g, binSize, range, mutationTypes, normalize) {
 
     g.xAxisScale = d3.scaleLinear().domain([range.min,range.max]).range([0, g.width]);
 
@@ -173,11 +180,11 @@ function uc2_rescaleX(data, g, binSize, range, mutationTypes) {
         .duration(500)
         .call(d3.axisBottom(g.xAxisScale).tickFormat(function(d) { return d3.format(".2s")(d); }));
 
-    uc2_update(data, g, binSize, mutationTypes);
+    uc2_update(data, g, binSize, mutationTypes, normalize);
 }
 
 /* Build the graph with an initial number of bins */
-function uc2(data, binSize, range, mutationTypes, stacked) {
+function uc2(data, binSize, range, mutationTypes, normalize) {
 
     var g = {} // here we put all useful objects describing our plot
 
@@ -212,7 +219,7 @@ function uc2(data, binSize, range, mutationTypes, stacked) {
         .text("distance (bp)");
 
     // Compute the bins and build the plot
-    uc2_update(data, g, binSize, mutationTypes);
+    uc2_update(data, g, binSize, mutationTypes, normalize);
 
     // Return the plot description
     return g;

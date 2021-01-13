@@ -70,8 +70,22 @@
                         <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
                 </div>
+                
+               <div class="col-md-8" style="margin-top:20px;" ng-if="loaded">
+                    <p>Normalize by mean</p>
+                </div>
+                
+                <div class="col-md-4 text-center" style="margin-top:20px;" ng-if="loaded">
+                    <div class="form-group">
+                        <switch size="small" id="enabled" name="enabled"
+                                ng-model="plot.normalizeByMean" ng-change="updatePlot(file_selector.file1, file_selector.file2, tumorTypes.current)">
+                        </switch>
+                        <br>
+                    </div>
+                </div>
+                
 
-                <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">
+                <div class="col-md-12" style="margin-top:0px;" ng-if="loaded">
 
                     <label for="inputBins">Mutation types:</label>
 
