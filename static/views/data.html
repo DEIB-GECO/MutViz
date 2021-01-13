@@ -120,6 +120,14 @@ required="true" placeholder="Enter email"/-->
 
                 <br>
                 <h4>Workspace ({{files.length}} datasets):</h4>
+                
+                <div class="row" ng-if="hasWarning()">
+                    <div class="col-md-12 text-center">
+                        <i class="fa fa-exclamation-triangle" style="font-size: 0.9em; margin-right:10px; color:#ff5722;"></i>
+                        Files containing more than 100K regions can be used only in <a href="#!/uc4">trinucleotide mutations</a>, 
+                        <a href="#!/uc5">mutations per donor</a> and <a href="#!/uc6">signature refitting</a>.
+                    </div>
+                </div>
 
                 <div class="row" style="background-color: #fafafa; padding:10px; margin: 2px; border-radius: 5px;">
 
@@ -131,7 +139,7 @@ required="true" placeholder="Enter email"/-->
                                     <span style="color:#007bff" ng-if="file.source=='repo'">(repository)</span>
 
                                     <br>
-                                    <span  ng-if="file.valid" style="color:green">{{file.parsed_lines}} region{{(file.parsed_lines==1)?'':'s'}}</span>
+                                    <span  ng-if="file.valid" style="color:green"><i ng-if="file.parsed_lines>100000" class="fa fa-exclamation-triangle" style="font-size: 0.9em; margin-right:10px; color:#ff5722;"></i>{{file.parsed_lines}} region{{(file.parsed_lines==1)?'':'s'}} </span>
                                      <br><span ng-if="file.valid" style="color:green; font-size:0.8em">{{file.avgLength.toFixed(0)}} bp (avg) -  {{file.maxLength}} bp (max)</span>
                                     <span ng-if="!file.valid" style="color:red">This file is not valid.</span>
                                     <a ng-if="file.source=='custom' && file.errors.length > 0" href="javascript:void(0);" ng-click="viewErrors(file)" style="color:red">+  errors</a>

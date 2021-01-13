@@ -68,6 +68,10 @@ app.controller('data_ctrl', function($scope, $rootScope, $routeParams, $http, $i
 
     }
 
+    $scope.hasWarning = function() {
+        return $rootScope.files.some(f=>f.parsed_lines>100000);
+    }
+    
     // On form submitted
     $scope.submit = function() {
 
