@@ -1,9 +1,15 @@
 var RECT_HEIGHT = 50;
 
-// Function that builds the color scale
-var uc3_getColor = d3.scaleLinear()
-.range(["white", "#e6194B"])
-.domain([0,1]);
+
+function uc3_getColor(value, max=1, normalize=false) {
+    if(normalize) {
+         return d3.scaleLinear().domain([0, 1/max, 1]).range(['#f44336', 'white', '#0a3281'])(value);
+    } else {
+         return d3.scaleLinear().range(["white", "#0a3281"]).domain([0,1])(value);
+    }
+     
+}
+
 
 // Get y value
 function uc3_yVal(bin,normalize=false,avg) {
@@ -19,7 +25,7 @@ function uc3_yVal(bin,normalize=false,avg) {
 
 
 // Add a track to the heatmap
-function uc3_addTracks(g, data) {
+function uc3_addTracks(g,data,normalize) {
 
     g.svg.selectAll()
         .data(data, function(d) {return d.group+':'+d.variable;})
@@ -29,7 +35,7 @@ function uc3_addTracks(g, data) {
         .attr("y", function(d) { return g.y(d.variable) })
         .attr("width", function(b){return g.xAxisScale(b.x1)-g.xAxisScale(b.x0)} )
         .attr("height", g.y.bandwidth() ) 
-        .style("fill", function(d) { return uc3_getColor(d.value)} )
+        .style("fill", function(d) { return uc3_getColor(d.value,g.global_max,normalize)} )
 }
 
 
@@ -117,7 +123,7 @@ function uc3_update(data, g, binSize, mutationTypes, normalize) {
     union = binned.reduce(function(a,b){return a.concat(b)});
 
     // Add the tracks to the plot
-    uc3_addTracks(g, union);
+    uc3_addTracks(g, union, normalize);
     
     
     // ADD LEGEND
@@ -146,7 +152,7 @@ function uc3_update(data, g, binSize, mutationTypes, normalize) {
     .attr("y", height)
     .attr("width", legendElementWidth)
     .attr("height", gridSize/2)
-    .style("fill", uc3_getColor(i/numElements));
+    .style("fill", uc3_getColor(i/numElements,g.global_max,normalize));
     
 
     

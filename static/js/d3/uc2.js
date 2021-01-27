@@ -1,7 +1,13 @@
 // Function that builds the color scale
-var uc2_getColor = d3.scaleLinear()
-.range(["white", "#0a3281"])
-.domain([0,1]);
+
+function uc2_getColor(value, max=1, normalize=false) {
+    if(normalize) {
+         return d3.scaleLinear().domain([0, 1/max, 1]).range(['#f44336', 'white', '#0a3281'])(value);
+    } else {
+         return d3.scaleLinear().range(["white", "#0a3281"]).domain([0,1])(value);
+    }
+     
+}
 
 // Get y value
 function uc2_yVal(bin, normalize=false, avg=1) {
@@ -29,7 +35,7 @@ function uc2_highlightMotif(g) {
 }
 
 // Add a track to the heatmap
-function uc2_addTracks(g, data) {
+function uc2_addTracks(g, data, normalize) {
 
     g.svg.selectAll()
         .data(data, function(d) {return d.group+':'+d.variable;})
@@ -39,7 +45,7 @@ function uc2_addTracks(g, data) {
         .attr("y", function(d) { return g.y(d.variable) })
         .attr("width", function(b){return g.xAxisScale(b.x1)-g.xAxisScale(b.x0)} )
         .attr("height", g.y.bandwidth() )
-        .style("fill", function(d) { return uc2_getColor(d.value)} )
+        .style("fill", function(d) { return uc2_getColor(d.value,g.global_max,normalize)} )
 }
 
 
@@ -93,8 +99,7 @@ function uc2_update(data, g, binSize, mutationTypes, normalize) {
     var maxInf1 = d3.max(binsf1, function(d) { return +uc2_yVal(d,normalize, avg_f1) });
     var maxf2 = d3.max(binsf2, function(d) { return +uc2_yVal(d, normalize, avg_f2) });
     
-   g.global_max = Math.max(maxInf1,maxf2);
-
+    g.global_max = Math.max(maxInf1,maxf2);
 
 
     var binsf1Norm = binsf1.map( function(b){
@@ -127,8 +132,7 @@ function uc2_update(data, g, binSize, mutationTypes, normalize) {
 
     data = binsf1Norm.concat(binsf2Norm);
 
-    uc2_addTracks(g, data);
-    
+    uc2_addTracks(g, data,normalize);
 
 
     // remove 
@@ -151,7 +155,7 @@ function uc2_update(data, g, binSize, mutationTypes, normalize) {
         .attr("y", height)
         .attr("width", legendElementWidth)
         .attr("height", gridSize/2)
-        .style("fill", uc2_getColor(i/numElements));
+        .style("fill", uc2_getColor(i/numElements, g.global_max,normalize));
     
 
 
