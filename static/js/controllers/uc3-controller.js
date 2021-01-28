@@ -113,7 +113,7 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         $scope.loaded = true;
         
         console.log(result);
-        console.log("ciao");
+
 
 
         // Slider
@@ -128,7 +128,9 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
 
             selectedRange = {
                 min: dataRange.min+0*(dataRange.max-dataRange.min),
-                max: dataRange.min+1*(dataRange.max-dataRange.min)
+                max: dataRange.min+1*(dataRange.max-dataRange.min),
+                minFull: -result[0].maxDistance,
+                maxFull: +result[0].maxDistance
             }
 
             noUiSlider.create($scope.slider, {
@@ -155,7 +157,9 @@ app.controller('uc3_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
         } else {
             selectedRange = {
                 min: $scope.slider.noUiSlider.get()[0],
-                max: $scope.slider.noUiSlider.get()[1]
+                max: $scope.slider.noUiSlider.get()[1],
+                minFull: -result[0].maxDistance,
+                maxFull: +result[0].maxDistance
             }
         }
 

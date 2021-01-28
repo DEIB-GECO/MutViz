@@ -184,7 +184,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
             selectedRange = {
                 min: dataRange.min+0*(dataRange.max-dataRange.min),
                 max: dataRange.min+1*(dataRange.max-dataRange.min),
-                 minFull: -minMaxDistance,
+                minFull: -minMaxDistance,
                 maxFull: +minMaxDistance
             }
 

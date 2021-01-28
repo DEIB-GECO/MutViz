@@ -105,8 +105,7 @@ function uc2_update(data, g, binSize, mutationTypes, normalize) {
 
     avg_f1 = d3.mean(fullBinsf1, function(d) { return uc2_yVal(d)});
     avg_f2 = d3.mean(fullBinsf2, function(d) { return uc2_yVal(d)});
-        console.log("AVG_F1 "+avg_f1+" AVG_F2"+avg_f2);
-        
+        console.log("AVG_F1 "+avg_f1+" AVG_F2"+avg_f2);    
         
    }
 
