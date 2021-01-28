@@ -85,18 +85,12 @@ function uc3_update(data, g, binSize, mutationTypes, normalize) {
 
         let fullHistogram = d3.histogram().value(function(d) {return d[0];}).domain(g.fullXAxisScale.domain()).thresholds(fullTicks); ;
         let fullBins = data.map(function(tumorType){return fullHistogram(uc3_getFilteredData(tumorType.data, mutationTypes));});
-        fullBins.forEach(bin=>bin.avg=d3.mean(bin, function(d) { return uc3_yVal(d)}));
+        for(i=0;i<fullBins.length;i++){
+            binned[i].avg = d3.mean(fullBins[i], function(d) { return uc3_yVal(d)})
+        }
 
-        //fullBins.forEach(bin=>console.log("AVG: "+bin.avg));
-    }
+        //binned.forEach(bin=>console.log("AVG: "+bin.avg));
 
-
-
-
-    if(normalize){
-
-
-        binned.forEach(bin=>bin.avg=d3.mean(bin, function(d) { return uc3_yVal(d)}));
     }
 
 
