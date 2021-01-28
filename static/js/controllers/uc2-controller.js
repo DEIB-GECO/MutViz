@@ -183,7 +183,9 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
 
             selectedRange = {
                 min: dataRange.min+0*(dataRange.max-dataRange.min),
-                max: dataRange.min+1*(dataRange.max-dataRange.min)
+                max: dataRange.min+1*(dataRange.max-dataRange.min),
+                 minFull: -minMaxDistance,
+                maxFull: +minMaxDistance
             }
 
             noUiSlider.create($scope.slider, {
@@ -210,7 +212,9 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         } else {
             selectedRange = {
                 min: $scope.slider.noUiSlider.get()[0],
-                max: $scope.slider.noUiSlider.get()[1]
+                max: $scope.slider.noUiSlider.get()[1],
+                minFull: -minMaxDistance,
+                maxFull: +minMaxDistance
             }
         }
 

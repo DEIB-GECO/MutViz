@@ -92,9 +92,23 @@ function uc2_update(data, g, binSize, mutationTypes, normalize) {
     var binsf2  = histogram(filtered_f2);
     
     
-    let avg_f1 = d3.mean(binsf1, function(d) { return uc2_yVal(d)});
-    let avg_f2 = d3.mean(binsf2, function(d) { return uc2_yVal(d)});
+    let avg_f1 = null;
+    let avg_f2 = null;
     
+
+    if(normalize){
+    let fullTicks = getTicks(g.fullXAxisScale.domain()[0], g.fullXAxisScale.domain()[1], binSize);
+
+    let fullHistogram = d3.histogram().value(function(d) {return d[0];}).domain(g.fullXAxisScale.domain()).thresholds(fullTicks); ;
+    let fullBinsf1 = fullHistogram(filtered_f1);
+    let fullBinsf2 = fullHistogram(filtered_f2);
+
+    avg_f1 = d3.mean(fullBinsf1, function(d) { return uc2_yVal(d)});
+    avg_f2 = d3.mean(fullBinsf2, function(d) { return uc2_yVal(d)});
+        console.log("AVG_F1 "+avg_f1+" AVG_F2"+avg_f2);
+        
+        
+   }
 
     var maxInf1 = d3.max(binsf1, function(d) { return +uc2_yVal(d,normalize, avg_f1) });
     var maxf2 = d3.max(binsf2, function(d) { return +uc2_yVal(d, normalize, avg_f2) });
@@ -207,6 +221,7 @@ function uc2(data, binSize, range, mutationTypes, normalize) {
 
     // Setup the x axis
     g.xAxisScale = d3.scaleLinear().domain([range.min,range.max]).range([0, g.width]);
+    g.fullXAxisScale =  d3.scaleLinear().domain([range.minFull, range.maxFull]).range([0, g.width]);
     g.xAxis = g.svg.append("g").attr("transform", "translate(0," + g.height + ")");
     g.xAxis.call(d3.axisBottom(g.xAxisScale));
 

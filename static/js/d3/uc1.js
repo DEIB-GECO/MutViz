@@ -137,6 +137,7 @@ function uc1_addLegendItem(g, index, color, text) {
         .text(text);
 }
 
+
 // This function (re-)builds the graph g provided the number of bins and selected mutation types
 function uc1_update(data, g, binSize, minY, mutationTypes, stacked, showTotal, normalize) {
 
@@ -179,9 +180,18 @@ function uc1_update(data, g, binSize, minY, mutationTypes, stacked, showTotal, n
     /* Now, since we can know the maximum value of y, 
      * we can complete the definition of yAxisScale and then build the yAxis.
      * The max function iterates over the bins, and for each bin (another array) takes the number of contained items (length * of the array containing the items) */
+   
+    let avg = null;
+    
+    if(normalize){
+    let fullTicks = getTicks(g.fullXAxisScale.domain()[0], g.fullXAxisScale.domain()[1], binSize);
+    let fullHistogram = d3.histogram().value(function(d) {return d[0];}).domain(g.fullXAxisScale.domain()).thresholds(fullTicks); ;
+    let fullBins = fullHistogram(data);
 
-    let avg = d3.mean(bins, function(d) { return uc1_yVal(d)});
-    console.log("MEAN :"+avg)
+    avg = d3.mean(fullBins, function(d) { return uc1_yVal(d)});
+   } else {
+       avg = d3.mean(bins, function(d) { return uc1_yVal(d)});
+   }
     
     dataMin = d3.max(bins, function(d) { return uc1_yVal(d,normalize,avg)});
     
@@ -302,6 +312,8 @@ function uc1_rescaleX(data, g, binSize, range, mutationTypes, stacked, showTotal
 
 /* Build the graph with an initial number of bins */
 function uc1(data, binSize, range, mutationTypes, stacked, showTotal, normalize, width, height) {
+    
+    console.log("FULL RANGE",range);
 
     console.log("width: "+width)
     console.log("height: "+height)
@@ -326,6 +338,7 @@ function uc1(data, binSize, range, mutationTypes, stacked, showTotal, normalize,
 
     // Defines linear functions for X and Y axis initialization
     g.xAxisScale = d3.scaleLinear().domain([range.min, range.max]).range([0, g.width]);
+    g.fullXAxisScale =  d3.scaleLinear().domain([range.minFull, range.maxFull]).range([0, g.width]);
     g.yAxisScale = d3.scaleLinear().range([g.height, 0]); // domain depends on the bins
 
     // Append to groups, one of each axis. xAxis must be moved down by the height of the graph
