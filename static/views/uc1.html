@@ -61,6 +61,12 @@
                             ng-change="loadFile(file_selector.file)" ng-disabled="execution.running">
                         <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
+                    <div class="row text-center">
+                        <div class="col-md-12">
+                            <span class="text-center" style="font-size: 0.9em">Mutations from <b>{{tumorTypes.current.donor_count}}</b> donors.</span>
+                        </div>
+                    </div>
+
                 </div>
 
 
@@ -96,7 +102,7 @@
                         <br>
                     </div>
                 </div>
-                
+
                 <div class="col-md-8" style="margin-top:5px;" ng-if="loaded">
                     <p>Show total</p>
                 </div>
@@ -109,11 +115,11 @@
                         <br>
                     </div>
                 </div>
-                
+
                 <div class="col-md-8" style="margin-top:5px;" ng-if="loaded">
                     <p>Show observed/expected</p>
                 </div>
-                
+
                 <div class="col-md-4 text-center" style="margin-top:5px;" ng-if="loaded">
                     <div class="form-group">
                         <switch size="small" id="enabled" name="enabled"
@@ -247,7 +253,7 @@
                                         <td class="align-middle" colspan="3">
                                             testing for <b><span ng-bind="getRightP(test.L,test.H)[1]"></span></b><br> 
                                             (a p-value of <span ng-bind="getRightP(test.L,test.H)[2]"></span> was instead obtained testing for <span ng-bind="getRightP(test.L,test.H)[3]"></span>)
-                                            
+
                                         </td>
                                     </tr>
 

@@ -56,314 +56,320 @@
                         </div>
                     </div>
 
-                </div>
 
-                <div class="col-md-12" style=" background-color: #fafafa;padding-bottom:10px;">
-                    <label for="ttSelect" style="margin-bottom: 0px;">Threshold {{threshold.active?'':'[disabled]'}}:</label><br>
-                    <span style="font-size: 0.9em; color:#5b5555;">(Minimum number of mutations per donor)</span>
-
-                    <div class="row" style="margin-top: 6px;">
-
-                        <div class="col-md-8">
-                            <input ng-disabled="!threshold.active" type="number" class="form-control" ng-model="threshold.minMutations" style="font-size: 0.8em;">
-                        </div>
-
-                        <div class="col-md-4">
-                            <switch size="small" id="enabled" name="enabled"
-                                    ng-model="threshold.active" ng-change="thresholdChanged">
-                                ></switch>
+                    <div class="row text-center" style="margin-bottom: 20px;">
+                        <div class="col-md-12">
+                            <span class="text-center" style="font-size: 0.9em">Mutations from <b>{{tumorTypes.current.donor_count}}</b> donors.</span>
                         </div>
 
                     </div>
 
-                </div>
+                    <div class="col-md-12" style=" background-color: #fafafa;padding-bottom:10px;">
+                        <label for="ttSelect" style="margin-bottom: 0px;">Threshold {{threshold.active?'':'[disabled]'}}:</label><br>
+                        <span style="font-size: 0.9em; color:#5b5555;">(Minimum number of mutations per donor)</span>
 
+                        <div class="row" style="margin-top: 6px;">
 
-                <div class="col-md-12 text-center" style="margin-top:10px;">
-                    <button class="btn btn-white"  style="width: 100%;"
-                            ng-click="loadFile(file_selector.name)"
-                            ng-disabled="execution.running || file_selector.name=='' || tumorTypes.current==null"
-                            type="submit">
-                        <i class="fa fa-play" style="font-size: 0.9em;
-                                                     margin-right: 6px;"></i> Plot</button>
-                    <a id="dwn_data" target="_blank" style="display: none"></a>
-                </div>
-
-                <div class="col-md-12 text-center" style="margin-top:30px;" ng-show="loaded">
-                    <b style="color:blue">{{numPatients}}</b> patients with mutations in the region set. <br>
-                    <div ng-if="numPatients<MIN_PATIENTS" style="margin-top:3px;">
-                        <i class="fa fa-exclamation-triangle" style="color:#FF9800"></i> <a href="" data-toggle="modal" data-target="#infoModal">behaviour changed</a>
-                    </div>
-                </div>
-
-
-                <div class="col-md-12" style="margin-top:30px;" >
-                    <div class="row">
-
-                        <div class="col-md-8" ng-show="loaded && !barPlot">
-                            Show outliers:
-                        </div>
-
-                        <div class="col-md-4" ng-show="loaded && !barPlot">
-                            <switch size="small" id="enabled" name="enabled"
-                                    ng-model="outliers.show" ng-change="loadFile(file_selector.name)">
-                                ></switch>
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:10px!important;margin-bottom: 20px!important;">
-
-                    <button class="btn btn-white"  style="width:100%"
-                            ng-click="downloadPlotData()"
-                            type="submit"><i class="fa fa-download"></i> Download Result (JSON)</button>
-                    <a id="dwn_data" target="_blank" style="display: none"></a>
-
-                </div>
-
-                <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-bottom: 20px!important;">
-
-                    <button class="btn btn-white" 
-                            style="width:100%"
-                            ng-click="downloadPlot()"
-                            type="submit"><i class="fa fa-download"></i> Download Image (PNG)</button>
-                    <a id="dwn" target="_blank" style="display: none"></a>
-
-                </div>
-
-            </div>
-        </div>
-    </nav>
-
-    <div id="content" style="padding-top: 0px; padding-left: 15px; background-color: {{execution.running?'#5d5d5d':''}}">
-        <div class="row">
-
-            <div class="col-md-12 text-center" ng-if="execution.running" style="line-height: 40px; margin-top: 20px; color:white;">
-                PROCESSING
-                <br>
-                <img src="img/running.gif" width="80px">
-            </div>
-
-            <div class="col-md-12 text-center" ng-if="!loaded && !execution.running" style="line-height: 40px;">
-                Select a file.
-            </div>
-
-            <div class="col-md-12 text-center my-auto" ng-if="loaded">
-                <div class="row">
-                    <div class="col-md-6 sub-menu-item {{barPlot?'active':''}}" ng-click="showBarPlot()">
-                        Bar Plot
-                    </div>
-                    <div class="col-md-6 sub-menu-item {{barPlot?'':'active'}}" ng-click="showBoxPlot()" 
-                         ng-if="numPatients>=MIN_PATIENTS">
-                        Box Plot
-                    </div>
-                    <div class="col-md-6 sub-menu-item {{barPlot?'':'active'}}" style="cursor: pointer"
-                         ng-if="numPatients<MIN_PATIENTS">
-                        <strike>Box Plot</strike>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-12" window-resize="loadFile(file_selector.name, tumorTypes.current)">
-                <div id="uc6" class="plot-container">
-                    <svg></svg>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</main>
-
-<div class="modal" tabindex="-1" role="dialog" id="infoModal">
-    <div class="modal-dialog" role="document" style="max-width: 700px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                SIGNATURE REFITTING
-            </div>
-            <div class="modal-body">
-                <div id="modal_description">
-
-                    Given a catalogue of mutational <b>signatures</b> S and a set of somatic mutations M found in a given tumor genome, exposures E can be computed ("signature refitting"). The exposures predict what fractions of the mutations can be attributed to the given signatures. Exposures are computed such that the exposure-weighted sum of signatures reflects the distribution of mutation types in the tumor genome.<br><br>
-
-                    Here, the set of somatic mutations M used are only those mutations which fall onto the region set specified by the user. Since, however, the region set may have a largely different trinucleotide content than the whole genome, for which mutational signatures have been originally been determined, the signatures are adjusted according to the trinucleotide content of the region set prior to determining exposures.<br><br>
-
-                    This visualization shows an <b>bar-plot</b> in which, for each signature (horizontal-axis), the corresponding exposure (verical-axis) is reported. Alternatively, a <b>box-plot</b> for each signature shows the distribution of exposures over donors.<br><br>
-
-                    For higher accuracy in signature refitting, when the <b>threshold</b> is enabled (e.g. <code>threshold=N</code>), the tool will consider only tumors (synonyms: donors, patients) for wich more than N mutations overlap regions in the provided region-set. In case less than 5 tumors have more than N mutations, the mutations are merged and an estimation of the average signature exposure is provided.<br><br>
-
-                    Differently from the first three visualiations (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given the set of mutations M and the region set R, the considered set of mutations is
-
-                    <div class="text-center">
-                        <code>{m in M : &exist;r in R, m.position &ge; r.start AND m.position &le; r.stop} </code>
-                    </div>
-
-
-                    In case the box-plot visualization is selected, hovering the box-plot with your mouse you will be able to get more information on the distribution and on outliers (e.g. you can get the donor-id associated to an outlier).
-                    Use the toolbar on the left to select:<br>
-                    <ul>
-                        <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
-                        <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed. You can further <b>filter mutations</b> by providing a predicate on the <b>clinical condition</b> of donors associated to the selected tumor type. Click on the filter-button next to the tumor-type selector to open the predicate editor. On top of the editor you will see the number of donors matching the current predicate.</li>
-                        <li>A <b>threshold</b> (N): when enabled and set, only donors (tumors) with more than N mutations overlapping the region-set will be considered.</li>
-                        <li><b>Mutation classes</b>: only mutations belonging to the selected classes will be displayed. </li>
-                    </ul>
-
-                    Once the plot is ready the number of considered patients will be displayed in the toolbar. <br><br>
-                    Source of mutational signatures: <a target="_blank" href="https://cancer.sanger.ac.uk/cosmic/signatures">COSMIC Mutational Signatures v3</a> and <a  target="_blank"  href="https://pubmed.ncbi.nlm.nih.gov/32025018/">Alexandrov et al</a>.<br><br>
-                    
-                    We considered only single base substitution (SBS) signatures, excluding those which have been characterized as possible sequencing artifacts (SBS 27, 29, 43,  and 45--60) or identified only in exome sequencing samples (SBS 23, 25,  and 42).
-
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal" tabindex="-1" role="dialog" id="filterModal">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header" style="display: block;">
-                Filter Mutations ( <b style="color:blue;">{{tumorTypes.current.donor_count}}</b> donors in {{tumorTypes.current.identifier}}  
-                <span ng-if="filter.showTest">-</span>  <span ng-if="filter.showTest" style="padding:2px; background-color: {{filter.testCount>0?'white':'#ffbdbd'}}"><b style="color:blue; "> {{filter.testCount}}</b> donors matched.</span>)
-            </div>
-            <div class="modal-body">
-
-                <div class="text-center" ng-if="isObjectEmpty(filter.conditions)">
-                    No filtering conditions applied.
-                </div>
-
-                <div class="input-group" ng-repeat="(k,v) in filter.conditions" style="margin-bottom: 5px">
-                    <input type="text" disabled style="width: 35%;text-align: center;" value="{{k}}">
-
-                    <input type="text" disabled style="width: 10%;text-align: center;border: 0px;" value="=">
-
-                    <input type="text" disabled style="width: 39%;text-align: center;" 
-                           value="{{v.join(', ')}}">
-                    <div style="padding-left: 32px">
-                        <a class="form-control btn btn btn-outline-secondary" ng-click="removeFilterCond(k)">
-                            <i class="fas fa-trash"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <hr>
-
-
-                <div class="input-group">
-
-                    <div class="dropdown" style="width:35%">
-                        <a class="btn btn-secondary dropdown-toggle" 
-                           style="width:100%;  
-                                  background-color: {{filter.newCondition.key?'white':'auto'}};
-                                  color: {{filter.newCondition.key?'black':'white'}}"
-                           type="button" id="dropdown_coins" data-toggle="dropdown" 
-                           aria-haspopup="true" aria-expanded="false">
-                            <div style="overflow-x: hidden; width: 80%;  white-space: nowrap;text-overflow: ellipsis;">
-                                <span>{{filter.newCondition.key?filter.newCondition.key:'Attribute'}}</span>
+                            <div class="col-md-8">
+                                <input ng-disabled="!threshold.active" type="number" class="form-control" ng-model="threshold.minMutations" style="font-size: 0.8em;">
                             </div>
-                        </a>
-                        <div id="menu" class="dropdown-menu" aria-labelledby="dropdown_coins" style="padding-bottom: 0px;">
-                            <form class="px-2 py-2">
-                                <input type="search" class="form-control" ng-model="filter.searchKey" id="searchCoin" placeholder="search" autofocus="autofocus">
-                            </form>
-                            <div id="menuItems" style="overflow-y: scroll; max-height: 145px;">
-                                <div ng-repeat="k in filteredKeys = ( getKeys() | filter: filter.searchKey) track by $index"
-                                     style="line-height: 2.4em; padding-left: 4px;  border-top: 1px solid #dfdfdf; cursor:pointer;"
-                                     ng-click="setNewKey(k)" 
-                                     class="clickable-item">
 
-                                    {{k}}
+                            <div class="col-md-4">
+                                <switch size="small" id="enabled" name="enabled"
+                                        ng-model="threshold.active" ng-change="thresholdChanged">
+                                    ></switch>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-12 text-center" style="margin-top:10px;">
+                        <button class="btn btn-white"  style="width: 100%;"
+                                ng-click="loadFile(file_selector.name)"
+                                ng-disabled="execution.running || file_selector.name=='' || tumorTypes.current==null"
+                                type="submit">
+                            <i class="fa fa-play" style="font-size: 0.9em;
+                                                         margin-right: 6px;"></i> Plot</button>
+                        <a id="dwn_data" target="_blank" style="display: none"></a>
+                    </div>
+
+                    <div class="col-md-12 text-center" style="margin-top:30px;" ng-show="loaded">
+                        <b style="color:blue">{{numPatients}}</b> patients with mutations in the region set. <br>
+                        <div ng-if="numPatients<MIN_PATIENTS" style="margin-top:3px;">
+                            <i class="fa fa-exclamation-triangle" style="color:#FF9800"></i> <a href="" data-toggle="modal" data-target="#infoModal">behaviour changed</a>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-12" style="margin-top:30px;" >
+                        <div class="row">
+
+                            <div class="col-md-8" ng-show="loaded && !barPlot">
+                                Show outliers:
+                            </div>
+
+                            <div class="col-md-4" ng-show="loaded && !barPlot">
+                                <switch size="small" id="enabled" name="enabled"
+                                        ng-model="outliers.show" ng-change="loadFile(file_selector.name)">
+                                    ></switch>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-top:10px!important;margin-bottom: 20px!important;">
+
+                        <button class="btn btn-white"  style="width:100%"
+                                ng-click="downloadPlotData()"
+                                type="submit"><i class="fa fa-download"></i> Download Result (JSON)</button>
+                        <a id="dwn_data" target="_blank" style="display: none"></a>
+
+                    </div>
+
+                    <div class="col-md-12 my-auto text-center" ng-if="loaded" style="margin-bottom: 20px!important;">
+
+                        <button class="btn btn-white" 
+                                style="width:100%"
+                                ng-click="downloadPlot()"
+                                type="submit"><i class="fa fa-download"></i> Download Image (PNG)</button>
+                        <a id="dwn" target="_blank" style="display: none"></a>
+
+                    </div>
+
+                </div>
+            </div>
+            </nav>
+
+        <div id="content" style="padding-top: 0px; padding-left: 15px; background-color: {{execution.running?'#5d5d5d':''}}">
+            <div class="row">
+
+                <div class="col-md-12 text-center" ng-if="execution.running" style="line-height: 40px; margin-top: 20px; color:white;">
+                    PROCESSING
+                    <br>
+                    <img src="img/running.gif" width="80px">
+                </div>
+
+                <div class="col-md-12 text-center" ng-if="!loaded && !execution.running" style="line-height: 40px;">
+                    Select a file.
+                </div>
+
+                <div class="col-md-12 text-center my-auto" ng-if="loaded">
+                    <div class="row">
+                        <div class="col-md-6 sub-menu-item {{barPlot?'active':''}}" ng-click="showBarPlot()">
+                            Bar Plot
+                        </div>
+                        <div class="col-md-6 sub-menu-item {{barPlot?'':'active'}}" ng-click="showBoxPlot()" 
+                             ng-if="numPatients>=MIN_PATIENTS">
+                            Box Plot
+                        </div>
+                        <div class="col-md-6 sub-menu-item {{barPlot?'':'active'}}" style="cursor: pointer"
+                             ng-if="numPatients<MIN_PATIENTS">
+                            <strike>Box Plot</strike>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-12" window-resize="loadFile(file_selector.name, tumorTypes.current)">
+                    <div id="uc6" class="plot-container">
+                        <svg></svg>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        </main>
+
+    <div class="modal" tabindex="-1" role="dialog" id="infoModal">
+        <div class="modal-dialog" role="document" style="max-width: 700px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    SIGNATURE REFITTING
+                </div>
+                <div class="modal-body">
+                    <div id="modal_description">
+
+                        Given a catalogue of mutational <b>signatures</b> S and a set of somatic mutations M found in a given tumor genome, exposures E can be computed ("signature refitting"). The exposures predict what fractions of the mutations can be attributed to the given signatures. Exposures are computed such that the exposure-weighted sum of signatures reflects the distribution of mutation types in the tumor genome.<br><br>
+
+                        Here, the set of somatic mutations M used are only those mutations which fall onto the region set specified by the user. Since, however, the region set may have a largely different trinucleotide content than the whole genome, for which mutational signatures have been originally been determined, the signatures are adjusted according to the trinucleotide content of the region set prior to determining exposures.<br><br>
+
+                        This visualization shows an <b>bar-plot</b> in which, for each signature (horizontal-axis), the corresponding exposure (verical-axis) is reported. Alternatively, a <b>box-plot</b> for each signature shows the distribution of exposures over donors.<br><br>
+
+                        For higher accuracy in signature refitting, when the <b>threshold</b> is enabled (e.g. <code>threshold=N</code>), the tool will consider only tumors (synonyms: donors, patients) for wich more than N mutations overlap regions in the provided region-set. In case less than 5 tumors have more than N mutations, the mutations are merged and an estimation of the average signature exposure is provided.<br><br>
+
+                        Differently from the first three visualiations (histogram, regions and tumors), this representation takes into account only mutations overlapping with regions in the provided region set: i.e., given the set of mutations M and the region set R, the considered set of mutations is
+
+                        <div class="text-center">
+                            <code>{m in M : &exist;r in R, m.position &ge; r.start AND m.position &le; r.stop} </code>
+                        </div>
+
+
+                        In case the box-plot visualization is selected, hovering the box-plot with your mouse you will be able to get more information on the distribution and on outliers (e.g. you can get the donor-id associated to an outlier).
+                        Use the toolbar on the left to select:<br>
+                        <ul>
+                            <li>A <b>region set</b>, among the ones added to the <a href="#!/data">workspace</a>.</li>
+                            <li>A <b>tumor type</b>: only mutations for the selected tumor type will be displayed. You can further <b>filter mutations</b> by providing a predicate on the <b>clinical condition</b> of donors associated to the selected tumor type. Click on the filter-button next to the tumor-type selector to open the predicate editor. On top of the editor you will see the number of donors matching the current predicate.</li>
+                            <li>A <b>threshold</b> (N): when enabled and set, only donors (tumors) with more than N mutations overlapping the region-set will be considered.</li>
+                            <li><b>Mutation classes</b>: only mutations belonging to the selected classes will be displayed. </li>
+                        </ul>
+
+                        Once the plot is ready the number of considered patients will be displayed in the toolbar. <br><br>
+                        Source of mutational signatures: <a target="_blank" href="https://cancer.sanger.ac.uk/cosmic/signatures">COSMIC Mutational Signatures v3</a> and <a  target="_blank"  href="https://pubmed.ncbi.nlm.nih.gov/32025018/">Alexandrov et al</a>.<br><br>
+
+                        We considered only single base substitution (SBS) signatures, excluding those which have been characterized as possible sequencing artifacts (SBS 27, 29, 43,  and 45--60) or identified only in exome sequencing samples (SBS 23, 25,  and 42).
+
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="filterModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="display: block;">
+                    Filter Mutations ( <b style="color:blue;">{{tumorTypes.current.donor_count}}</b> donors in {{tumorTypes.current.identifier}}  
+                    <span ng-if="filter.showTest">-</span>  <span ng-if="filter.showTest" style="padding:2px; background-color: {{filter.testCount>0?'white':'#ffbdbd'}}"><b style="color:blue; "> {{filter.testCount}}</b> donors matched.</span>)
+                </div>
+                <div class="modal-body">
+
+                    <div class="text-center" ng-if="isObjectEmpty(filter.conditions)">
+                        No filtering conditions applied.
+                    </div>
+
+                    <div class="input-group" ng-repeat="(k,v) in filter.conditions" style="margin-bottom: 5px">
+                        <input type="text" disabled style="width: 35%;text-align: center;" value="{{k}}">
+
+                        <input type="text" disabled style="width: 10%;text-align: center;border: 0px;" value="=">
+
+                        <input type="text" disabled style="width: 39%;text-align: center;" 
+                               value="{{v.join(', ')}}">
+                        <div style="padding-left: 32px">
+                            <a class="form-control btn btn btn-outline-secondary" ng-click="removeFilterCond(k)">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <hr>
+
+
+                    <div class="input-group">
+
+                        <div class="dropdown" style="width:35%">
+                            <a class="btn btn-secondary dropdown-toggle" 
+                               style="width:100%;  
+                                      background-color: {{filter.newCondition.key?'white':'auto'}};
+                                      color: {{filter.newCondition.key?'black':'white'}}"
+                               type="button" id="dropdown_coins" data-toggle="dropdown" 
+                               aria-haspopup="true" aria-expanded="false">
+                                <div style="overflow-x: hidden; width: 80%;  white-space: nowrap;text-overflow: ellipsis;">
+                                    <span>{{filter.newCondition.key?filter.newCondition.key:'Attribute'}}</span>
+                                </div>
+                            </a>
+                            <div id="menu" class="dropdown-menu" aria-labelledby="dropdown_coins" style="padding-bottom: 0px;">
+                                <form class="px-2 py-2">
+                                    <input type="search" class="form-control" ng-model="filter.searchKey" id="searchCoin" placeholder="search" autofocus="autofocus">
+                                </form>
+                                <div id="menuItems" style="overflow-y: scroll; max-height: 145px;">
+                                    <div ng-repeat="k in filteredKeys = ( getKeys() | filter: filter.searchKey) track by $index"
+                                         style="line-height: 2.4em; padding-left: 4px;  border-top: 1px solid #dfdfdf; cursor:pointer;"
+                                         ng-click="setNewKey(k)" 
+                                         class="clickable-item">
+
+                                        {{k}}
+
+                                    </div>
 
                                 </div>
-
-                            </div>
-                            <div
-                                 style="line-height: 1.55em; padding-left: 4px;  border-top: 1px solid #dfdfdf; background-color: #fafafa;">
-                                <label style="margin-bottom: 0; width:100%; text-align: center;font-size: 0.7em;"
-                                       ng-if="filteredKeys.length>3">
-                                    (scroll down)
-                                </label>
-                            </div>
-                            <div id="empty" class="dropdown-header" ng-if="filteredKeys.length==0">No values found</div>
-                        </div>
-                    </div>
-                    <div class="text-center" style="width:10%; line-height: 39px;">
-                        <i class="fa fa-equals" style="color:#7a7a7a;"></i>
-                    </div>
-
-                    <div class="dropdown" style="width:40%">
-                        <a class="btn btn-secondary dropdown-toggle" 
-                           style="width:100%;  
-                                  background-color: {{filter.newCondition.values.length>0?'white':'auto'}};
-                                  color: {{filter.newCondition.values.length>0?'black':'white'}}"
-                           type="button" id="dropdown_coins" data-toggle="dropdown" 
-                           aria-haspopup="true" aria-expanded="false">
-                            <div style="overflow-x: hidden; width: 80%;  white-space: nowrap;text-overflow: ellipsis;">
-                                <span>{{filter.newCondition.values.length>0?filter.newCondition.values.join(', '):'Values'}}</span>
-                            </div>
-
-                        </a>
-                        <div  class="dropdown-menu" id="values" aria-labelledby="dropdown_coins" style="padding-bottom: 0px;">
-                            <form class="px-2 py-2">
-                                <input type="search" class="form-control" ng-model="filter.searchValue" id="searchCoin" placeholder="search" autofocus="autofocus">
-                            </form>
-                            <div
-                                 style="line-height: 1.55em; padding-left: 4px;  border-top: 1px solid #dfdfdf; background-color: #fafafa;">
-                                <label style="margin-bottom: 0; width:100%; text-align: center;font-size: 0.7em;">
-                                    {{filter.undefined_count}} undefined
-                                </label>
-                            </div>
-                            <div id="menuItems" style="overflow-y: scroll; max-height: 145px;">
-                                <div ng-repeat="v in filteredValues = (  filter.values | filter: filter.searchValue) | orderBy:'-count' track by $index"
-                                     style="line-height: 2.4em; padding-left: 4px;  border-top: 1px solid #dfdfdf;"
-                                     class="clickable-item{{filter.newCondition.values.indexOf(v) > -1?'-selected':''}}">
-                                    <label style="margin-bottom: 0; width:100%;">
-                                        <input 
-                                               type="checkbox"
-                                               name="selectedValues"
-                                               ng-checked="filter.newCondition.values.indexOf(v) > -1"
-                                               ng-click="toggleNewValue(v.value)"
-                                               > {{v.value}} ({{v.count}} donors)
-
+                                <div
+                                     style="line-height: 1.55em; padding-left: 4px;  border-top: 1px solid #dfdfdf; background-color: #fafafa;">
+                                    <label style="margin-bottom: 0; width:100%; text-align: center;font-size: 0.7em;"
+                                           ng-if="filteredKeys.length>3">
+                                        (scroll down)
                                     </label>
                                 </div>
+                                <div id="empty" class="dropdown-header" ng-if="filteredKeys.length==0">No values found</div>
+                            </div>
+                        </div>
+                        <div class="text-center" style="width:10%; line-height: 39px;">
+                            <i class="fa fa-equals" style="color:#7a7a7a;"></i>
+                        </div>
 
+                        <div class="dropdown" style="width:40%">
+                            <a class="btn btn-secondary dropdown-toggle" 
+                               style="width:100%;  
+                                      background-color: {{filter.newCondition.values.length>0?'white':'auto'}};
+                                      color: {{filter.newCondition.values.length>0?'black':'white'}}"
+                               type="button" id="dropdown_coins" data-toggle="dropdown" 
+                               aria-haspopup="true" aria-expanded="false">
+                                <div style="overflow-x: hidden; width: 80%;  white-space: nowrap;text-overflow: ellipsis;">
+                                    <span>{{filter.newCondition.values.length>0?filter.newCondition.values.join(', '):'Values'}}</span>
+                                </div>
+
+                            </a>
+                            <div  class="dropdown-menu" id="values" aria-labelledby="dropdown_coins" style="padding-bottom: 0px;">
+                                <form class="px-2 py-2">
+                                    <input type="search" class="form-control" ng-model="filter.searchValue" id="searchCoin" placeholder="search" autofocus="autofocus">
+                                </form>
+                                <div
+                                     style="line-height: 1.55em; padding-left: 4px;  border-top: 1px solid #dfdfdf; background-color: #fafafa;">
+                                    <label style="margin-bottom: 0; width:100%; text-align: center;font-size: 0.7em;">
+                                        {{filter.undefined_count}} undefined
+                                    </label>
+                                </div>
+                                <div id="menuItems" style="overflow-y: scroll; max-height: 145px;">
+                                    <div ng-repeat="v in filteredValues = (  filter.values | filter: filter.searchValue) | orderBy:'-count' track by $index"
+                                         style="line-height: 2.4em; padding-left: 4px;  border-top: 1px solid #dfdfdf;"
+                                         class="clickable-item{{filter.newCondition.values.indexOf(v) > -1?'-selected':''}}">
+                                        <label style="margin-bottom: 0; width:100%;">
+                                            <input 
+                                                   type="checkbox"
+                                                   name="selectedValues"
+                                                   ng-checked="filter.newCondition.values.indexOf(v) > -1"
+                                                   ng-click="toggleNewValue(v.value)"
+                                                   > {{v.value}} ({{v.count}} donors)
+
+                                        </label>
+                                    </div>
+
+                                </div>
+                                <div
+                                     style="line-height: 1.55em; padding-left: 4px;  border-top: 1px solid #dfdfdf; background-color: #fafafa;">
+                                    <label style="margin-bottom: 0; width:100%; text-align: center;font-size: 0.7em;"
+                                           ng-if="filteredValues.length>3">
+                                        (scroll down)
+                                    </label>
+                                </div>
+                                <div id="empty" class="dropdown-header" ng-if="filteredValues.length==0">No values found</div>
                             </div>
-                            <div
-                                 style="line-height: 1.55em; padding-left: 4px;  border-top: 1px solid #dfdfdf; background-color: #fafafa;">
-                                <label style="margin-bottom: 0; width:100%; text-align: center;font-size: 0.7em;"
-                                       ng-if="filteredValues.length>3">
-                                    (scroll down)
-                                </label>
-                            </div>
-                            <div id="empty" class="dropdown-header" ng-if="filteredValues.length==0">No values found</div>
+                        </div>
+                        <div style="padding-left: 25px;">
+                            <a class="form-control btn btn btn-outline-secondary" ng-click="addFilterCond(filter.newCondition.key,filter.newCondition.values)">
+                                <i class="fas fa-plus"></i>
+                            </a>
                         </div>
                     </div>
-                    <div style="padding-left: 25px;">
-                        <a class="form-control btn btn btn-outline-secondary" ng-click="addFilterCond(filter.newCondition.key,filter.newCondition.values)">
-                            <i class="fas fa-plus"></i>
-                        </a>
-                    </div>
+                    <script>
+                        $('.dropdown-menu#values').on('click', function(event){
+                            // The event won't be propagated up to the document NODE and 
+                            // therefore delegated events won't be fired
+                            event.stopPropagation();
+                        });
+                    </script>
+
+
                 </div>
-                <script>
-                    $('.dropdown-menu#values').on('click', function(event){
-                        // The event won't be propagated up to the document NODE and 
-                        // therefore delegated events won't be fired
-                        event.stopPropagation();
-                    });
-                </script>
-
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>

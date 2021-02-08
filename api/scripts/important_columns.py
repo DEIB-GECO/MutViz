@@ -1,9 +1,9 @@
 import pandas as pd
-import numpy as np
 
 df = pd.read_csv("clinical_data_mutviz.tsv", sep="\t")
 
 tumor_types = set(df["project_code"])
+
 
 exclude = ["icgc_donor_id", "project_code", "project_code.1"]
 

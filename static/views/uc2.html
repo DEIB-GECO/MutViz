@@ -69,6 +69,11 @@
                             ng-change="loadFiles(file_selector.file1, file_selector.file2)" ng-disabled="execution.running">
                         <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
+                     <div class="row text-center">
+                        <div class="col-md-12">
+                            <span class="text-center" style="font-size: 0.9em">Mutations from <b>{{tumorTypes.current.donor_count}}</b> donors.</span>
+                        </div>
+                    </div>
                 </div>
                 
                <div class="col-md-8" style="margin-top:20px;" ng-if="loaded">

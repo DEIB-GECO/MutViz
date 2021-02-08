@@ -185,22 +185,23 @@ function uc1_update(data, g, binSize, minY, mutationTypes, stacked, showTotal, n
     
     if(normalize){
     let fullTicks = getTicks(g.fullXAxisScale.domain()[0], g.fullXAxisScale.domain()[1], binSize);
-    let fullHistogram = d3.histogram().value(function(d) {return d[0];}).domain(g.fullXAxisScale.domain()).thresholds(fullTicks); ;
-    let fullBins = fullHistogram(data);
+    let fullHistogram = d3.histogram().value(function(d) {return d[0];}).domain(g.fullXAxisScale.domain()).thresholds(fullTicks); 
+        
+    let normData = showTotal?  data : uc1_getFilteredData(data,mutationTypes); 
+        
+    let fullBins = fullHistogram(normData);
 
     avg = d3.mean(fullBins, function(d) { return uc1_yVal(d)});
-   } else {
-       avg = d3.mean(bins, function(d) { return uc1_yVal(d)});
-   }
+   } 
     
     dataMin = d3.max(bins, function(d) { return uc1_yVal(d,normalize,avg)});
     
     console.log("MIN :"+dataMin)
     console.log("minY :"+minY)
     
-    yMin = dataMin + (normalize?0.5:20);
+    yMin = dataMin + 0.2*dataMin;
     if(minY > dataMin)
-        yMin = minY + (normalize?0.5:20);
+        yMin = minY +0.2*minY;
     
     console.log("yMin :"+yMin)
     
@@ -265,7 +266,7 @@ function uc1_update(data, g, binSize, minY, mutationTypes, stacked, showTotal, n
     }
 
     if( !showTotal) {
-        g.yAxisScale.domain([0, maxInFiltered + 20]);
+        g.yAxisScale.domain([0, maxInFiltered + 0.2*maxInFiltered]);
 
         g.yAxis
             .transition()
