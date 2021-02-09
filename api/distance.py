@@ -105,7 +105,7 @@ def get_distances(logger):
                               MutationGroup.mutation_code_id)
 
                 if tumorType:
-                    query = query.filter(MutationGrouped.tumor_type_id == tumor_type_reverse_dict[tumorType])
+                    query = query.filter(MutationGroup.tumor_type_id == tumor_type_reverse_dict[tumorType])
 
                 logger.debug(f"query: {query}")
                 query_result = query.all()
