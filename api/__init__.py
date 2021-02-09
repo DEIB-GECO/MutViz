@@ -72,7 +72,7 @@ with app.app_context():
 
 
     res = TumorType.query.all()
-    tumor_type_dict = dict([(x.tumor_type_id, (x.tumor_type, x.description, x.mutation_count, x.description, x.attributes, x.donor_count, x.clinical_tumor_type_id)) for x in res])
+    tumor_type_dict = dict([(x.tumor_type_id, (x.tumor_type, x.description, x.mutation_count, x.description, x.attributes, x.donor_count, x.wgs, x.wxs)) for x in res])
     tumor_type_reverse_dict = dict([(x.tumor_type, x.tumor_type_id) for x in res])
 
     res = TrinucleotideEncoded.query.all()
