@@ -58,8 +58,7 @@ class MutationCode(db.Model):
     mutation = db.Column(db.String(4))
     from_allele = db.Column(db.String)
     to_allele = db.Column(db.String)
-
-
+    mutation_r = db.Column(db.String(4))
 
 t_mutation_trinucleotide = db.Table(
     'mutation_trinucleotide',
@@ -140,16 +139,6 @@ class MutationGrouped(db.Model):
     position = db.Column(db.Integer, primary_key=True, nullable=False, index=True)
     mutation_code_id = db.Column(db.SmallInteger, primary_key=True, nullable=False)
     count = db.Column(db.BigInteger)
-
-class MutationCodeR(db.Model):
-    __tablename__ = 'mutation_code_r'
-
-    mutation_code_id = db.Column(db.SmallInteger, primary_key=True)
-    transition = db.Column(db.Boolean)
-    mutation = db.Column(db.String(4))
-    from_allele = db.Column(db.String)
-    to_allele = db.Column(db.String)
-    mutation_r = db.Column(db.String(4))
 
 
 class DistanceCache(db.Model):

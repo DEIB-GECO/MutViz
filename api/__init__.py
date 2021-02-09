@@ -67,7 +67,6 @@ with app.app_context():
     mutation_code_dict = dict([(x.mutation_code_id, (x.from_allele, x.to_allele)) for x in res])
     mutation_code_reverse_dict = dict([((x.from_allele, x.to_allele), x.mutation_code_id) for x in res])
 
-    res = MutationCodeR.query.all()
     mutation_code_r_dict = dict([(x.mutation_code_id, x.mutation_r) for x in res])
 
 
