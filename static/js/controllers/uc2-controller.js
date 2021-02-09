@@ -7,7 +7,7 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
     window.scroll(0, 0);
     $rootScope.active_menu = "uc2";
 
-    $scope.plot = {binSize: 10, d3graph: null}
+    $scope.plot = {binSize: 10, d3graph: null, normalizeByMean:false}
     $scope.loaded = false;
 
     // status
@@ -183,7 +183,9 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
 
             selectedRange = {
                 min: dataRange.min+0*(dataRange.max-dataRange.min),
-                max: dataRange.min+1*(dataRange.max-dataRange.min)
+                max: dataRange.min+1*(dataRange.max-dataRange.min),
+                minFull: -minMaxDistance,
+                maxFull: +minMaxDistance
             }
 
             noUiSlider.create($scope.slider, {
@@ -210,18 +212,23 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         } else {
             selectedRange = {
                 min: $scope.slider.noUiSlider.get()[0],
-                max: $scope.slider.noUiSlider.get()[1]
+                max: $scope.slider.noUiSlider.get()[1],
+                minFull: -minMaxDistance,
+                maxFull: +minMaxDistance
             }
         }
 
         // Save last result
         $rootScope.lastResult = JSON.stringify(plotData);
+        
+        console.log("LOADING FILES "+  $scope.plot.normalizeByMean);
 
         // Generate the plot
         $scope.plot.d3graph = uc2(plotData,
                                   $scope.plot.binSize,
                                   selectedRange,
-                                  $scope.getSelectedTypes());
+                                  $scope.getSelectedTypes(),
+                                 $scope.plot.normalizeByMean);
 
         // Set callback on slider change
         $scope.slider.noUiSlider.on('set.one', function () { 
@@ -240,7 +247,8 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
                          $scope.plot.d3graph,
                          $scope.plot.binSize, 
                          selectedRange,
-                         $scope.getSelectedTypes());
+                         $scope.getSelectedTypes(),
+                         $scope.plot.normalizeByMean);
 
         });
 
@@ -279,19 +287,19 @@ app.controller('uc2_ctrl', function($scope, $rootScope, $routeParams, $http, $ti
         uc2_update(plotData,
                    $scope.plot.d3graph,
                    $scope.plot.binSize, 
-                   $scope.getSelectedTypes());
+                   $scope.getSelectedTypes(),
+                   $scope.plot.normalizeByMean);
     } 
 
 
     // Update the plot according to the new bin size
     $scope.changeMutationType =  function() {
-    
 
-        $scope.test.pvalue = null;
-
-        types = $scope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.to!=null});
+        types = $scope.mutationTypes.selectedTypes.filter(function(t){return t.from !=null && t.from !="" && t.to!=null && t.to!="" && t.from !=t.to});
         
-        if(types.length==0) return;
+        if(types.length!=$scope.mutationTypes.selectedTypes.length) return;
+        
+        $scope.test.pvalue = null;
 
         // Make conditions exclusive
         exclusive = types.map( function(t){ 

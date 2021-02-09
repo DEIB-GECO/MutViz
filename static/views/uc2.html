@@ -56,7 +56,7 @@
                 <div class="col-md-12" style="margin-top:10px;" ng-if=" file_selector.file1!=null &&   file_selector.file2!=null && (file_selector.file1.parsed_lines >100000  || file_selector.file2.parsed_lines >100000)">
                     <p class="text-center" style="background-color: #fff38a; line-height: 30px; height: 90px;">
                         <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i><br>
-                        This visualization does not support files containing more than 100K regions. 
+                        This functionality does not support files containing more than 100K regions. 
                     </p>
 
                 </div>
@@ -69,9 +69,28 @@
                             ng-change="loadFiles(file_selector.file1, file_selector.file2)" ng-disabled="execution.running">
                         <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
+                     <div class="row text-center">
+                        <div class="col-md-12">
+                            <span class="text-center" style="font-size: 0.9em">Mutations from <b>{{tumorTypes.current.donor_count}}</b> donors.</span>
+                        </div>
+                    </div>
                 </div>
+                
+               <div class="col-md-8" style="margin-top:20px;" ng-if="loaded">
+                    <p>Show observed/expected</p>
+                </div>
+                
+                <div class="col-md-4 text-center" style="margin-top:20px;" ng-if="loaded">
+                    <div class="form-group">
+                        <switch size="small" id="enabled" name="enabled"
+                                ng-model="plot.normalizeByMean" ng-change="updatePlot(file_selector.file1, file_selector.file2, tumorTypes.current)">
+                        </switch>
+                        <br>
+                    </div>
+                </div>
+                
 
-                <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">
+                <div class="col-md-12" style="margin-top:0px;" ng-if="loaded">
 
                     <label for="inputBins">Mutation types:</label>
 

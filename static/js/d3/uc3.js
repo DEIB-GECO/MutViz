@@ -1,12 +1,18 @@
 var RECT_HEIGHT = 50;
 
-// Function that builds the color scale
-var uc3_getColor = d3.scaleLinear()
-.range(["white", "#e6194B"])
-.domain([0,1]);
+
+function uc3_getColor(value, max=1, normalize=false) {
+    if(normalize) {
+        return d3.scaleLinear().domain([0, 1/max, 1]).range(['#f44336', 'white', '#0a3281'])(value);
+    } else {
+        return d3.scaleLinear().range(["white", "#0a3281"]).domain([0,1])(value);
+    }
+
+}
+
 
 // Get y value
-function uc3_yVal(bin) {
+function uc3_yVal(bin,normalize=false,avg) {
     y_val = bin.map( function(x) {
         if(x.length>=4)
             return x[3];
@@ -14,12 +20,12 @@ function uc3_yVal(bin) {
             return 1;
     }).reduce(function(x,y){return x+y},0);
 
-    return y_val;
+    return normalize ? y_val/avg : y_val;
 }
 
 
 // Add a track to the heatmap
-function uc3_addTracks(g, data) {
+function uc3_addTracks(g,data,normalize) {
 
     g.svg.selectAll()
         .data(data, function(d) {return d.group+':'+d.variable;})
@@ -29,7 +35,7 @@ function uc3_addTracks(g, data) {
         .attr("y", function(d) { return g.y(d.variable) })
         .attr("width", function(b){return g.xAxisScale(b.x1)-g.xAxisScale(b.x0)} )
         .attr("height", g.y.bandwidth() ) 
-        .style("fill", function(d) { return uc3_getColor(d.value)} )
+        .style("fill", function(d) { return uc3_getColor(d.value,g.global_max,normalize)} )
 }
 
 
@@ -56,7 +62,9 @@ function uc3_getFilteredData(data, mutationTypes) {
 }
 
 // This function (re-)builds the graph g provided the number of bins and selected mutation types
-function uc3_update(data, g, binSize, mutationTypes) {
+function uc3_update(data, g, binSize, mutationTypes, normalize) {
+
+
 
     // bins intervals centered on 0
     ticks =  getTicks(g.xAxisScale.domain()[0], g.xAxisScale.domain()[1], binSize);
@@ -71,16 +79,32 @@ function uc3_update(data, g, binSize, mutationTypes) {
     // Binned data (array, one element is the binned data for a specific tumor type in data)
     binned = data.map(function(tumorType){return histogram(uc3_getFilteredData(tumorType.data, mutationTypes));});
 
+
+    if(normalize){
+        let fullTicks = getTicks(g.fullXAxisScale.domain()[0], g.fullXAxisScale.domain()[1], binSize);
+
+        let fullHistogram = d3.histogram().value(function(d) {return d[0];}).domain(g.fullXAxisScale.domain()).thresholds(fullTicks); ;
+        let fullBins = data.map(function(tumorType){return fullHistogram(uc3_getFilteredData(tumorType.data, mutationTypes));});
+        for(i=0;i<fullBins.length;i++){
+            binned[i].avg = d3.mean(fullBins[i], function(d) { return uc3_yVal(d)})
+        }
+
+        //binned.forEach(bin=>console.log("AVG: "+bin.avg));
+
+    }
+
+
     // Max elements contained in a bin (array, one for each binned data in binned)
-    maxx = binned.map(function(bins){ return d3.max(bins, function(d) { return +uc3_yVal(d) }); });
+    maxx = binned.map(function(bins){ return d3.max(bins, function(d) { return +uc3_yVal(d, normalize, bins.avg) }); });
 
     g.global_max = maxx.reduce(function(a, b) {return Math.max(a, b);});
+
 
     // Add to each bin the normalized value
     var normalized = binned.map(function(bins,i){  
 
         return bins.map( function(b){
-            b.value = uc3_yVal(b) / g.global_max; //maxx[i];
+            b.value = uc3_yVal(b, normalize, bins.avg) / g.global_max; //maxx[i];
             b.variable = data[i].type;
             b.group = b.x0;
             return b;
@@ -107,49 +131,58 @@ function uc3_update(data, g, binSize, mutationTypes) {
     union = binned.reduce(function(a,b){return a.concat(b)});
 
     // Add the tracks to the plot
-    uc3_addTracks(g, union);
-    
-    
+    uc3_addTracks(g, union, normalize);
+
+
     // ADD LEGEND
-    values = Array.from(Array(g.global_max).keys())
-    
+    //values = Array.from(Array(g.global_max).keys())
+
     // remove 
     d3.selectAll(".legend").remove();
     d3.selectAll(".legend_ticks").remove();
-    
+
     // create element for legend
     legend_el = d3.select("#uc3 svg").append("g").lower().attr("transform","translate(" + g.margin.left + "," + 0 + ")")
-    
-    var legend = legend_el.selectAll(".legend") 
-    .data(values, function(d) {return d;})
-    .enter().append("g")
-    .attr("class", "legend");
-    
-    legendElementWidth = g.width/values.length;
+
+
+    let numElements = 500;
+
+
+    legendElementWidth = g.width/numElements;
     height = 0;
     gridSize = 10;
 
-    legend.append("rect")
-        .attr("x", function(d, i){ return legendElementWidth * i;})
-        .attr("y", height)
-        .attr("width", legendElementWidth)
-        .attr("height", gridSize/2)
-        .style("fill", function(d, i) {return uc3_getColor(d/g.global_max)});
+
+
+    for(i=0; i<numElements; i++)
+        legend_el.append("g").attr("class", "legend").append("rect")
+            .attr("x",  legendElementWidth * i)
+            .attr("y", height)
+            .attr("width", legendElementWidth)
+            .attr("height", gridSize/2)
+            .style("fill", uc3_getColor(i/numElements,g.global_max,normalize));
+
+
+
 
     // Setup the x axis
     legend_scale = d3.scaleLinear().domain([0,g.global_max]).range([0,g.width]);
     legend_xAxis = legend_el.append("g").attr("class","legend_ticks").attr("transform", "translate(0," + 0+ ")");
-    
+
     yAxisTicks = legend_scale.ticks().filter(function(tick){return  Number.isInteger(tick);});
     yAxis = d3.axisBottom(legend_scale)
-    .tickValues(yAxisTicks)
-    .tickFormat(d3.format('d'));
+        .tickValues(yAxisTicks)
+        .tickFormat(d3.format('d'));
     legend_xAxis.call(yAxis);
+
+
+
+
 
 }
 
 /* This function rescales the x axis, given the new provided domain (range) */
-function uc3_rescaleX(data, g, binSize, range, mutationTypes) {
+function uc3_rescaleX(data, g, binSize, range, mutationTypes, normalize) {
 
     g.xAxisScale = d3.scaleLinear().domain([range.min,range.max]).range([0, g.width]);
 
@@ -159,11 +192,11 @@ function uc3_rescaleX(data, g, binSize, range, mutationTypes) {
         .call(d3.axisBottom(g.xAxisScale).tickFormat(function(d) { return d3.format(".2s")(d); }));
 
     // Recompute the bins and rebuild the plot
-    uc3_update(data, g, binSize, mutationTypes);
+    uc3_update(data, g, binSize, mutationTypes, normalize);
 }
 
 /* Build the graph with an initial number of bins */
-function uc3(data, binSize, range, mutationTypes) {
+function uc3(data, binSize, range, mutationTypes, normalize) {
 
     var g = {} // here we put all useful objects describing our plot
 
@@ -184,6 +217,7 @@ function uc3(data, binSize, range, mutationTypes) {
 
     // Setup the x axis
     g.xAxisScale = d3.scaleLinear().domain([range.min,range.max]).range([0, g.width]);
+    g.fullXAxisScale =  d3.scaleLinear().domain([range.minFull, range.maxFull]).range([0, g.width]);
     g.xAxis = g.svg.append("g").attr("transform", "translate(0," + g.height + ")");
     g.xAxis.call(d3.axisBottom(g.xAxisScale));
 
@@ -200,7 +234,7 @@ function uc3(data, binSize, range, mutationTypes) {
         .text("distance (bp)");
 
     // Compute the bins and build the plot
-    uc3_update(data, g, binSize, mutationTypes);
+    uc3_update(data, g, binSize, mutationTypes, normalize);
 
     // Return the plot description
     return g;

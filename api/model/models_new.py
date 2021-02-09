@@ -6,28 +6,14 @@ db = SQLAlchemy()
 
 
 
-t_mutation_trinucleotide_cache = db.Table(
-    'mutation_trinucleotide_cache',
-    db.Column('file_id', db.ForeignKey('user_file.id', ondelete='CASCADE'), nullable=False, index=True),
-    db.Column('donor_id', db.Integer, nullable=False),
-    db.Column('tumor_type_id', db.SmallInteger, nullable=False),
-    db.Column('chrom', db.SmallInteger, nullable=False),
-    db.Column('position', db.Integer, nullable=False),
-    db.Column('mutation_code_id', db.SmallInteger, nullable=False),
-    db.Column('trinucleotide_id_r', db.SmallInteger, nullable=False)
-)
+class TumorType(db.Model):
+    __tablename__ = 'tumor_type'
 
-
-
-class UserFile(db.Model):
-    __tablename__ = 'user_file'
-
-    id = db.Column(db.SmallInteger, primary_key=True, server_default=db.FetchedValue())
-    name = db.Column(db.String(100), unique=True)
-    description = db.Column(db.Text)
-    count = db.Column(db.Integer)
-    preloaded = db.Column(db.Boolean, nullable=False, server_default=db.FetchedValue())
-    expiration = db.Column(db.Date)
-    expired = db.Column(db.Boolean, nullable=False, server_default=db.FetchedValue())
-    avg_length = db.Column(db.Float(53))
-    max_length = db.Column(db.Float(53))
+    tumor_type_id = db.Column(db.SmallInteger, primary_key=True)
+    tumor_type = db.Column(db.String(8), nullable=False, unique=True)
+    description = db.Column(db.String)
+    mutation_count = db.Column(db.Integer)
+    attributes = db.Column(db.String)
+    donor_count = db.Column(db.Integer)
+    wgs = db.Column(db.Boolean)
+    wxs = db.Column(db.Boolean)

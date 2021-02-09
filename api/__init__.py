@@ -54,6 +54,14 @@ with app.app_context():
 
 chromosome_dict = dict([(str(x), x) for x in range(1, 23)] + [('x', 23), ('y', 24), ('mt', 25), ('m', 25), ])
 
+
+@app.after_request
+def after_request(response):
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, public, max-age=0"
+    response.headers["Expires"] = 0
+    response.headers["Pragma"] = "no-cache"
+    return response
+
 with app.app_context():
     res = MutationCode.query.all()
     mutation_code_dict = dict([(x.mutation_code_id, (x.from_allele, x.to_allele)) for x in res])
@@ -64,7 +72,7 @@ with app.app_context():
 
 
     res = TumorType.query.all()
-    tumor_type_dict = dict([(x.tumor_type_id, (x.tumor_type, x.description, x.mutation_count, x.description, x.attributes, x.donor_count, x.clinical_tumor_type_id)) for x in res])
+    tumor_type_dict = dict([(x.tumor_type_id, (x.tumor_type, x.description, x.mutation_count, x.description, x.attributes, x.donor_count, x.wgs, x.wxs)) for x in res])
     tumor_type_reverse_dict = dict([(x.tumor_type, x.tumor_type_id) for x in res])
 
     res = TrinucleotideEncoded.query.all()

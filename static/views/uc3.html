@@ -47,7 +47,7 @@
                 <div class="col-md-12" style="margin-top:10px;" ng-if=" file_selector.file!=null &&  file_selector.file.parsed_lines >100000 ">
                     <p class="text-center" style="background-color: #fff38a; line-height: 30px; height: 90px;">
                         <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i><br>
-                        This visualization does not support files containing more than 100K regions. 
+                        This functionality does not support files containing more than 100K regions. 
                     </p>
 
                 </div>
@@ -58,7 +58,7 @@
                     <div class="row" ng-repeat="tt in selectedTumorTypes | reverse">
 
                         <div class="col-md-8" style="line-height: 39px;">
-                            <span style="margin-left: 10px; padding: 6px; border: 1px solid black;">{{tt.identifier}}</span>
+                            <span style="margin-left: 10px; padding: 6px; border: 1px solid black;">{{tt.identifier}} ({{tt.donor_count}})</span>
                         </div>
 
                         <div class="col-md-4">
@@ -88,8 +88,22 @@
                     </div>
 
                 </div>
+                
+                <div class="col-md-8" style="margin-top:20px;" ng-if="loaded">
+                    <p>Show observed/expected</p>
+                </div>
+                
+                <div class="col-md-4 text-center" style="margin-top:20px;" ng-if="loaded">
+                    <div class="form-group">
+                        <switch size="small" id="enabled" name="enabled"
+                                ng-model="plot.normalizeByMean" ng-change="updatePlot(file_selector.file, selectedTumorTypes)">
+                        </switch>
+                        <br>
+                    </div>
+                </div>
+                
 
-                <div class="col-md-12" style="margin-top:30px;" ng-if="loaded">
+                <div class="col-md-12" style="margin-top:0px;" ng-if="loaded">
                     <div class="form-group">
                         <label for="inputBins">Bin size (bp):</label>
                         <input type="number" class="form-control" id="inputBins" 

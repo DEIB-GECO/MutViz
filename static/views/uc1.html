@@ -49,7 +49,7 @@
                 <div class="col-md-12" style="margin-top:10px;" ng-if=" file_selector.file!=null &&  file_selector.file.parsed_lines >100000 ">
                     <p class="text-center" style="background-color: #fff38a; line-height: 30px; height: 90px;">
                         <i class="fa fa-exclamation-triangle" style="font-size: 0.9em;"></i><br>
-                        This visualization does not support files containing more than 100K regions. 
+                        This functionality does not support files containing more than 100K regions. 
                     </p>
 
                 </div>
@@ -61,6 +61,12 @@
                             ng-change="loadFile(file_selector.file)" ng-disabled="execution.running">
                         <option ng-repeat="type in tumorTypes.available track by $index" ng-value="type">{{type.name}}</option>
                     </select>
+                    <div class="row text-center">
+                        <div class="col-md-12">
+                            <span class="text-center" style="font-size: 0.9em">Mutations from <b>{{tumorTypes.current.donor_count}}</b> donors.</span>
+                        </div>
+                    </div>
+
                 </div>
 
 
@@ -84,10 +90,12 @@
                     </div>
                 </div>
 
+                <div class="col-md-8" style="margin-top:5px;" ng-if="loaded">
+                    <p>Stacked</p>
+                </div>
 
-                <div class="col-md-6 text-center" style="margin-top:10px;" ng-if="loaded">
+                <div class="col-md-4 text-center" style="margin-top:5px;" ng-if="loaded">
                     <div class="form-group">
-                        <label for="stacked">Stacked</label><br>
                         <switch size="small" id="enabled" name="enabled"
                                 ng-model="mutationTypes.stacked" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
                         </switch>
@@ -95,15 +103,32 @@
                     </div>
                 </div>
 
-                <div class="col-md-6 text-center" style="margin-top:10px;" ng-if="loaded">
+                <div class="col-md-8" style="margin-top:5px;" ng-if="loaded">
+                    <p>Show total</p>
+                </div>
+
+                <div class="col-md-4 text-center" style="margin-top:5px;" ng-if="loaded">
                     <div class="form-group">
-                        <label for="total">Show Total</label><br>
                         <switch size="small" id="enabled" name="enabled"
                                 ng-model="plot.showTotal" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
                         </switch>
                         <br>
                     </div>
                 </div>
+
+                <div class="col-md-8" style="margin-top:5px;" ng-if="loaded">
+                    <p>Show observed/expected</p>
+                </div>
+
+                <div class="col-md-4 text-center" style="margin-top:5px;" ng-if="loaded">
+                    <div class="form-group">
+                        <switch size="small" id="enabled" name="enabled"
+                                ng-model="plot.normalizeByMean" ng-change="updatePlot(file_selector.file, tumorTypes.current)">
+                        </switch>
+                        <br>
+                    </div>
+                </div>
+
 
 
                 <div class="col-md-12" style="margin-top:10px;" ng-if="loaded">
@@ -228,7 +253,7 @@
                                         <td class="align-middle" colspan="3">
                                             testing for <b><span ng-bind="getRightP(test.L,test.H)[1]"></span></b><br> 
                                             (a p-value of <span ng-bind="getRightP(test.L,test.H)[2]"></span> was instead obtained testing for <span ng-bind="getRightP(test.L,test.H)[3]"></span>)
-                                            
+
                                         </td>
                                     </tr>
 

@@ -5,41 +5,41 @@ app.config(['$routeProvider', '$locationProvider',
 
     $routeProvider
       .when('/home', {
-        templateUrl: 'views/home.html?v=1.1.3.1',
+        templateUrl: 'views/home.html?v=2.0.2',
         controller: 'home_ctrl',
         controllerAs: 'home'
       })
       .when('/data', {
-        templateUrl: 'views/data.html?v=1.1.3',
+        templateUrl: 'views/data.html?v=2.0.2',
         controller: 'data_ctrl',
         controllerAs: 'data'
       })
       .when('/uc1', {
-        templateUrl: 'views/uc1.html?v=1.1.3',
+        templateUrl: 'views/uc1.html?v=2.0.2',
         controller: 'uc1_ctrl',
         controllerAs: 'uc1c'
       })
       .when('/uc2', {
-        templateUrl: 'views/uc2.html?v=1.1.3',
+        templateUrl: 'views/uc2.html?v=2.0.2',
         controller: 'uc2_ctrl',
         controllerAs: 'uc2c'
       })
       .when('/uc3', {
-        templateUrl: 'views/uc3.html?v=1.1.3',
+        templateUrl: 'views/uc3.html?v=2.0.2',
         controller: 'uc3_ctrl',
         controllerAs: 'uc3c'
       })
       .when('/uc4', {
-        templateUrl: 'views/uc4.html?v=1.1.3',
+        templateUrl: 'views/uc4.html?v=2.0.2',
         controller: 'uc4_ctrl',
         controllerAs: 'uc4c'
       })
       .when('/uc5', {
-        templateUrl: 'views/uc5.html?v=1.1.3',
+        templateUrl: 'views/uc5.html?v=2.0.2',
         controller: 'uc5_ctrl',
         controllerAs: 'uc5c'
       }).when('/uc6', {
-        templateUrl: 'views/uc6.html?v=1.1.3',
+        templateUrl: 'views/uc6.html?v=2.0.2',
         controller: 'uc6_ctrl',
         controllerAs: 'uc6c'
       }).otherwise('/home');
