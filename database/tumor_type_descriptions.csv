@@ -1,0 +1,81 @@
+ALL-US,Acute Lymphoblastic Leukemia
+AML-US,Acute Myeloid Leukemia
+BLCA-CN,Bladder Cancer
+BLCA-US,Bladder Urothelial Cancer
+BOCA-FR,Soft Tissue cancer
+BOCA-UK,Bone Cancer
+BPLL-FR,B-Cell Prolymphocytic Leukemia"
+BRCA-EU,Breast ER+ and HER2- Cancer
+BRCA-FR,Breast Cancer
+BRCA-KR,Breast Cancer
+BRCA-UK,Breast Triple Negative/Lobular Cancer
+BRCA-US,Breast Cancer
+BTCA-JP,Biliary Tract Cancer
+BTCA-SG,Biliary Tract Cancer
+CESC-US,Cervical Squamous Cell Carcinoma
+CLLE-ES,Chronic Lymphocytic Leukemia
+CMDI-UK,Chronic Myeloid Disorders
+COAD-US,Colon Adenocarcinoma
+COCA-CN,Colorectal Cancer
+DLBC-US,Lymphoid Neoplasm Diffuse Large B-cell Lymphoma
+EOPC-DE,Early Onset Prostate Cancer
+ESAD-UK,Esophageal Adenocarcinoma
+ESCA-CN,Esophageal Cancer
+GACA-CN,Gastric Cancer
+GACA-JP,Gastric Cancer
+GBM-US,Brain Glioblastoma Multiforme
+HNSC-US,Head and Neck Squamous Cell Carcinoma
+KICH-US,Kidney Chromophobe
+KIRC-US,Kidney Renal Clear Cell Carcinoma
+KIRP-US,Kidney Renal Papillary Cell Carcinoma
+LAML-CN,Leukemia
+LAML-KR,Acute Myeloid Leukemia
+LAML-US,Acute Myeloid Leukemia
+LGG-US,Brain Lower Grade Glioma
+LIAD-FR,Benign Liver Tumour
+LICA-CN,Liver Cancer
+LICA-FR,Liver Cancer
+LIHC-US,Liver Hepatocellular carcinoma
+LIHM-FR,Liver Cancer
+LINC-JP,Liver Cancer
+LIRI-JP,Liver Cancer
+LMS-FR,Soft tissue cancer
+LUAD-US,Lung Adenocarcinoma
+LUSC-CN,Lung Cancer
+LUSC-KR,Lung Cancer
+LUSC-US,Lung Squamous Cell Carcinoma
+MALY-DE,Malignant Lymphoma
+MELA-AU,Skin Cancer
+NACA-CN,Nasopharyngeal cancer
+NBL-US,Neuroblastoma
+NKTL-SG,Blood Cancer
+ORCA-IN,Oral Cancer
+OV-AU,Ovarian Cancer
+OV-US,Ovarian Serous Cystadenocarcinoma
+PAAD-US,Pancreatic Cancer
+PACA-AU,Pancreatic Cancer
+PACA-CA,Pancreatic Cancer
+PAEN-AU,Pancreatic Cancer Endocrine neoplasms
+PAEN-IT,Pancreatic Endocrine Neoplasms
+PBCA-DE,Pediatric Brain Cancer
+PBCA-US,Pediatric Brain Tumor
+PEME-CA,Pediatric Medulloblastoma
+PRAD-CA,Prostate Adenocarcinoma
+PRAD-CN,Prostate Cancer
+PRAD-FR,Prostate Cancer
+PRAD-UK,Prostate Adenocarcinoma
+PRAD-US,Prostate Adenocarcinoma
+READ-US,Rectum Adenocarcinoma
+RECA-CN,Renal Cancer
+RECA-EU,Renal Cell Cancer
+RT-US,Rhabdoid Tumors
+SARC-US,Sarcoma
+SKCA-BR,Skin Adenocarcinoma
+SKCM-US,Skin Cutaneous melanoma
+STAD-US,Gastric Adenocarcinoma
+THCA-CN,Thyroid Cancer
+THCA-SA,Thyroid Cancer
+THCA-US,Head and Neck Thyroid Carcinoma
+UCEC-US,Uterine Corpus Endometrial Carcinoma- TCGA, US"
+UTCA-FR,Uterine Cancer
+WT-US,Wilms Tumor

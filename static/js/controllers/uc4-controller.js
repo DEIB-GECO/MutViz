@@ -34,8 +34,11 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                     console.log("result for "+ jobID+" is ready");
 
                     // Add the new file to the local list of files together with the answer
-                    if( Object.keys($rootScope.filter.conditions).length==0 )
+                    if( Object.keys($rootScope.filter.conditions).length==0 ){
                         $scope.uc4_files[filename].result = response.data.result;
+                    }
+
+
 
                     $scope.load(response.data.result, true);
                     $scope.execution.running = false;
@@ -77,12 +80,12 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             request_body = {
                 file_name: filename
             }
-            
+
             if( Object.keys($rootScope.filter.conditions).length > 0 ) {
                 request_body.filter = JSON.stringify($rootScope.filter.conditions);
                 request_body.tumorType = $rootScope.tumorTypes.current.identifier;
             }
-            
+
 
             // Call the API
             $http({
@@ -92,7 +95,7 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
                 url: API_R02
             }).then(
                 function success(response) {
-                    $scope.uc4_files[filename] = file;
+                    $scope.uc4_files[filename] = {...file};
                     $scope.pollUC4(filename, response.data.jobID);
                 }
                 , 
@@ -140,7 +143,7 @@ app.controller('uc4_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             width = $("#uc4").width();
         if(window.innerHeight-250>height)
             height=window.innerHeight-250;
-        
+
 
 
         // Save last result

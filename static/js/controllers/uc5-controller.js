@@ -103,7 +103,7 @@ app.controller('uc5_ctrl', function($scope, $rootScope, $routeParams, $timeout, 
             }).then(
                 function success(response) {
 
-                    $scope.uc5_files[filename] = file;
+                    $scope.uc5_files[filename] = {...file};;
                     $scope.pollUC5(filename, response.data.jobID);
 
                 }, 
