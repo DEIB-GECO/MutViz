@@ -64,7 +64,7 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
     $rootScope.login = function() {
         var password = prompt("Please enter your passowrd");
         document.cookie = "password=" + password;
-        $http.defaults.headers.common.Authorization = 'Basic '+getCookie("password");
+        location.reload();
     }
 
     $rootScope.isObjectEmpty = function(card){
