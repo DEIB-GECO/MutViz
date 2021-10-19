@@ -124,7 +124,18 @@ def get_test_distances():
 
 @app.route(MUTVIZ_CONF["base_url"] + '/api/repository/')
 def get_repository():
-    return api.repository.get_repository()
+    authorization = request.headers.get("Authorization")
+    res = api.repository.get_repository()
+    if authorization== 'Basic <PASS_HERE>':
+        print("Authorized")
+        return res
+    else:
+        print("Not Authorized")
+        print(authorization)
+        res_json = json.loads(res)
+        output_dict = [x for x in res_json if not x["name"].startswith("UMB")]
+        return json.dumps(output_dict)
+
 
 @app.route(MUTVIZ_CONF["base_url"] + '/api/tumor_types/')
 def get_tumor_types():
