@@ -2,6 +2,11 @@
    Main Controller - Always active independently on the view
    ########################################################## */
 app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $timeout,  $sce) {
+    
+    // Set password header if cookie present
+    if(getCookie("password")) {
+       $http.defaults.headers.common.Authorization = 'Basic '+getCookie("password");
+    }
 
     // Mutations
     $rootScope.mutationTypes = {
@@ -54,6 +59,12 @@ app.controller('main_ctrl', function($scope, $http, $location, $rootScope, $time
         );
 
 
+    }
+    
+    $rootScope.login = function() {
+        var password = prompt("Please enter your passowrd");
+        document.cookie = "password=" + password;
+        $http.defaults.headers.common.Authorization = 'Basic '+getCookie("password");
     }
 
     $rootScope.isObjectEmpty = function(card){

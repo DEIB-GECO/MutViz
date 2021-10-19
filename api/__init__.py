@@ -1,8 +1,12 @@
 from logging.config import dictConfig
 
 from flask import Flask
+from flask import request
 from flask_cors import CORS
 from flask_executor import Executor
+
+import json
+
 
 from api.db import *
 from api.utils import *
@@ -124,7 +128,17 @@ def get_repository():
 
 @app.route(MUTVIZ_CONF["base_url"] + '/api/tumor_types/')
 def get_tumor_types():
-    return api.repository.get_tumor_types()
+    res = api.repository.get_tumor_types()
+    authorization = request.headers.get("Authorization")
+    if authorization== 'Basic <PASS_HERE>':
+        print("Authorized")
+        return res
+    else:
+        print("Not Authorized")
+        print(authorization)
+        res_json = json.loads(res)
+        output_dict = [x for x in res_json if not x["identifier"].startswith("UMB")]
+        return json.dumps(output_dict)
 
 @app.route(MUTVIZ_CONF["base_url"] + '/api/trinucleotide/', methods=['POST'])
 def get_trinucleotide():
